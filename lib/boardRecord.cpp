@@ -1,5 +1,25 @@
 #include "boardRecord.h"
 
+std::ostream &operator<<(std::ostream &os, oneMove &move) {
+	os << "mode = " << move.mode << "\n";
+	if (move.mode=="normal" || move.mode=="debug") {
+		os  << "time used: " << move.time << "ms, hint on: " << std::boolalpha
+			<< move.hintOn << ", suggestion = " << move.suggestion
+			<< "\nword = " << move.word << ", list = [ ";
+		for (short i : move.list)
+			os << i << " ";
+		os << "]\nmove = " << move.move;
+		if (move.byComputer)
+			os << " by computer '" << move.player << "':\n";
+		else
+			os << " by player '" << move.player << "':\n";
+	}
+	else if (move.mode == "add")
+		os << "add '" << move.player << "' in column " << move.move << endl;
+	else if (move.mode == "reverse")
+		os << "remove column " << move.move << endl;
+	return os;
+}
 
 void BoardRecord::getFile() {
 	std::ifstream inGames(gamesFileName);

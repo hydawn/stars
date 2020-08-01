@@ -60,11 +60,11 @@ public:
         root["word"]=word;
         return root;
     }
+    friend std::ostream &operator<<(std::ostream &os, oneMove &move);
 };
 
 class BoardRecord {
 private:
-    vector<oneMove> historyMove;
     string gamesFileName;
     string settingsFileName;
     Json::Value settings;
@@ -75,6 +75,7 @@ private:
     void writeSettings();
 
 public:
+    vector<oneMove> historyMove;
     Json::Value games;
     BoardRecord() :
         historyMove(vector<oneMove>()),
@@ -86,6 +87,7 @@ public:
 
     // record
     void push_back(const oneMove &om) { historyMove.push_back(om); }
+    void pop_back() { historyMove.pop_back(); }
 
     // save & clear & refresh
     void saveGame(BoardHandle& state);

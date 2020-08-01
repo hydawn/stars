@@ -157,6 +157,8 @@ string BoardInterface::getInput(string mode, char plr, double& inputTime) {
 		}
 		else if (!strcmp(input, "H") || !strcmp(input, "hint"))
 			return input;
+		else if (!strcmp(input, "save"))
+			record.saveGame(analyse->board);
 		else if (!strcmp(input, "S")||!strcmp(input, "show"))
 			analyse->show();
 		else if (input[0] == '\0') {
@@ -171,8 +173,10 @@ string BoardInterface::getInput(string mode, char plr, double& inputTime) {
 			cout << getInfo(input) << endl;
 		else if (!strcmp(input,"s") || !strcmp(input, "setting") || !strcmp(input, "settings"))
 			settingsMode();
-		else if (!strcmp(input,"p") || !strcmp(input, "play") || !strcmp(input, "play back"))
+		else if (!strcmp(input,"p") || !strcmp(input, "play") || !strcmp(input, "play"))
 			playMode();
+		else if (!strcmp(input,"P") || !strcmp(input, "play back")  || !strcmp(input, "playback"))
+			playBackMode();
 		else if (mode != "normal" ) {
 			if (!strcmp(input,"r") || !strcmp(input, "reverse"))
 				reverseMode();
@@ -226,9 +230,8 @@ void BoardInterface::reverseMode() {
 		move.move=input[0] - '0';
 		printf("remove %d as you like it:\n", move.move);
 		analyse->reverse(input[0]-'0');
-		analyse->show();
-
 		record.push_back(move);
+		analyse->show();
 	}
 }
 
@@ -333,13 +336,13 @@ void BoardInterface::debugMode(char arg) {
 		record.push_back(byOpponent);
         printf("\n%c goes here %d\n", opp, nextMove);
 		if (analyse->boardIsFull()) {
-			cout << "Player time used: " << byPlayer.time << "\n\n";
+			cout << "Player time used: " << byPlayer.time << "ms\n\n";
 			analyse->show();
 			printf("board is full, game is over, lura is gone.\n");
 			break;
 		}
         if (analyse->gameIsOver() == opp) {
-			cout << "Player time used: " << byPlayer.time << "\n\n";
+			cout << "Player time used: " << byPlayer.time << "ms\n\n";
 			analyse->show();
             printf("The computer wins, good luck next time!\nFeel free to type r.\n");
             break;
@@ -357,7 +360,7 @@ void BoardInterface::debugMode(char arg) {
 			printf("this %d is recommended\n", nextMove);
 
 		// show
-		cout << "Player time used: " << byPlayer.time << "\n\n";
+		cout << "Player time used: " << byPlayer.time << "ms\n\n";
         analyse->show();
 		printf("\n");
     }
@@ -413,7 +416,7 @@ void BoardInterface::normalMode() {
 		showComment(byOpponent);
 
 		// show
-		cout << "Player time used: " << byPlayer.time << endl;
+		cout << "Player time used: " << byPlayer.time << "ms\n\n";
         analyse->show();
 
 		byOpponent.suggestion = oppMove;
@@ -525,6 +528,85 @@ void BoardInterface::playMode() {
 	printf("Exit from play mode...\n");
 }
 
+void BoardInterface::playBackMode() {
+	if (!record.getNumberOfSavedBoard()) {
+		printf("No games has been recorded yet, maybe next time.\n");
+		printf("Exit from play back mode...\n");
+		return;
+	}
+	printf("We are here in play back mode.\n");
+	printf("You can choose from %d saved games.", record.getNumberOfSavedBoard());
+	printf("Use 0 to exit.\n");
+	printf("Hit 'Enter' to see more, type in index number to see one of the games.\n");
+	printf("or type c to see the board that is currently displayed.\n");
+	printf("Explore!\n");
+	Json::Value* game = record.showSavedGames();
+	if (!game) {
+		printf("Exit from play back mode...\n");
+		return;
+	}
+
+	// set up a new game
+	// BoardAnalyse analyser((*game)["state"]);
+	BoardAnalyse analyser;
+	BoardRecord newRecord, tempRecord;
+	newRecord.refreshHistoryMove((*game)["historyMove"]);
+	printf("Here's the play back of an old game:\n");
+	printf("Use c to cut in and play, h for help, b to go back, 0 to exit.\n");
+	char input[16];
+	bool wentBack = false;
+	char reversePlayer = ' ';
+	vector<oneMove>::iterator iter = newRecord.historyMove.begin();
+	while (iter != newRecord.historyMove.end()) {
+		// show
+		printf("This is step %d/%d\n", tempRecord.historyMove.size() + 1, newRecord.historyMove.size());
+		if (wentBack)
+			wentBack = false;
+		else {
+			cout << *iter;
+			tempRecord.push_back(*iter);
+			if (iter->mode!="reverse")
+				analyser.go(iter->player, iter->move);
+			else {
+				reversePlayer = analyser.board.board[iter->move][analyser.board.top[iter->move - 1] - 1];
+				analyser.reverse(iter->move);
+			}
+		}
+		analyser.show();
+
+		// get input
+		printf("> ");
+		cin.getline(input, 16);
+		if (!strcmp(input, "0")||!strcmp(input, "q")||!strcmp(input, "quit")||!strcmp(input, "exit"))
+			break;
+		else if (!strcmp(input, "c")||!strcmp(input, "cut")||!strcmp(input, "cut in")){
+			BoardAnalyse tempAnalyser = analyser;
+			BoardInterface interface(tempAnalyser);
+			interface.refreshRecord(tempRecord);
+			printf("Go into a new normal mode:\n");
+			interface.normalMode();
+			printf("We're back in play back mode again\n");
+		}
+		else if (!strcmp(input, "b")||!strcmp(input, "back")||!strcmp(input, "go back")) {
+			if (tempRecord.historyMove.empty()) {
+				printf("This is the beginning, there is no going back.\n");
+			}
+			else {
+				tempRecord.pop_back();
+				if (iter->mode!="reverse")
+					analyser.reverse(iter->move);
+				else
+					analyser.go(reversePlayer, iter->move);
+				wentBack = true;
+				--iter;
+				continue;
+			}
+		}
+		++iter;
+	}
+	printf("Exit from play back mode...\n");
+}
+
 string BoardInterface::getHelp(string mode) {
 	string enjoy="Enjoy!\n";
 	string addon = "";
@@ -547,7 +629,9 @@ string BoardInterface::getHelp(string mode) {
 		"0/q/quit/exit - exit from a certain mode or exit the game\n" +
 		"d/debug       - into debug mode\n" +
 		"h/help        - show help message of the current mode\n" +
-		"p/play        - into play back mode\n" +
+		"p/play        - into play mode\n" +
+		"P/play back   - into play back mode\n" +
+		"save          - save the current game\n" +
 		"S/show        - show the current board\n" +
 		"s/settings    - view and change the settings\n" +
 		"t/tips        - tips I wrote to help other player (you) to play the game\n" +
@@ -803,7 +887,7 @@ void BoardInterface::importNewBoard() {
 	printf("import a new board>\n");
 	getStateFromInput();
 	record.clearHistoryMove();
-	printf("This is the board we are gonna use:\n");
+	printf("Here's the imported board we are gonna use:\n");
 	analyse->show();
 	printf("hit 'Enter' to continue> ");
 	cin.clear();

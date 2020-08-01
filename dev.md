@@ -5,6 +5,11 @@ well, this is clearly more organized than CharmedPython
 - a few read functions to read games from json, and a playMode to play back those
   saved games and cut in when want to.
 
+# release note - version 1.0.0 - C++
+preRelease - total failure, no pause in bash, clock() is not working, core
+dumped, returnSituation is never used, depth > 3 is never used.
+
+
 # class board
 in here, everything starts from 1,1 !!
 ## var
@@ -30,7 +35,7 @@ and the performance is 5 times better, what should I do then?
 
 # performance testing board
 ## nearly empty board
-        BlankBoard1
+  BlankBoard1
 ```
 | | | | | | | | |
 | | | | | | | | |

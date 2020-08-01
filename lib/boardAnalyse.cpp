@@ -9,7 +9,7 @@ void BoardAnalyse::go(const char plr, const short move) {
 
 void BoardAnalyse::reverse(const short column){
 	if(board.colIsEmpty(column))
-		throw runtime_error("Error: tying to reverse a empty column\n");
+		throw runtime_error("Error: tying to reverse an empty column\n");
 	board.remove(column);
 }
 

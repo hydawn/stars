@@ -31,6 +31,7 @@ public:
     void normalMode();
     void settingsMode();
     void playMode();
+    void playBackMode();
 
     // ask & do
     void askToDebug(bool yes); // if yes == true, then default yes
