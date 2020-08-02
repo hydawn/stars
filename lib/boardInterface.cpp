@@ -335,10 +335,10 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 			byPlayer.move = atoi(input.c_str());
 			analyse->go(byPlayer.player, byPlayer.move);
 			record.push_back(byPlayer); // byPlayer end here
-			if (isOver(byPlayer.player))
+			if (isOver(byPlayer))
 				break;
 		}
-		else if (isOver(byPlayer.player))
+		else if (isOver(byPlayer))
 			break;
 
 		// opp respond
@@ -350,10 +350,8 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 		record.push_back(byOpponent);
         printf("\n%c goes here %d\n", byOpponent.player, byOpponent.move);
 		cout << "Player time used: " << byPlayer.time << "ms\n\n";
-		if (isOver(byOpponent.player)) {
-			analyse->show();
+		if (isOver(byOpponent))
 			break;
-		}
 
         // recommend
 		byPlayer.hintOn = record.getSettings("inDebugMode", "hintOn");
@@ -404,7 +402,7 @@ void BoardInterface::normalMode() {
 		byPlayer.move = atoi(input.c_str());
 		analyse->go(byPlayer.player, byPlayer.move);
 		record.push_back(byPlayer);
-		if (isOver(byPlayer.player))
+		if (isOver(byPlayer))
 			break;
 
 		// opp respond
@@ -421,7 +419,7 @@ void BoardInterface::normalMode() {
 
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
-		if (isOver(byOpponent.player))
+		if (isOver(byOpponent))
 			break;
 		
 		// player recommend - not shown
@@ -459,9 +457,9 @@ void BoardInterface::normalMode() {
 }
 
 void BoardInterface::settingsMode() {
-	printf("We are in settings now:\n");
+	printf("We are in settings mode now:\n");
 	cout << "we have "<< record.getSettingsItemNumber() <<" situations and within them we have ";
-	cout << "multiple items each marked with numbers\nbelow, type in numbers to change ";
+	cout << "multiple items each marked with tags\nbelow, type in tags to change ";
 	cout << "these settings, 0 to exit, S/show to show current\nsettings, h/help for help\n";
 	// show
 	record.showSettingsWithTags();
@@ -472,20 +470,16 @@ void BoardInterface::settingsMode() {
 		cin.getline(input, 8);
 		if (input[0] == '\0' || !strcmp(input,"0") || !strcmp(input, "q") ||
 			!strcmp(input, "exit") || !strcmp(input, "quit") ||
-			!strcmp(input, "no")) {
-			cout << "Exit from settings mode.\n";
-			return;
-		}
+			!strcmp(input, "no"))
+			break;
 		else if (!strcmp(input, "h")||!strcmp(input, "help"))
 			cout << getHelp("settings");
 		else if (!strcmp(input, "S")||!strcmp(input, "show"))
 			record.showSettingsWithTags();
-		else if (strlen(input)==2) {
-			int tag1 = atoi(input), tag2 = atoi(input + 1);
-			if (tag1<10 && tag1>-1 && tag2<10 && tag2>-1 &&
-				record.changeSettingsUsingTags(tag1, tag2))
-				cout << "Done\n";
-			else {
+		else if (strlen(input) == 2) {
+			int tag1 = input[0] - 'a', tag2 = input[1] - 'a';
+			if (!(tag1 < 26 && tag1 > -1 && tag2 < 26 && tag2 > -1 &&
+				record.changeSettingsUsingTags(tag1, tag2))) {
 				cout << "Invalid input, let's try again.\n";
 				cout << "And if you don't know what's going on, you can always type help, happy to help as always.\n";
 			}
@@ -495,6 +489,8 @@ void BoardInterface::settingsMode() {
 			cout << "And if you don't know what's going on, you can always type help, happy to help as always.\n";
 		}
 	}
+	record.saveSettings();
+	printf("Exit from settings mode.\n");
 }
 
 void BoardInterface::playMode() {
@@ -624,6 +620,8 @@ void BoardInterface::customMode() {
 		return;
 	analyse->customBoard(column, row, winn);
 	record.clearHistoryMove();
+	printf("Here's the board we're gonna use:\n");
+	analyse->show();
 	printf("Exit from custom mode ...\n");
 }
 
@@ -918,10 +916,13 @@ void BoardInterface::importNewBoard() {
 	cin.getline(disposal, 8);
 }
 
-bool BoardInterface::isOver(char plr) {
-	if (analyse->gameIsOver() == plr) {
+bool BoardInterface::isOver(const oneMove& move) {
+	if (analyse->gameIsOver() == move.player) {
 		analyse->show();
-		printf("Game is over, you win!\n");
+		if (move.byComputer)
+			printf("Game is over, good luck next time!\n");
+		else 
+			printf("Congratulations, you win!\n");
 		return true;
 	}
 	if (analyse->boardIsFull()) {

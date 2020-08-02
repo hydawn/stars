@@ -51,7 +51,7 @@ public:
     void showComment(oneMove& move);
 
     // check
-    bool isOver(char plr);
+    bool isOver(const oneMove& move);
 };
 
 #endif

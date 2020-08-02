@@ -135,6 +135,7 @@ void BoardRecord::saveGame(BoardHandle& state) {
 		}
 	}
 	saveGame(gameName, state);
+	cout << "game \"" << gameName << "\" is saved.\n";
 }
 
 void BoardRecord::saveGame(const string& gameName, BoardHandle& state) {
@@ -153,9 +154,9 @@ void BoardRecord::saveGame(const string& gameName, BoardHandle& state) {
 void BoardRecord::showSettingsWithTags() {
 	members member = settings.getMemberNames();
 	cout << "situation\t" << "item\t\t\t" << "true/false\t" <<"tagNumber\n";
-	int x = 0;
+	char x = 'a';
 	for (members::iterator i = member.begin(); i != member.end();++i) {
-		int y = 0;
+		char y = 'a';
 		members inset = settings[*i].getMemberNames();
 		printf("\n");
 		for (members::iterator j = inset.begin(); j != inset.end();++j) {
@@ -179,8 +180,7 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 		for (members::iterator j = inset.begin(); j != inset.end();++j) {
 			if (x==tag1&&y==tag2) {
 				settings[*i][*j] = !settings[*i][*j].asBool();
-				saveSettings();
-				cout << "debuginfo: " << *i << ": " << *j << " is changed from "
+				cout << *i << ": " << *j << " is changed from "
 					<< std::boolalpha << !settings[*i][*j].asBool()
 					<< " to " << settings[*i][*j] << endl;
 				return true;
