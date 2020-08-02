@@ -204,13 +204,9 @@ Json::Value* BoardRecord::showSavedGames() {
 				return nullptr;
 			if (!strcmp(input, "c")||!strcmp(input, "current"))
 				return &(*iter);
-			try {
-				int number = atoi(input);
-				if (number > 0 && number <= getNumberOfSavedBoard())
-					return &games[number-1];
-			} catch(const std::exception& e) {
-				std::cerr << e.what() << endl;
-			}
+			int number = atoi(input);
+			if (number && number <= getNumberOfSavedBoard())
+				return &games[number-1];
 			cout << "Pardon?\n";
 		}
 	}

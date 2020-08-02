@@ -108,16 +108,18 @@ string BoardInterface::getInput(string mode) {
 		else if (!strcmp(input, "m") || !strcmp(input, "move"))
 			printf("Why don't we try this in debug mode to see what it does?\n");
 		else if (mode!="add" && strlen(input) == 1) {
-            short num = input[0] - '0';
-			if (num > 0 && num <= analyse->getColumn() &&
+            int num = atoi(input);
+			if (num && num <= analyse->getColumn() &&
 				!analyse->colIsEmpty(num))
 				return input;
 			cout << "Invalid " << mode
 				<< " mode number input, let\'s try again\n";
 		}
-		else if (mode!="reverse" && strlen(input) == 3) {
-			short num = input[2] - '0';
-            if ((input[0]=='X' || input[0]=='x' || input[0]=='0') && num >= 0 &&
+		else if (mode!="reverse" && strlen(input) > 2) {
+			char temp[INTER_MAX_INPUT];
+			strcpy(temp, input + 2);
+			int num = atoi(temp);
+            if ((input[0]=='X' || input[0]=='x' || input[0]=='0') && num &&
 				num <= analyse->getColumn() && !analyse->colIsFull(num))
 				return input;
 		}
@@ -141,8 +143,8 @@ string BoardInterface::getInput(string mode, char plr, double& inputTime) {
 		inputTime = elapsed.count();
 
 		if (strlen(input) == 1) {
-            short num = input[0] - '0';
-			if (num > 0 && num <= analyse->getColumn() &&
+            int num = atoi(input);
+			if (num && num <= analyse->getColumn() &&
 				!analyse->colIsFull(num))
 				return input;
 		}
@@ -201,13 +203,15 @@ void BoardInterface::addMode() {
 	string input;
 	oneMove move;
 	move.mode = "add";
-	while(true){
+	while(true) {
 		input = getInput("add");
 		if(input.empty())
 			return;
-		move.player = input[0];
-		move.move = input[2] - '0';
-		if (move.player == 'x') move.player = 'X';
+		if (input[0] == '0')
+			move.player = input[0];
+		else
+			move.player = 'X';
+		move.move = atoi(input.c_str() + 2);
 		printf("player '%c' goes move '%d' as you like it:\n", move.player, move.move);
 		analyse->go(move.player, move.move);
 		analyse->show();
@@ -224,9 +228,9 @@ void BoardInterface::reverseMode() {
 		input = getInput("reverse");
 		if (input.empty())
 			return;
-		move.move=input[0] - '0';
+		move.move = atoi(input.c_str());
 		printf("remove %d as you like it:\n", move.move);
-		analyse->reverse(input[0]-'0');
+		analyse->reverse(move.move);
 		record.push_back(move);
 		analyse->show();
 	}
@@ -312,8 +316,8 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 		}
 		else if (input!="m" && input!="move") {
 			// player goes
-			analyse->go(byPlayer.player, input[0] - '0');
-			byPlayer.move = input[0] - '0';
+			byPlayer.move = atoi(input.c_str());
+			analyse->go(byPlayer.player, byPlayer.move);
 			record.push_back(byPlayer); // byPlayer end here
 			if (analyse->gameIsOver() == byPlayer.player) {
 				analyse->show();
@@ -394,7 +398,7 @@ void BoardInterface::normalMode() {
 		}
 
 		// player goes
-		byPlayer.move = input[0] - '0';
+		byPlayer.move = atoi(input.c_str());
 		analyse->go(byPlayer.player, byPlayer.move);
 		record.push_back(byPlayer);
 		if (analyse->gameIsOver() == byPlayer.player) {
@@ -487,7 +491,7 @@ void BoardInterface::settingsMode() {
 		else if (!strcmp(input, "S")||!strcmp(input, "show"))
 			record.showSettingsWithTags();
 		else if (strlen(input)==2) {
-			int tag1 = input[0] - '0', tag2=input[1]-'0';
+			int tag1 = atoi(input), tag2 = atoi(input + 1);
 			if (tag1<10 && tag1>-1 && tag2<10 && tag2>-1 &&
 				record.changeSettingsUsingTags(tag1, tag2))
 				cout << "Done\n";
