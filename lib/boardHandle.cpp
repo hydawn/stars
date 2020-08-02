@@ -3,15 +3,6 @@
 int BoardHandle::removeNumber;
 int BoardHandle::addNumber;
 
-BoardHandle::BoardHandle() : row(8), column(8), winn(4) {
-    generate();
-}
-
-BoardHandle::BoardHandle(const BoardHandle& input) : row(input.row),
-    column(input.column), winn(input.winn){
-    generate(input.board, input.top);
-}
-
 BoardHandle::BoardHandle(const Json::Value &root) : row(root["row"].asInt()),
     column(root["column"].asInt()), winn(root["winn"].asInt()) {
     generate();
@@ -35,16 +26,15 @@ BoardHandle::~BoardHandle() {
 
 void BoardHandle::generate() {
     // TODO - is quite stupid, change this when have the chance
-    // it's best to use allocate
+    // it's best to use allocate?
     board = new char* [column];
     top = new short[column];
     for (short i = 0; i < column; ++i) {
-        board[i] = new char[row + 1];
         top[i] = 0;
-    }
-    for (short i = 0; i < column; ++i)
+        board[i] = new char[row + 1];
         for (short j = 0; j < row; ++j)
             board[i][j] = ' ';
+    }
 }
 
 void BoardHandle::generate(char** b, const short* t) {
@@ -57,7 +47,7 @@ void BoardHandle::generate(char** b, const short* t) {
     refreshBoard(b);
 }
 
-BoardHandle& BoardHandle::operator=(const BoardHandle &bh){
+BoardHandle& BoardHandle::operator=(const BoardHandle &bh) {
     if(this==&bh)
         return *this;
     refreshBoard(bh.board);
@@ -65,7 +55,7 @@ BoardHandle& BoardHandle::operator=(const BoardHandle &bh){
     return *this;
 }
 
-Json::Value BoardHandle::boardToJson(){
+Json::Value BoardHandle::boardToJson() {
     Json::Value root;
     for (short i = 0; i < column;++i){
         board[i][row] = '\0';
@@ -75,8 +65,7 @@ Json::Value BoardHandle::boardToJson(){
     return root;
 }
 
-Json::Value BoardHandle::topToJson()
-{
+Json::Value BoardHandle::topToJson() {
     return arraryToJson(top, column);
 }
 
@@ -88,7 +77,6 @@ Json::Value BoardHandle::arraryToJson(T a[], int n){
     return root;
 }
 
-
 void BoardHandle::show() {
     for (short i = 1; i <= column; ++i)
         printf(" %d", i);
@@ -99,7 +87,6 @@ void BoardHandle::show() {
         printf("|\n");
     }
 }
-
 
 bool BoardHandle::boardIsFull() {
     // static int timer = 0;
@@ -149,20 +136,24 @@ char BoardHandle::rPlayer(const char plr) {
 short BoardHandle::randomMove() {
     shortv list;
     nonFullColumn(list);
+    if (list.empty())
+        throw runtime_error("trying randomMove() in an empty list\n");
     return randomMove(list);
 }
 
 short BoardHandle::randomMove(shortv& list) {
+    // debug
+    if (list.empty())
+        throw runtime_error("trying randomMove(shortv& list) in an empty list\n");
     srand((unsigned)time(NULL));
     return list[rand() % list.size()];
 }
 
-short BoardHandle::randomSuggestion(const char plr, shortv& list) {
-    shortv opp2, opp1, plr2, plr1, nfl;
+short BoardHandle::randomSuggestion(const char plr, shortv& list, const string& mode) {
+    shortv opp2, opp1, plr2, plr1;
     char opp = rPlayer(plr);
-    nonFullColumn(nfl);
     srand((unsigned)time(NULL));
-    for (vIter col = nfl.begin(); col != nfl.end(); ++col) {
+    for (vIter col = list.begin(); col != list.end(); ++col) {
         if (colIsFull(*col) || colIsEmpty(*col));
         else if (board[*col - 1][top[*col - 1] - 1] == plr) {
             if (top[*col - 1] - 1 > 0 && board[*col - 1][top[*col - 1] - 2] == plr)
@@ -177,19 +168,35 @@ short BoardHandle::randomSuggestion(const char plr, shortv& list) {
                 opp1.push_back(*col);
         }
     }
-    short ran = rand() % 1000;
-    if (!opp2.empty() && ran < 92)
-        return randomMove(opp2);
-    if (!plr2.empty() && ran < 85)
-        return randomMove(plr2);
-    if (!plr1.empty() && ran < 75)
+    short ran = rand() % 100;
+    if (mode == "progressive") {
+        if (!opp2.empty() && ran < 95)
+            return randomMove(opp2);
+        ran = rand() % 100;
+        if (!plr2.empty() && ran < 72)
+            return randomMove(plr2);
+    }
+    else if (mode == "defensive") {
+        if (!opp2.empty() && ran < 95)
+            return randomMove(opp2);
+        ran = rand() % 100;
+        if (!plr2.empty() && ran < 72)
+            return randomMove(plr2);
+    }
+    else
+        throw runtime_error("no such mode.\n");
+    ran = rand() % 100;
+    if (!opp1.empty() && ran < 97)
+        return randomMove(opp1);
+    ran = rand() % 100;
+    if (!plr1.empty() && ran < 95)
         return randomMove(plr1);
-    if (!opp1.empty() && ran < 55)
-        return randomMove(plr1);
+    if (list.empty())
+        throw runtime_error("call randomSuggestion with empty list");
     return randomMove(list);
 }
 
-short BoardHandle::randomSuggestion(const char plr, shortv& list, shortv oppList) {
+short BoardHandle::randomSuggestion(const char plr, shortv& list, shortv oppList, const string& mode) {
     shortv tempList;
     for (vIter i = list.begin(); i != list.end(); ++i)
         for (vIter j = oppList.begin(); j != oppList.end();++j)
@@ -198,9 +205,12 @@ short BoardHandle::randomSuggestion(const char plr, shortv& list, shortv oppList
                 j = oppList.erase(j);
                 break;
             }
-    if (tempList.empty())
-        return randomSuggestion(plr, list);
-    return randomSuggestion(plr, tempList);
+    if (tempList.empty()) {
+        if (list.empty())
+            throw runtime_error("call randomSuggestion(4) with empty list");
+        return randomSuggestion(plr, list, mode);
+    }
+    return randomSuggestion(plr, tempList, mode);
 }
 
 bool BoardHandle::winPieceNearBy(const short col, const short ro) {
@@ -254,10 +264,3 @@ void BoardHandle::refreshTop() {
     }
 }
 
-void BoardHandle::clearBoardAndTop() {
-    for (short i = 0; i < column;++i) {
-        for (short j = 0; j < top[i];++j)
-            board[i][j] = ' ';
-        top[i] = 0;
-    }
-}

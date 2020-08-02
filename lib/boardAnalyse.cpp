@@ -683,7 +683,14 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 
 	shortv list, oppList;
 	double timeUsed = 0;
-    system_clock::time_point start = system_clock::now();
+
+	board.nonFullColumn(list);
+	if (list.empty())
+		throw runtime_error("call respond with full board!\n");
+	if (board.isOver() == plr || board.isOver() == board.rPlayer(plr))
+		throw runtime_error("call respond with ended game!\n");
+
+	system_clock::time_point start = system_clock::now();
 	string word = returnMove(plr, list, 3);
     system_clock::time_point end = system_clock::now();
 	auto elapsed = duration_cast<milliseconds>(end - start);
@@ -697,7 +704,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 		printf("]\n");
 	}
 	if (showTime)
-		cout << "Time used: " << timeUsed << " ms\n";
+		cout << "Computer time used: " << timeUsed << " ms\n";
 
 
 	thisMove.word = word;

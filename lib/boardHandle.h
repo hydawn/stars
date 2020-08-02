@@ -33,8 +33,10 @@ public:
     static int addNumber;
     /************************debug***************************/
 
-    BoardHandle();
-    BoardHandle(const BoardHandle& input);
+    BoardHandle() : row(8), column(8), winn(4) { generate(); }
+    BoardHandle(const BoardHandle& input) : row(input.row),
+        column(input.column), winn(input.winn) { 
+        generate(input.board, input.top); }
     BoardHandle(const Json::Value &root);
     BoardHandle(const short r, const short c, const short w);
     ~BoardHandle();
@@ -81,17 +83,22 @@ public:
     // random
     short randomMove();
     short randomMove(shortv& list);
-    short randomSuggestion(const char plr, shortv& list);
-    short randomSuggestion(const char plr, shortv& list, shortv oppList);
+    short randomSuggestion(const char plr, shortv& list, const string& mode="progressive");
+    short randomSuggestion(const char plr, shortv& list, shortv oppList, const string& mode="progressive");
 
     //change function
-    void add(const char plr, const short col) { 
-        board[col - 1][top[col - 1]++] = plr; 
+    void add(const char plr, const short col) {
+        /*****************************debug**********************************/
+        // debug, feel free to remove this for performance reasons
+        if (top[col - 1] == row)
+            throw runtime_error("trying to remove from a empty column.\n");
         ++addNumber;
+        /*****************************debug**********************************/
+        board[col - 1][top[col - 1]++] = plr; 
     }
     void remove(const short col) { 
         /*****************************debug**********************************/
-        // debug, fell free to remove this for performance reasons
+        // debug, feel free to remove this for performance reasons
         if (top[col - 1] == 0)
             throw runtime_error("trying to remove from a empty column.\n");
         ++removeNumber;
@@ -110,7 +117,6 @@ public:
     // refresh
     void refreshBoard(char** b); 
     void refreshTop();
-    void clearBoardAndTop();
 };
 
 #endif

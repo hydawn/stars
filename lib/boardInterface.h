@@ -47,6 +47,9 @@ public:
 
     // show
     void showComment(oneMove& move);
+
+    // check
+    bool isOver(char plr);
 };
 
 #endif
