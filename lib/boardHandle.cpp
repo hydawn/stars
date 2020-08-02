@@ -116,7 +116,7 @@ char BoardHandle::isOver() {
 void BoardHandle::nonFullColumn(shortv& nonFull) {
 	nonFull.clear();  // see if delete this will help?
 	for (short i = 0; i < column; ++i)
-		if (top[i] != column)
+		if (top[i] != row)
 			nonFull.push_back(i + 1);
 	// static int timer = 0;
 	// printf("nonfull %d ", ++timer);

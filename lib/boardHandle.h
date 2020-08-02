@@ -92,7 +92,7 @@ public:
 		/*****************************debug**********************************/
 		// debug, feel free to remove this for performance reasons
 		if (top[col - 1] == row)
-			throw runtime_error("trying to remove from a empty column.\n");
+			throw runtime_error("trying to add to a full column.\n");
 		++addNumber;
 		/*****************************debug**********************************/
 		board[col - 1][top[col - 1]++] = plr;
@@ -101,7 +101,7 @@ public:
 		/*****************************debug**********************************/
 		// debug, feel free to remove this for performance reasons
 		if (top[col - 1] == 0)
-			throw runtime_error("trying to remove from a empty column.\n");
+			throw runtime_error("trying to remove from an empty column.\n");
 		++removeNumber;
 		/*****************************debug**********************************/
 		board[col - 1][(top[col - 1]--) - 1] = ' ';

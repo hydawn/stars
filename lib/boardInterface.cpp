@@ -336,6 +336,8 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 
 		// recommend
 		byPlayer.hintOn		= record.getSettings("inDebugMode", "hintOn");
+		if (byPlayer.hintOn)
+			cout << "Here is hint provided for you\n";
 		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer, byPlayer.hintOn,
 											   record.getSettings("inDebugMode", "showTime"));
 		showComment(byPlayer);
