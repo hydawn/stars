@@ -4,49 +4,53 @@
 
 #define INTER_MAX_INPUT 64
 
-using std::string;
 using std::cin;
+using std::string;
 
-class BoardInterface
-{
+class BoardInterface {
 private:
-    BoardAnalyse* analyse; // this might be more important?
-    BoardRecord record;
+	BoardAnalyse* analyse;	// this might be more important?
+	BoardRecord	  record;
 
 public:
-    BoardInterface() {generate(8,8,4);}
-    BoardInterface(BoardAnalyse& hb) { analyse = &hb;}
+	BoardInterface() { generate(8, 8, 4); }
+	BoardInterface(BoardAnalyse& hb) { analyse = &hb; }
 
-    void generate(short c, short r, short w) { analyse = new BoardAnalyse;}
+	void generate(short c, short r, short w) { analyse = new BoardAnalyse; }
 
-    // general
-    string getInput(string mode);
-    string getInput(string mode, char plr, double& inputTime);
-    void getStateFromInput();
+	// general
+	string getInput(const string mode);
+	string getInput(const string mode, char plr, double& inputTime);
+	short  getCustomInput(const string item);
+	void   getStateFromInput();
 
-    // mode
-    void addMode();
-    void reverseMode();
-    void debugMode(oneMove& byPlayer);
-    void normalMode();
-    void settingsMode();
-    void playMode();
-    void playBackMode();
+	// mode
+	void addMode();
+	void reverseMode();
+	void debugMode(oneMove& byPlayer);
+	void normalMode();
+	void settingsMode();
+	void playMode();
+	void playBackMode();
+	void customMode();
 
-    // ask & do
-    bool askToDebug(bool yes); // if yes == true, then default yes
-    void askToSaveBoard(bool yes);
-    void importNewBoard();
+	// ask & do
+	bool askToDebug(bool yes);	// if yes == true, then default yes
+	void askToSaveBoard(bool yes);
+	void importNewBoard();
 
-    // info
-    string getHelp(string mode = "normal");
-    string getInfo(string input = "info");
+	// info
+	string getHelp(string mode = "normal");
+	string getInfo(string input = "info");
 
-    // refresh
-    void refreshRecord(const BoardRecord &record_) { record = record_; }
+	// refresh
+	void refreshRecord(const BoardRecord& record_) { record = record_; }
 
-    // show
-    void showComment(oneMove& move);
+	// show
+	void showComment(oneMove& move);
+
+	// check
+	bool isOver(const oneMove& move);
 };
 
 #endif

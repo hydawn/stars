@@ -1,12 +1,15 @@
 well, this is clearly more organized than CharmedPython
 
 # TODO
-- add help info
+- 0 to exit a mode, quit to quit the whole game
 - add performance settings
 - improve performance - cut branches
 - add GUI?
+- set computer strategy : progressive (mainly build self) or defensive (mainly intercept)
+- set calculate depth
+- Then I will stop
 
-# pre-release note - version 1.0.0 - C++
+# pre-release note - version 1.0 - Beta
 preRelease - total failure, no pause in bash, clock() is not working as expected, core dumped, returnSituation is never used, depth > 3 is never used.
 
 # analyse testing board
@@ -208,11 +211,16 @@ this however, `ShortList` takes 21ms, `vector<short>` takes 25ms
 
 
 # worth noticing
+
 ## C string compare (char[])
 c style string have no overload at =, so I have to use !strcmp() which return 0 if two strings are the same
+
 ## C input
 if I use `cin >> word;` before using `cin.getline(input, 256);` I will always get a \0. So I have to add a `char disposal = cin.get();` to get rid of the `\0` that nobody want.  
 by the way, cin.clear() won't help
+
+## class
+`generate()` and `free()` is quite useful when trying to refresh (add other functions to) a class containing new and delete
 
 # class BoardHandle
 in here, everything starts from 0,0  

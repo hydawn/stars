@@ -1,5 +1,5 @@
 # Old Testing Board
-Back in the days when I use python, I generated (by hand) a lot of games for testing how smart the program was.  
+Back in the days when I use python, I generated (by hand) a few games for testing how smart the program was.  
 Now you can import these board and play for fun.  
 
 ## 2020-7-5-12:56 shallow analysis - solved
