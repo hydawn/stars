@@ -12,17 +12,6 @@ BoardHandle::BoardHandle(const Json::Value &root) : row(root["row"].asInt()),
     }
 }
 
-BoardHandle::BoardHandle(const short r, const short c, const short w) : 
-    row(r), column(c), winn(w) {
-    generate();
-}
-
-BoardHandle::~BoardHandle() {
-    for (short i = 0; i < row; ++i)
-        delete[] board[i];
-    delete[] board;
-    delete[] top;
-}
 
 void BoardHandle::generate() {
     // TODO - is quite stupid, change this when have the chance
@@ -45,6 +34,13 @@ void BoardHandle::generate(char** b, const short* t) {
         top[i] = t[i];
     }
     refreshBoard(b);
+}
+
+void BoardHandle::free() {
+    for (short i = 0; i < row; ++i)
+        delete[] board[i];
+    delete[] board;
+    delete[] top;
 }
 
 BoardHandle& BoardHandle::operator=(const BoardHandle &bh) {
@@ -78,8 +74,11 @@ Json::Value BoardHandle::arraryToJson(T a[], int n){
 }
 
 void BoardHandle::show() {
-    for (short i = 1; i <= column; ++i)
+    short i = 1;
+    for (; i <= column && i <= 10; ++i)
         printf(" %d", i);
+    for (; i <= column; ++i)
+        printf("%d", i);
     printf("\n");
     for (short i = row - 1; i > -1; --i) {
         for (short j = 0; j < column; ++j)
@@ -264,3 +263,10 @@ void BoardHandle::refreshTop() {
     }
 }
 
+void BoardHandle::customBoard(const short cl, const short ro, const short wi) {
+    free();
+    column = cl;
+    row = ro;
+    winn = wi;
+    generate();
+}

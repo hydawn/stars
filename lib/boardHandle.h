@@ -21,7 +21,6 @@ typedef ShortList shortv;
 
 class BoardHandle {
     // handles the memory allocate and ways to change the board
-private:
 public:
     char **board;
     short *top; // 0~column, 0 means no piece, column means full
@@ -38,16 +37,20 @@ public:
         column(input.column), winn(input.winn) { 
         generate(input.board, input.top); }
     BoardHandle(const Json::Value &root);
-    BoardHandle(const short r, const short c, const short w);
-    ~BoardHandle();
+    BoardHandle(const short r, const short c, const short w) : 
+        row(r), column(c), winn(w) { generate();}
+    ~BoardHandle() { free(); }
 
     // construct
     void generate();
     void generate(char** b, const short* t);
 
+    // destruct
+    void free();
+
     // operator
     BoardHandle &operator=(const BoardHandle &bh);
-    operator Json::Value(){
+    operator Json::Value() {
         Json::Value root;
         root["board"] = boardToJson();
         root["top"] = topToJson();
@@ -65,9 +68,9 @@ public:
     void show();
 
     // getter
-    short getRow(){return row;}
+    short getRow() {return row;}
     short getColumn() {return column;}
-    short getWinn(){return winn;}
+    short getWinn() {return winn;}
 
     // is function
     bool colIsFull(const short col) { return top[col - 1] == column; }
@@ -117,6 +120,9 @@ public:
     // refresh
     void refreshBoard(char** b); 
     void refreshTop();
+
+    // custom
+    void customBoard(const short cl, const short ro, const short wi);
 };
 
 #endif

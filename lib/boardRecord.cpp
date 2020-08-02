@@ -57,6 +57,11 @@ void BoardRecord::getFile() {
 			"		\"defaultDebug\" : false,\n" +
 			"		\"defaultSaveBoard\" : false\n" +
 			"	},\n" +
+			"	\"inCustomMode\":\n" +
+			"	{\n" +
+			"		\"askToSaveBoard\" : false,\n" +
+			"		\"defaultSaveBoard\" : false\n" +
+			"	},\n" +
 			"	\"inDebugMode\" : \n" +
 			"	{\n" +
 			"		\"hintOn\" : false,\n" +

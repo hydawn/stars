@@ -4,11 +4,9 @@
 
 /*********/
 int main() {
-    string input;
-    char plr = 'X', opp = '0';
     BoardAnalyse boardAnalyser;
     BoardInterface boardInterface(boardAnalyser);
-    printf("Use 1~8 to place a piece, h for help, 0 to exit.\n");
+    printf("Use numbers to place a piece, h for help, 0 to exit.\n");
     printf("Game is afoot!\n");
 
     boardInterface.normalMode();

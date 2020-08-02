@@ -20,8 +20,9 @@ public:
     void generate(short c, short r, short w) { analyse = new BoardAnalyse;}
 
     // general
-    string getInput(string mode);
-    string getInput(string mode, char plr, double& inputTime);
+    string getInput(const string mode);
+    string getInput(const string mode, char plr, double& inputTime);
+    short getCustomInput(const string item);
     void getStateFromInput();
 
     // mode
@@ -32,6 +33,7 @@ public:
     void settingsMode();
     void playMode();
     void playBackMode();
+    void customMode();
 
     // ask & do
     bool askToDebug(bool yes); // if yes == true, then default yes
