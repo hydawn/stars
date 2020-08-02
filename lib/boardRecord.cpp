@@ -32,15 +32,56 @@ void BoardRecord::getFile() {
 		std::ofstream outSet(settingsFileName);
 		// hard core show
 		string addon		   = "";
-		string defaultSettings = addon + "{\n" + "	\"changeBoard\" : \n" + "	{\n" + "		\"askToSaveBoard\" : false,\n" + "		\"defaultSaveBoard\" : false\n" + "	},\n" +
-								 "	\"exitNormal\" : \n" + "	{\n" + "		\"askToDebug\" : false,\n" + "		\"askToSaveBoard\" : true,\n" + "		\"defaultDebug\" : false,\n" +
-								 "		\"defaultSaveBoard\" : false\n" + "	},\n" + "	\"gameIsOver\" : \n" + "	{\n" + "		\"askToDebug\" : true,\n" + "		\"askToSaveBoard\" : true,\n" +
-								 "		\"defaultDebug\" : false,\n" + "		\"defaultSaveBoard\" : false\n" + "	},\n" + "	\"inCustomMode\":\n" + "	{\n" +
-								 "		\"askToSaveBoard\" : false,\n" + "		\"defaultSaveBoard\" : false\n" + "	},\n" + "	\"inDebugMode\" : \n" + "	{\n" + "		\"hintOn\" : false,\n" +
-								 "		\"showCalculate\" : false,\n" + "		\"showTime\" : false\n" + "	},\n" + "	\"inNormalMode\" : \n" + "	{\n" + "		\"showCalculate\" : false,\n" +
-								 "		\"showTime\" : false\n" + "	},\n" + "	\"whenSaveGame\" : \n" + "	{\n" + "		\"askGiveName\" : true,\n" + "		\"defaultGiveName\" : false\n" +
-								 "	},\n" + "	\"inToDebugMode\" : \n" + "	{\n" + "		\"askToImport\" : false,\n" + "		\"askToSaveBoard\" : false,\n" +
-								 "		\"defaultImport\" : false,\n" + "		\"defaultSaveBoard\" : false\n" + "	}\n" + "}\n";
+		string defaultSettings = addon +
+			"{\n" +
+			"	\"changeBoard\" : \n" +
+			"	{\n" +
+			"		\"askToSaveBoard\" : false,\n" +
+			"		\"defaultSaveBoard\" : false\n" +
+			"	},\n" +
+			"	\"exitNormal\" : \n" +
+			"	{\n" +
+			"		\"askToDebug\" : false,\n" +
+			"		\"askToSaveBoard\" : true,\n" +
+			"		\"defaultDebug\" : false,\n" +
+			"		\"defaultSaveBoard\" : false\n" +
+			"	},\n" +
+			"	\"gameIsOver\" : \n" +
+			"	{\n" +
+			"		\"askToDebug\" : true,\n" +
+			"		\"askToSaveBoard\" : true,\n" +
+			"		\"defaultDebug\" : false,\n" +
+			"		\"defaultSaveBoard\" : false\n" +
+			"	},\n" +
+			"	\"inCustomMode\":\n" +
+			"	{\n" +
+			"		\"askToSaveBoard\" : false,\n" +
+			"		\"defaultSaveBoard\" : false\n" +
+			"	},\n" +
+			"	\"inDebugMode\" : \n" +
+			"	{\n" +
+			"		\"hintOn\" : false,\n" +
+			"		\"showCalculate\" : false,\n" +
+			"		\"showTime\" : false\n" +
+			"	},\n" +
+			"	\"inNormalMode\" : \n" +
+			"	{\n" +
+			"		\"showCalculate\" : false,\n" +
+			"		\"showTime\" : false\n" +
+			"	},\n" +
+			"	\"whenSaveGame\" : \n" +
+			"	{\n" +
+			"		\"askGiveName\" : true,\n" +
+			"		\"defaultGiveName\" : false\n" +
+			"	},\n" +
+			"	\"inToDebugMode\" : \n" +
+			"	{\n" +
+			"		\"askToImport\" : false,\n" +
+			"		\"askToSaveBoard\" : false,\n" +
+			"		\"defaultImport\" : false,\n" +
+			"		\"defaultSaveBoard\" : false\n" +
+			"	}\n" +
+			"}\n";
 		outSet << defaultSettings;
 		if (!outSet.is_open()) {
 			throw runtime_error("failed to create file, mission aborted\n ");
