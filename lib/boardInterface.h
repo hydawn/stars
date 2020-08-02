@@ -27,14 +27,14 @@ public:
     // mode
     void addMode();
     void reverseMode();
-    void debugMode(char arg='n');
+    void debugMode(oneMove& byPlayer);
     void normalMode();
     void settingsMode();
     void playMode();
     void playBackMode();
 
     // ask & do
-    void askToDebug(bool yes); // if yes == true, then default yes
+    bool askToDebug(bool yes); // if yes == true, then default yes
     void askToSaveBoard(bool yes);
     void importNewBoard();
 

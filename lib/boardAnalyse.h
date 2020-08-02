@@ -1,9 +1,11 @@
 #ifndef _BOARDANALYSE_H_
 #define _BOARDANALYSE_H_ 1
 #include <string.h>
+#include <chrono>
 #include "boardRecord.h"
 
 using std::string;
+using namespace std::chrono;
 
 class BoardAnalyse {
     // more like an analyze class

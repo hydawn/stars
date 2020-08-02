@@ -10,15 +10,13 @@
 using std::vector;
 using std::string;
 using std::runtime_error;
-/*******
+/*****
 typedef vector<short>::iterator vIter;
 typedef vector<short> shortv;
-/*****/
-/**********/
+*****/
 #include "shortList.h"
 typedef ShortList::iterator vIter;
 typedef ShortList shortv;
-/**********/
 
 
 class BoardHandle {
