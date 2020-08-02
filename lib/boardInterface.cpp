@@ -149,7 +149,7 @@ string BoardInterface::getInput(const string mode, char plr, double& inputTime) 
 		else if (!strcmp(input, "h") || !strcmp(input, "help"))
 			cout << getHelp(mode) << endl;
 		else if (!strcmp(input, "i") || !strcmp(input, "info") || !strcmp(input, "story") ||
-				 !strcmp(input, "t") || !strcmp(input, "tips"))
+				 !strcmp(input, "t") || !strcmp(input, "tips") || !strcmp(input, "a song, please"))
 			cout << getInfo(input) << endl;
 		else if (!strcmp(input, "P") || !strcmp(input, "play back") || !strcmp(input, "playback"))
 			playBackMode();
@@ -484,7 +484,7 @@ void BoardInterface::playMode() {
 	printf("We are here in play mode.\n");
 	printf("You can choose from %d saved games.\n", record.getNumberOfSavedBoard());
 	printf("Hit 'Enter' to see more, type in index number to went into\n");
-	printf("one of those games. Or type c to continue tp play the board that is currently\ndisplayed. ");
+	printf("one of those games. Or type c to continue to play the board that is currently\ndisplayed. ");
 	printf("Use 0 to exit.\n");
 	printf("Explore!\n");
 	Json::Value* game = record.showSavedGames();
@@ -626,21 +626,24 @@ string BoardInterface::getHelp(string mode) {
 		"and see what the help information in debug mode have to say?\n" + enjoy + end;
 	string normal =
 		addon + "Type in numbers (1~8) to play, one who place four piece in a row first wins\n\n" +
-		"0/q/quit/exit - exit from a certain mode or exit the game\n" +
-		"C/custom      - custom board height, width and win number (4 by default)"
-		"d/debug       - into debug mode\n" +
-		"h/help        - show help message of the current mode\n" + "p/play        - into play mode\n" +
-		"P/play back   - into play back mode\n" + "save          - save the current game\n" +
-		"S/show        - show the current board\n" + "s/settings    - view and change the settings\n" +
-		"t/tips        - tips I wrote to help other player (you) to play the game\n" +
-		"w/winn        - show win number (4 by default)\n"
-		"i/info        - information about the game\n\n" +
+		"0/q/quit/exit -- exit from a certain mode or exit the game\n" +
+		"C/custom ------- custom board height, width and win number (4 by default)\n"
+		"d/debug -------- into debug mode\n" +
+		"h/help --------- show help message of the current mode\n" +
+		"p/play --------- into play mode\n" +
+		"P/play back ---- into play back mode\n" +
+		"save ----------- save the current game\n" +
+		"S/show --------- show the current board\n" +
+		"s/settings ----- view and change the settings\n" +
+		"t/tips --------- tips I wrote to help other player (you) to play the game\n" +
+		"w/winn --------- show win number (4 by default)\n"
+		"i/info --------- information about the game\n\n" +
 		enjoy + end;
 	string debug = addon +
-				   "You are in debug mode now, It's quite the same with normal mode, just that you\n" +
-				   "can get some hint from the computer from time to time. If the computer says\n" +
-				   "word=good, then you'll win in a few steps, just take the step within the list\n" +
-				   "that follows, then you will win - if there's no bugs :-)\n" + enterForMore;
+		"You are in debug mode now, It's quite the same with normal mode, just that you\n" +
+		"can get some hint from the computer from time to time. If the computer says\n" +
+		"word=good, then you'll win in a few steps, just take the step within the list\n" +
+		"that follows, then you will win - if there's no bugs :-)\n" + enterForMore;
 	vector<string> moreDebug = {
 		addon + "If word=free, list=[1, 5] but you can see that there are plenty of column that\n" +
 			"is not full but out side of that [1, 5] list, it is recommended that you take\n" +
@@ -653,7 +656,8 @@ string BoardInterface::getHelp(string mode) {
 			"Some funtions in this program that ordinary players cannot harness. One might\n" +
 			"argue that these ancient artifacts might cause harm to the experience. Do you\n" +
 			"wish to continue?\n" + enterForMore,
-		addon + "a/add         - into add mode: add some moves\n" +
+		addon +
+			"a/add         - into add mode: add some moves\n" +
 			"c/change      - change (swap) the player\n" +
 			"H/hint        - show hint for the previous step\n"
 			"I/import      - import a new board from input\n" +
@@ -741,9 +745,14 @@ string BoardInterface::getHelp(string mode) {
 		return addon;
 	}
 	if (mode == "settings") {
-		string settings =
-			addon + "sorry, this help hasn't beening written yet, but the developer is working really\n" +
-			"hard to get it done, you'll probably see this in the next version!\n";
+		string settings = addon + 
+			"Each situation represent a situation where questions might be asked, you can\n" +
+			"decide whether it will be asked, and dispite whether it IS asked, the default\n" +
+			"answer would be. Notice that, for example, in situation gameIsOver, if\n" +
+			"askToDebug is false but defaultDebug is true, then when game is over, we will\n" +
+			"went into debug mode immediately.\n" +
+			"Personally, I only let exitNormal:askToSaveBoard and whenSaveGame:askGiveName\n" +
+			"to be true, don't know why I wrote all those settings...\n";
 		return settings;
 	}
 	return reverse;
@@ -752,7 +761,7 @@ string BoardInterface::getHelp(string mode) {
 string BoardInterface::getInfo(string input) {
 	string addon = "";
 	string enjoy = "Enjoy!\n";
-	string end	 = "------------------------------------ The End -----------------------------------\n";
+	string end	 = "----------------------------------- The End ------------------------------------\n";
 	string tips	 = addon + "Tips from CharmedPython:\n" +
 		"So the trick is to build yourself as high as possible, but don't make hugh\n" +
 		"chunks, leave some room between them. Here are some good examples:\n" +
@@ -772,16 +781,39 @@ string BoardInterface::getInfo(string input) {
 		"debugging originally. Em, I wonder what other functions it can perform for other\n" +
 		"players. Difficult to answer without actual practice wouldn't you say?\n" + enjoy +
 		"Good luck\n" + end;
-	string info =
+	string info = addon +
+		"\n------------------------------ version 1.0 - Beta ------------------------------\n" +
+		"                                                                    by DuanHanyu\n" +
+		"                                                                        2020-8-2";
+	vector<string> story = {
 		addon +
-		"sorry that you have to read this, I haven't wrote this yet ;-) but soon I will.\nBest wishes from "
-		"Duan Hanyu\n" +
-		enjoy + end;
-	string story =
-		addon + "Out of a few random try, you finally get yourself an Easter Egg! But I'm afraid\n" +
-		"this is actually wrote for myself, so it's quite boring for other players. Sorry\n" +
-		"for that;-) Anyway, I have just finished an interview when I see my roommate\n" +
-		"coding. He told me it was his homework, I got interested. And since then I have\n" + enjoy + end;
+		"Out of a few random try, you finally get yourself an Easter Egg! But I'm afraid\n" +
+		"this is actually wrote for myself, so it's quite boring for other players. Not\n" +
+		"too late to quite now.\n" +
+		"------------------------- 'Enter' for more, q to quit --------------------------\n",
+		addon +
+		"Anyway, I have just finished an interview when I see my roommate\n" +
+		"coding. He told me it was his homework, I got interested. Then I begin to work\n"
+		"on this silly thing till I found that it's taking up all of my time and I'm not\n" +
+		"even satisfied? Like it's a weird addictive activity that does even provide\n" +
+		"satisfaction like another other decent addictive activity will. Watching Game of\n" +
+		"Thrones all day might indicate that someone's life is decaying, but at least\n" +
+		"that \"feels good\". Now I'm just coding for almost no reason at all, there's\n" +
+		"not much technique here, doesn't require any brain work. Brick by brick, anyone\n" +
+		"can build this. I mean, what? I didn't go to school so that I can sit here and\n" +
+		"type all day. And there's always new features to develop and new bugs to fix.\n" +
+		"Now I really get it when my cousin say you can never finish a project, it's a\n" + "disaster.\n" +
+		"------------------------- 'Enter' for more, q to quit --------------------------\n",
+		addon +
+		"But when I say end a project instead of stop coding, I suddenly realized that it\n" +
+		"IS my fault that the project never ends 'cause I never said WHEN it ends. When?\n" +
+		"Do I stop once the computer can play at least five moves? Do I stop once I've\n" +
+		"developed a recursive analyse function? Do I stop once play back feature is\n" +
+		"developed? Maybe I should have set a goal, a point, where once it was met, I\n" +
+		"stop. Maybe I should do that whenever I start to do anything?\n" + "So... where should I stop?\n" +
+		"\n" + "Well, one have to admit, typing that IS refreshing. The developer is OK now.\n" +
+		"Sorry you have to see all these irrelevant crap. Have a nice day\n" + end
+};
 	if (input == "t" || input == "tips") {
 		cout << tips;
 		char dis[8];
@@ -807,8 +839,29 @@ string BoardInterface::getInfo(string input) {
 		}
 		return addon;
 	}
-	if (input == "story")
-		return story;
+	if (input == "story") {
+		char  dis[16];
+		int	  wrongInput = 0;
+		short i			 = 1;
+		cout << story[0] << "> ";
+		cin.getline(dis, 16);
+		if (!strcmp(dis, "q") || !strcmp(dis, "0") || !strcmp(dis, "quit") || !strcmp(dis, "exit"))
+			return addon;
+		cout << story[1] << "> ";
+		cin.getline(dis, 16);
+		if (!strcmp(dis, "q") || !strcmp(dis, "0") || !strcmp(dis, "quit") || !strcmp(dis, "exit"))
+			return addon;
+		cout << story[2];
+		return addon;
+	}
+	if (input == "a song, please") {
+		string aSong = addon +
+		"\n    Oh my darling, oh my darling, oh my darling Clementine\n" +
+		"    You are lost and gone forever, dreadful sorry Clementine\n" +
+		"    How I missed her, how I missed her, how I missed my Clementine\n" +
+		"    Until I kissed her little sister and forgot my Clementine";
+		return aSong;
+	}
 	return info;
 }
 
