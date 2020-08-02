@@ -53,9 +53,9 @@ Player 'X' move>
 Then you're good to go.  
 
 # other modes
-Other modes such as play back and settings just there to explore \~
+Other modes such as play back mode and custom mode just there to explore \~
 
-# known bugs
+# known bugs for unknown reasons
 If it stopped when you didn't ask it to and you don't know why, calm down and follow these steps below:
 1. start up a new game
 2. play it like nothing has ever happened

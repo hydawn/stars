@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION "3.16.0")
 project("CharmedCpp")
 
 add_executable(
-    "${PROJECT_NAME}"
-    "main.cpp"
-    "lib/boardAnalyse.cpp"
-    "lib/boardHandle.cpp"
-    "lib/boardInterface.cpp"
-    "lib/boardRecord.cpp"
-    "lib/jsoncpp.cpp"
+	"${PROJECT_NAME}"
+	"main.cpp"
+	"lib/boardAnalyse.cpp"
+	"lib/boardHandle.cpp"
+	"lib/boardInterface.cpp"
+	"lib/boardRecord.cpp"
+	"lib/jsoncpp.cpp"
 )
 
 

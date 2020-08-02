@@ -8,7 +8,7 @@ void BoardAnalyse::go(const char plr, const short move) {
 }
 
 void BoardAnalyse::reverse(const short column) {
-	if(state.colIsEmpty(column))
+	if (state.colIsEmpty(column))
 		throw runtime_error("Error: tying to reverse an empty column\n");
 	state.remove(column);
 }
@@ -38,15 +38,14 @@ shortv BoardAnalyse::firstPoint(const char plr, shortv& nfc) {
 
 // this is actually copied from the original analyse to cope with the
 // performance problem
-string BoardAnalyse::hiddenAnalyse(const char plr, shortv& list)
-{
+string BoardAnalyse::hiddenAnalyse(const char plr, shortv& list) {
 	// static int timer = 0;
 	// ++timer;
 	// printf("analyse %d ", timer);
 	// reform
 
 	shortv tempList, goodList, temp1, temp2, nonFull;
-	vIter col;
+	vIter  col;
 
 	state.nonFullColumn(nonFull);
 	list = firstPoint(plr, nonFull);
@@ -54,7 +53,7 @@ string BoardAnalyse::hiddenAnalyse(const char plr, shortv& list)
 		return "good";
 
 	char opp = state.rPlayer(plr);
-	list = firstPoint(opp, nonFull);
+	list	 = firstPoint(opp, nonFull);
 	if (list.size() > 1)
 		return "bad";
 	if (list.size() == 1) {
@@ -68,7 +67,7 @@ string BoardAnalyse::hiddenAnalyse(const char plr, shortv& list)
 
 	// I'll go
 	list = nonFull;
-	col = list.begin();
+	col	 = list.begin();
 	while (col != list.end()) {
 		state.add(plr, *col);
 		state.nonFullColumn(nonFull);
@@ -81,8 +80,7 @@ string BoardAnalyse::hiddenAnalyse(const char plr, shortv& list)
 		tempList = firstPoint(plr, nonFull);
 		if (tempList.size() > 1) {
 			goodList.push_back(*col);
-		}
-		else if (tempList.size() == 1) {
+		} else if (tempList.size() == 1) {
 			state.add(opp, tempList[0]);
 			state.nonFullColumn(nonFull);
 			// it's my turn
@@ -134,7 +132,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	// reform
 
 	shortv tempList, goodList, temp1, temp2, nonFull;
-	vIter col;
+	vIter  col;
 
 	state.nonFullColumn(nonFull);
 	list = firstPoint(plr, nonFull);
@@ -142,7 +140,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 		return "good";
 
 	char opp = state.rPlayer(plr);
-	list = firstPoint(opp, nonFull);
+	list	 = firstPoint(opp, nonFull);
 	if (list.size() > 1)
 		return "bad";
 	if (list.size() == 1) {
@@ -156,7 +154,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 
 	// I'll go
 	list = nonFull;
-	col = list.begin();
+	col	 = list.begin();
 	while (col != list.end()) {
 		state.add(plr, *col);
 		state.nonFullColumn(nonFull);
@@ -169,8 +167,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 		tempList = firstPoint(plr, nonFull);
 		if (tempList.size() > 1) {
 			goodList.push_back(*col);
-		}
-		else if (tempList.size() == 1) {
+		} else if (tempList.size() == 1) {
 			state.add(opp, tempList[0]);
 			state.nonFullColumn(nonFull);
 			// it's my turn
@@ -217,14 +214,14 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	string word = analyse(plr, list);
 	if (word == "good" || word == "bad" || list.size() == 1)
 		return word;
-	
+
 	/*********************************debug************************************/
 	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
 	// long longCounter = 0;
 	/*********************************debug************************************/
-	char opp = state.rPlayer(plr);
+	char   opp = state.rPlayer(plr);
 	shortv list1, goodList;
-	vIter col = list.begin();//, col1, col2;
+	vIter  col = list.begin(); //, col1, col2;
 
 	// one big loop ahead of us
 	while (col != list.end()) {
@@ -234,182 +231,181 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 			state.remove(*col);
 			col = list.erase(col);
 			continue;
-		}
-		else if (word == "bad")
+		} else if (word == "bad")
 			goodList.push_back(*col);
 		else {
 			shortv list2;
-			short goodCount1 = 0;
-			bool isBad1=false;
-			for (vIter col1 = list1.begin();col1!=list1.end();++col1){
+			short  goodCount1 = 0;
+			bool   isBad1	  = false;
+			for (vIter col1 = list1.begin(); col1 != list1.end(); ++col1) {
 				state.add(opp, *col1);
 				word = analyse(plr, list2);
 				if (word == "bad") { // bad
 					state.remove(*col1);
-					isBad1=true;
+					isBad1 = true;
 					break; // goes straight to line197 if (col1!=list1.end())
-				}
-				else if (word=="good")
+				} else if (word == "good")
 					++goodCount1;
 				else {
 					// let's see if opp go col1 will be good for me
 					shortv list3;
-					short badCount2 = 0;
-					short isGood2 = false;
+					short  badCount2 = 0;
+					short  isGood2	 = false;
 					// evaluate if plr go *col2 is good
 					for (vIter col2 = list2.begin(); col2 != list2.end(); ++col2) {
 						state.add(plr, *col2);
 						word = analyse(opp, list3);
-						if (word == "good")  // bad for me, can't go col2
+						if (word == "good") // bad for me, can't go col2
 							++badCount2;
 						else if (word == "bad") { // good
 							state.remove(*col2);
 							isGood2 = true;
 							// ++goodCount1;
 							break;
-						}
-						else if (depth > 2) {
+						} else if (depth > 2) {
 							shortv list4;
-							short goodCount3 = 0;
-							bool isBad3 = false;
+							short  goodCount3 = 0;
+							bool   isBad3	  = false;
 							for (vIter col3 = list3.begin(); col3 != list3.end(); ++col3) {
 								state.add(opp, *col3);
 								word = analyse(plr, list4);
 								if (word == "bad") { // bad
 									state.remove(*col3);
 									isBad3 = true;
-									break; //straight into 'if after while'
-								}
-								else if (word == "good")
+									break; // straight into 'if after while'
+								} else if (word == "good")
 									++goodCount3;
 								else if (depth > 3) {
 									shortv list5;
-									bool isGood4 = false;
-									short badCount4 = 0;
-									for (vIter col4 = list4.begin(); col4 != list4.end();++col4) {
+									bool   isGood4	 = false;
+									short  badCount4 = 0;
+									for (vIter col4 = list4.begin(); col4 != list4.end(); ++col4) {
 										state.add(plr, *col4);
 										word = analyse(opp, list5);
 										if (word == "bad") { // good, then col3 is good
 											isGood4 = true;
 											state.remove(*col4);
 											break;
-										}
-										else if (word == "good")
+										} else if (word == "good")
 											++badCount4;
 										else if (depth > 4) {
 											shortv list6;
-											bool isBad5 = false;
-											short goodCount5 = 0;
-											for (vIter col5 = list5.begin(); col5 != list5.end();++col5){
+											bool   isBad5	  = false;
+											short  goodCount5 = 0;
+											for (vIter col5 = list5.begin(); col5 != list5.end(); ++col5) {
 												state.add(opp, *col5);
 												word = analyse(plr, list6);
-												if(word=="good")
+												if (word == "good")
 													++goodCount5;
-												else if (word=="bad"){
+												else if (word == "bad") {
 													state.remove(*col5);
 													isBad5 = true;
 													break;
-												}
-												else if (depth > 5) {
+												} else if (depth > 5) {
 													shortv list7;
-													bool isGood6 = false;
-													short badCount6 = 0;
-													for (vIter col6 = list6.begin(); col6 != list6.end();++col6) {
+													bool   isGood6	 = false;
+													short  badCount6 = 0;
+													for (vIter col6 = list6.begin(); col6 != list6.end(); ++col6) {
 														state.add(plr, *col6);
 														word = analyse(opp, list7);
-														if (word=="bad") {// good
+														if (word == "bad") { // good
 															state.remove(*col6);
 															isGood6 = true;
 															break;
-														}
-														else if (word=="good"){
+														} else if (word == "good") {
 															++badCount6;
-														}
-														else if (depth > 6 && !list7.empty()) {
+														} else if (depth > 6 && !list7.empty()) {
 															// this is gonna be a disaster, it's just too much for a function
 															shortv list8;
-															bool isBad7 = false;
-															short goodCount7 = 0;
+															bool   isBad7	  = false;
+															short  goodCount7 = 0;
 															for (vIter col7 = list7.begin(); col7 != list7.end(); ++col7) {
 																state.add(opp, *col7);
 																word = analyse(plr, list8);
-																if (word == "good") ++goodCount7;
+																if (word == "good")
+																	++goodCount7;
 																else if (word == "bad") {
 																	state.remove(*col7);
-																	isBad7 = true; break;
-																}
-																else if (depth > 7 && !list8.empty()) {
+																	isBad7 = true;
+																	break;
+																} else if (depth > 7 && !list8.empty()) {
 																	shortv list9;
-																	bool isGood8 = false;
-																	short badCount8 = 0;
+																	bool   isGood8	 = false;
+																	short  badCount8 = 0;
 																	for (vIter col8 = list8.begin(); col8 != list8.end(); ++col8) {
 																		state.add(plr, *col8);
 																		word = analyse(opp, list9);
-																		if (word == "good") ++badCount8;//bad for me
+																		if (word == "good")
+																			++badCount8; // bad for me
 																		else if (word == "bad") {
 																			isGood8 = true;
 																			state.remove(*col8);
 																			break;
-																		}
-																		else if (depth > 8 && !list9.empty()){
+																		} else if (depth > 8 && !list9.empty()) {
 																			shortv list10;
-																			bool isBad9 = false;
-																			short goodCount9 = 0;
-																			// ++longCounter;
-																			// printf("%d%d %d%d %d%d %d%d %d player x hit here.\n\n", *col,*col1, *col2, *col3, *col4, *col5, *col6, *col7, *col8);
+																			bool   isBad9	  = false;
+																			short  goodCount9 = 0;
 																			for (vIter col9 = list9.begin(); col9 != list9.end(); ++col9) {
 																				state.add(opp, *col9);
 																				word = analyse(plr, list10);
-																				if (word=="good")
+																				if (word == "good")
 																					++goodCount9;
-																				else if(word=="bad"){
+																				else if (word == "bad") {
 																					state.remove(*col9);
 																					isBad9 = true;
 																					break;
-																				}
-																				else
+																				} else
 																					;
 																				state.remove(*col9);
 																			}
-																			if (isBad9) ++badCount8;
-																			else if (goodCount9 == list9.size() && goodCount9!=0){
+																			if (isBad9)
+																				++badCount8;
+																			else if (goodCount9 == list9.size() && goodCount9 != 0) {
 																				isGood8 = true;
-																				state.remove(*col8); break;
+																				state.remove(*col8);
+																				break;
 																			}
 																		}
 																		state.remove(*col8);
 																	}
-																	if (isGood8) ++goodCount7;
+																	if (isGood8)
+																		++goodCount7;
 																	else if (badCount8 == list8.size()) {
 																		state.remove(*col7);
-																		isBad7 = true; break;
+																		isBad7 = true;
+																		break;
 																	}
 																}
 																state.remove(*col7);
 															}
-															if (isBad7)++badCount6;
-															else if(goodCount7==list7.size()){
+															if (isBad7)
+																++badCount6;
+															else if (goodCount7 == list7.size()) {
 																state.remove(*col6);
-																isGood6 = true; break;
+																isGood6 = true;
+																break;
 															}
 														}
 														state.remove(*col6);
 													}
-													if (isGood6) ++goodCount5;
-													else if (badCount6==list6.size() && !list6.empty()){
+													if (isGood6)
+														++goodCount5;
+													else if (badCount6 == list6.size() && !list6.empty()) {
 														state.remove(*col5);
-														isBad5 = true; break;
+														isBad5 = true;
+														break;
 													}
 												}
 												state.remove(*col5);
 											}
-											if(isBad5) ++badCount4;
-											else if(goodCount5==list5.size() && !list5.empty()){
+											if (isBad5)
+												++badCount4;
+											else if (goodCount5 == list5.size() && !list5.empty()) {
 												isGood4 = true;
-												state.remove(*col4); break;
+												state.remove(*col4);
+												break;
 											}
-										}
-										else if (list5.size() == 1) {
+										} else if (list5.size() == 1) {
 											shortv list6;
 											state.add(opp, list5[0]);
 											word = analyse(plr, list6);
@@ -418,26 +414,22 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 												state.remove(*col4);
 												isGood4 = true;
 												break;
-											}
-											else if (word == "bad")
+											} else if (word == "bad")
 												++badCount4;
-											else if (list6.size() == 1) {
-												// shortv list7;
-												// blahblahblah
-											}
+											else if (list6.size() == 1)
+												;
 											state.remove(list5[0]);
 										}
 										state.remove(*col4);
 									}
 									if (isGood4)
 										++goodCount3;
-									else if(badCount4==list4.size() && !list4.empty()){
+									else if (badCount4 == list4.size() && !list4.empty()) {
 										state.remove(*col3);
 										isBad3 = true;
-										break; //straight into 'if after while'
+										break; // straight into 'if after while'
 									}
-								}
-								else if (list4.size() == 1) {
+								} else if (list4.size() == 1) {
 									state.add(plr, list4[0]);
 									shortv list5;
 									word = analyse(opp, list5);
@@ -445,9 +437,9 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 										state.remove(list4[0]);
 										state.remove(*col3);
 										isBad3 = true;
-										break; //straight into 'if after while'
-									}
-									else if (word == "bad") ++goodCount3; //break if there was a for loop for list4
+										break; // straight into 'if after while'
+									} else if (word == "bad")
+										++goodCount3; // break if there was a for loop for list4
 									else if (list5.size() == 1) {
 										shortv list6;
 										state.add(opp, list5[0]);
@@ -455,14 +447,13 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 										if (word == "bad") {
 											state.remove(list5[0], list4[0], *col3);
 											isBad3 = true;
-											break; //straight into 'if after while'
-										}
-										else if (word=="good") ++goodCount3;//break if there was a for loop for list4
+											break; // straight into 'if after while'
+										} else if (word == "good")
+											++goodCount3; // break if there was a for loop for list4
 										else
 											;
 										state.remove(list5[0]);
-									}
-									else
+									} else
 										;
 									state.remove(list4[0]);
 								}
@@ -471,46 +462,40 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 							if (isBad3) { // col2 is bad for me
 								++badCount2;
 							}
-							if (goodCount3 == list3.size() && !list3.empty()){
+							if (goodCount3 == list3.size() && !list3.empty()) {
 								state.remove(*col2);
 								isGood2 = true;
 								// ++goodCount1;
 								break;
 							}
-						}
-						else if (list3.size() == 1) { // if opp has to go here
+						} else if (list3.size() == 1) { // if opp has to go here
 							state.add(opp, list3[0]);
 							shortv list4;
 							word = analyse(plr, list4);
 							if (word == "bad") { // bad for me
 								++badCount2;
-							}
-							else if (word == "good"){
+							} else if (word == "good") {
 								state.remove(list3[0]);
 								state.remove(*col2);
 								++goodCount1;
 								break; // break the list2 for loop
-							}
-							else if (list4.size() == 1) {
+							} else if (list4.size() == 1) {
 								state.add(plr, list4[0]);
 								shortv list5;
 								word = analyse(opp, list5);
 								if (word == "good") {
 									++badCount2;
-								}
-								else if (word == "bad") {
+								} else if (word == "bad") {
 									state.remove(list4[0], list3[0], *col2);
 									++goodCount1;
 									break;
-								}
-								else if (list5.size()==1){
+								} else if (list5.size() == 1) {
 									state.add(opp, list5[0]);
 									shortv list6;
-									word=analyse(plr, list6);
-									if (word=="bad"){
+									word = analyse(plr, list6);
+									if (word == "bad") {
 										++badCount2;
-									}
-									else if (word=="good") {
+									} else if (word == "good") {
 										printf("finally!, comething good!\n\n");
 										state.remove(list5[0]);
 										state.remove(list4[0], list3[0], *col2);
@@ -525,7 +510,7 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 						}
 						state.remove(*col2);
 					}
-					if (badCount2==list2.size() && !list2.empty() ) { // if all bad, then opp go col1 is bad for me
+					if (badCount2 == list2.size() && !list2.empty()) { // if all bad, then opp go col1 is bad for me
 						state.remove(*col1);
 						isBad1 = true;
 						break;
@@ -548,17 +533,17 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 		state.remove(*col);
 		++col;
 	}
-	
+
 	/*******************************debug**********************************/
-	addNumber1 = state.getAddNumber()- addNumber1;
-	removeNumber1 = state.getRemoveNumber()- removeNumber1;
+	addNumber1	  = state.getAddNumber() - addNumber1;
+	removeNumber1 = state.getRemoveNumber() - removeNumber1;
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	// printf("depth=%d longCounter\n", depth);//longCounter);
 	if (addNumber1 != removeNumber1) {
 		throw runtime_error("add and remove didn't match!\n");
 	}
 	/*******************************debug**********************************/
-	if (!goodList.empty()){
+	if (!goodList.empty()) {
 		list = goodList;
 		return "good";
 	}
@@ -571,8 +556,7 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 // go straight into loop and return word in player's perspective
 // check if game is over or board is full before call this, given list must not
 // be empty
-string BoardAnalyse::returnSituation(const char plr, shortv& list,
-	short returnMoveDepth/*3*/, int recursiveCount/*0*/, int countTop/*3*/) {
+string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
 	/****************************debug theory**********************************
 	this recursiveSituation is merely an infinite version of returnMove. If you
 	can see this, you will soon find a flaw in this function: there are no
@@ -586,49 +570,44 @@ string BoardAnalyse::returnSituation(const char plr, shortv& list,
 	change this formal recursiveSituation's name as returnSituation, and the
 	newly defined recursiveSituationInline as recursiveSituation
 	****************************debug theory**********************************/
-	if (list.empty())
-	{
+	if (list.empty()) {
 		throw runtime_error("recursiveSituation: given list is empty!\n");
 		return "end";
 	}
 
 	// a loop
-	vIter col = list.begin();
-	char opp = state.rPlayer(plr);
+	vIter  col = list.begin();
+	char   opp = state.rPlayer(plr);
 	shortv goodList, list1;
 	string word;
-	while (col!=list.end()){
+	while (col != list.end()) {
 		state.add(plr, *col);
 		word = returnMove(opp, list1, returnMoveDepth);
-		if (word=="free"){
+		if (word == "free") {
 			if (!list1.empty())
-				word = recursiveSituation(opp, list1, returnMoveDepth,
-					recursiveCount, countTop);
+				word = recursiveSituation(opp, list1, returnMoveDepth, recursiveCount, countTop);
 			else
 				printf("game is over, what do I do? ---- nothing I suppose.\n");
 		}
-		if (word=="good"){
+		if (word == "good") {
 			state.remove(*col);
 			col = list.erase(col);
 			continue;
-		}
-		else if (word=="bad")
+		} else if (word == "bad")
 			goodList.push_back(*col);
 		state.remove(*col);
 		++col;
 	}
-	if (!goodList.empty()){
+	if (!goodList.empty()) {
 		list = goodList;
 		return "good";
-	}
-	else if (list.empty())
+	} else if (list.empty())
 		return "bad";
 	return "free";
 }
 
 // shouldn't call this with an emptylist
-string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
-	short returnMoveDepth/*3*/, int recursiveCount/*0*/, int countTop/*3*/) {
+string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
 	/*****************************debug theory*********************************
 	Here is another version of recursiveSituation unfortunately, doesn't take
 	shortv isn't gonna work, so here we are. Now I can use for loop and
@@ -636,8 +615,7 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
 	This is basically the old recursiveSituation copied here
 	*****************************debug theory*********************************/
 	/*****************************debug action*********************************/
-	if (list.empty())
-	{
+	if (list.empty()) {
 		throw runtime_error("recursiveSituation: given list is empty!\n");
 		return "end";
 	}
@@ -646,22 +624,20 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
 	// main
 	shortv list1;
 	string word;
-	short badCount = 0;
-	vIter col = list.begin();
-	for (;col != list.end();++col)
-	{
+	short  badCount = 0;
+	vIter  col		= list.begin();
+	for (; col != list.end(); ++col) {
 		state.add(plr, *col);
 		word = returnMove(state.rPlayer(plr), list1, returnMoveDepth);
-		if (word=="free"){
+		if (word == "free") {
 			if (!list1.empty())
-				word = recursiveSituation(state.rPlayer(plr), list1,
-					returnMoveDepth, recursiveCount, countTop);
+				word = recursiveSituation(state.rPlayer(plr), list1, returnMoveDepth, recursiveCount, countTop);
 			else /*debug - delete this else for performance considerations*/
 				printf("game is over, what do I do? ---- nothing I suppose.\n");
 		}
-		if (word=="good")
+		if (word == "good")
 			++badCount;
-		else if (word=="bad"){
+		else if (word == "bad") {
 			state.remove(*col);
 			break;
 		}
@@ -679,7 +655,7 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
 int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool showTime) {
 	/*
 	 * Maybe it's better to move it to boardInterface
-	*/
+	 */
 
 	shortv list, oppList;
 	double timeUsed = 0;
@@ -690,22 +666,21 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
 		throw runtime_error("call respond with ended game!\n");
 
-	system_clock::time_point start = system_clock::now();
-	string word = returnMove(plr, list, 3);
-    system_clock::time_point end = system_clock::now();
-	auto elapsed = duration_cast<milliseconds>(end - start);
-	timeUsed = elapsed.count();
-	string word0 = returnMove(state.rPlayer(plr), oppList, 3);
+	system_clock::time_point start	 = system_clock::now();
+	string					 word	 = returnMove(plr, list, 3);
+	system_clock::time_point end	 = system_clock::now();
+	auto					 elapsed = duration_cast<milliseconds>(end - start);
+	timeUsed						 = elapsed.count();
+	string word0					 = returnMove(state.rPlayer(plr), oppList, 3);
 
 	if (showCal) {
-		std::cout << "\nword = " << word <<"\nlist = [ ";
-		for(short c:list)
+		std::cout << "\nword = " << word << "\nlist = [ ";
+		for (short c : list)
 			std::cout << c << " ";
 		printf("]\n");
 	}
 	if (showTime)
 		cout << "Computer time used: " << timeUsed << " ms\n";
-
 
 	thisMove.word = word;
 	thisMove.list = list;
@@ -716,9 +691,9 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 		word = analyse(plr, list);
 		if (word == "bad")
 			return state.randomMove();
-		else return state.randomSuggestion(plr, list, oppList);
-	}
-	else
+		else
+			return state.randomSuggestion(plr, list, oppList);
+	} else
 		throw runtime_error("what?\n");
 	return 0;
 }
