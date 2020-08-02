@@ -10,7 +10,6 @@ add_executable(
     "lib/boardInterface.cpp"
     "lib/boardRecord.cpp"
     "lib/jsoncpp.cpp"
-    "test_1.cpp"
 )
 
 

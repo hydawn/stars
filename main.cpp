@@ -11,7 +11,6 @@ int main() {
     printf("Use 1~8 to place a piece, h for help, 0 to exit.\n");
     printf("Game is afoot!\n");
 
-    // normal mode
     boardInterface.normalMode();
 
     cout << "Over!\n";

@@ -9,7 +9,7 @@ void BoardAnalyse::go(const char plr, const short move) {
 
 void BoardAnalyse::reverse(const short column){
 	if(board.colIsEmpty(column))
-		throw runtime_error("Error: tying to reverse a empty column\n");
+		throw runtime_error("Error: tying to reverse an empty column\n");
 	board.remove(column);
 }
 
@@ -372,7 +372,7 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 																				board.remove(*col9);
 																			}
 																			if (isBad9) ++badCount8;
-																			else if (goodCount9=list9.size() && goodCount9!=0){
+																			else if (goodCount9 == list9.size() && goodCount9!=0){
 																				isGood8 = true;
 																				board.remove(*col8); break;
 																			}
@@ -585,7 +585,7 @@ string BoardAnalyse::returnSituation(const char plr, shortv& list,
 	recursiveSituation which doesn't take shortv as an argument, and
 	change this formal recursiveSituation's name as returnSituation, and the
 	newly defined recursiveSituationInline as recursiveSituation
-	/****************************debug theory**********************************/
+	****************************debug theory**********************************/
 	if (list.empty())
 	{
 		throw runtime_error("recursiveSituation: given list is empty!\n");
@@ -634,7 +634,7 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
 	shortv isn't gonna work, so here we are. Now I can use for loop and
 	count and break! This will work faster than the last one.
 	This is basically the old recursiveSituation copied here
-	/*****************************debug theory*********************************/
+	*****************************debug theory*********************************/
 	/*****************************debug action*********************************/
 	if (list.empty())
 	{
@@ -671,7 +671,7 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
 		// this is actually based on a fact that list.empty() == false, which is
 		// not always the case if the function isn't called properly
 		return "good";
-	else if (badCount=list.size())
+	else if (badCount == list.size())
 		return "bad";
 	return "free";
 }
@@ -683,10 +683,11 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 
 	shortv list, oppList;
 	double timeUsed = 0;
-	clock_t start = clock();
+    system_clock::time_point start = system_clock::now();
 	string word = returnMove(plr, list, 3);
-	clock_t end = clock();
-	timeUsed = end - start;
+    system_clock::time_point end = system_clock::now();
+	auto elapsed = duration_cast<milliseconds>(end - start);
+	timeUsed = elapsed.count();
 	string word0 = returnMove(board.rPlayer(plr), oppList, 3);
 
 	if (showCal) {
