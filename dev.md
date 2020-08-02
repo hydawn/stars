@@ -2,14 +2,14 @@ well, this is clearly more organized than CharmedPython
 
 # TODO
 - 0 to exit a mode, quit to quit the whole game
-- add help info
 - add performance settings
 - improve performance - cut branches
 - add GUI?
 - set computer strategy : progressive (mainly build self) or defensive (mainly intercept)
 - set calculate depth
+- Then I will stop
 
-# pre-release note - version 1.0.0 - C++
+# pre-release note - version 1.0 - Beta
 preRelease - total failure, no pause in bash, clock() is not working as expected, core dumped, returnSituation is never used, depth > 3 is never used.
 
 # analyse testing board

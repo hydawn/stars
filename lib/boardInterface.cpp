@@ -784,6 +784,7 @@ string BoardInterface::getInfo(string input) {
 		"players. Difficult to answer without actual practice wouldn't you say?\n" + enjoy +
 		"Good luck\n" + end;
 	string info = addon +
+		"A 1v1 & 8x8 command line based board game\n" +
 		"\n------------------------------ version 1.0 - Beta ------------------------------\n" +
 		"                                                                    by DuanHanyu\n" +
 		"                                                                        2020-8-2";
