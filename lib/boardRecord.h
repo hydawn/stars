@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "boardHandle.h"
+#include "boardState.h"
 
 using std::cin;
 using std::cout;
@@ -87,8 +87,8 @@ public:
 	void pop_back() { historyMove.pop_back(); }
 
 	// save & clear & refresh
-	void saveGame(BoardHandle &state);
-	void saveGame(const string &gameName, BoardHandle &state);
+	void saveGame(BoardState &state);
+	void saveGame(const string &gameName, BoardState &state);
 	void saveSettings() { writeSettings(); }
 	// below is used to change board
 	void clearHistoryMove() { historyMove.clear(); }
@@ -120,7 +120,7 @@ public:
 	// display index number, date, name and final board
 	// return 0 to exit
 	void		refreshHistoryMove(const Json::Value &hm);
-	BoardHandle getState(const int &index) { return games[index]["state"]; }
+	BoardState getState(const int &index) { return games[index]["state"]; }
 };
 
 #endif

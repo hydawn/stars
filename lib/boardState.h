@@ -1,13 +1,13 @@
 #ifndef _BOARDHANDLE_H_
 #define _BOARDHANDLE_H_ 1
+
 #include <stdio.h>
 #include <time.h>
-
 #include <stdexcept>
 #include <string>
 #include <vector>
-
 #include "json.h"
+#include "shortList.h"
 
 using std::runtime_error;
 using std::string;
@@ -16,11 +16,10 @@ using std::vector;
 typedef vector<short>::iterator vIter;
 typedef vector<short> shortv;
 *****/
-#include "shortList.h"
 typedef ShortList::iterator vIter;
 typedef ShortList			shortv;
 
-class BoardHandle {
+class BoardState {
 	// handles the memory allocate and ways to change the board
 public:
 	char** board;
@@ -33,11 +32,11 @@ public:
 	static int addNumber;
 	/************************debug***************************/
 
-	BoardHandle() : row(8), column(8), winn(4) { generate(); }
-	BoardHandle(const BoardHandle& input) : row(input.row), column(input.column), winn(input.winn) { generate(input.board, input.top); }
-	BoardHandle(const Json::Value& root);
-	BoardHandle(const short r, const short c, const short w) : row(r), column(c), winn(w) { generate(); }
-	~BoardHandle() { free(); }
+	BoardState() : row(8), column(8), winn(4) { generate(); }
+	BoardState(const BoardState& input) : row(input.row), column(input.column), winn(input.winn) { generate(input.board, input.top); }
+	BoardState(const Json::Value& root);
+	BoardState(const short r, const short c, const short w) : row(r), column(c), winn(w) { generate(); }
+	~BoardState() { free(); }
 
 	// construct
 	void generate();
@@ -47,7 +46,7 @@ public:
 	void free();
 
 	// operator
-	BoardHandle& operator=(const BoardHandle& bh);
+	BoardState& operator=(const BoardState& bh);
 				 operator Json::Value() {
 		 Json::Value root;
 		 root["board"]	= boardToJson();

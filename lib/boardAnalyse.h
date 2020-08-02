@@ -1,9 +1,8 @@
 #ifndef _BOARDANALYSE_H_
 #define _BOARDANALYSE_H_ 1
+
 #include <string.h>
-
 #include <chrono>
-
 #include "boardRecord.h"
 
 using std::string;
@@ -19,9 +18,9 @@ private:
 	string recursiveSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 
 public:
-	BoardHandle state;
+	BoardState state;
 	BoardAnalyse() : state(8, 8, 4) {}
-	BoardAnalyse(BoardHandle board_) : state(board_) {}
+	BoardAnalyse(BoardState board_) : state(board_) {}
 	BoardAnalyse(const short r, const short c, const short w) : state(r, c, w) {}
 
 	void show() { state.show(); }

@@ -113,7 +113,7 @@ void BoardRecord::writeSettings() {
 	outFile << settings;
 }
 
-void BoardRecord::saveGame(BoardHandle& state) {
+void BoardRecord::saveGame(BoardState& state) {
 	string gameName = "no one";
 	if (getSettings("whenSaveGame", "askGiveName")) {
 		bool defaultGiveName = getSettings("whenSaveGame", "defaultGiveName");
@@ -133,7 +133,7 @@ void BoardRecord::saveGame(BoardHandle& state) {
 	cout << "game \"" << gameName << "\" is saved.\n";
 }
 
-void BoardRecord::saveGame(const string& gameName, BoardHandle& state) {
+void BoardRecord::saveGame(const string& gameName, BoardState& state) {
 	Json::Value oneGame;
 	oneGame["name"]	 = gameName;
 	time_t now		 = time(NULL);
@@ -217,7 +217,7 @@ Json::Value* BoardRecord::showSavedGames() {
 }
 
 void BoardRecord::showSavedBoard(const Json::Value& state) {
-	BoardHandle bstate(state);
+	BoardState bstate(state);
 	bstate.show();
 }
 
