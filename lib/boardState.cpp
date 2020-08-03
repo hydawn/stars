@@ -3,7 +3,9 @@
 int BoardState::removeNumber;
 int BoardState::addNumber;
 
-BoardState::BoardState(const Json::Value& root) : row(root["row"].asInt()), column(root["column"].asInt()), winn(root["winn"].asInt()) {
+BoardState::BoardState(const Json::Value& root)
+	: row(root["row"].asInt()), column(root["column"].asInt()), winn(root["winn"].asInt()) {
+	starsOn = false;
 	generate();
 	for (short i = 0; i < column; ++i) {
 		strcpy(board[i], root["board"][i].asCString());
@@ -14,22 +16,26 @@ BoardState::BoardState(const Json::Value& root) : row(root["row"].asInt()), colu
 void BoardState::generate() {
 	// TODO - is quite stupid, change this when have the chance
 	// it's best to use allocate?
-	board = new char*[column];
-	top	  = new short[column];
+	board	= new char*[column];
+	top		= new short[column];
+	starArea = new short[column];
 	for (short i = 0; i < column; ++i) {
-		top[i]	 = 0;
-		board[i] = new char[row + 1];
+		top[i]	   = 0;
+		starArea[i] = row;
+		board[i]   = new char[row + 1];
 		for (short j = 0; j < row; ++j)
 			board[i][j] = ' ';
 	}
 }
 
 void BoardState::generate(char** b, const short* t) {
-	board = new char*[column];
-	top	  = new short[column];
+	board	= new char*[column];
+	top		= new short[column];
+	starArea = new short[column];
 	for (short i = 0; i < column; ++i) {
-		board[i] = new char[row + 1];
-		top[i]	 = t[i];
+		board[i]   = new char[row + 1];
+		top[i]	   = t[i];
+		starArea[i] = row;
 	}
 	refreshBoard(b);
 }
@@ -39,13 +45,20 @@ void BoardState::free() {
 		delete[] board[i];
 	delete[] board;
 	delete[] top;
+	delete[] starArea;
 }
 
 BoardState& BoardState::operator=(const BoardState& bh) {
 	if (this == &bh)
 		return *this;
-	refreshBoard(bh.board);
-	refreshTop();
+	/*refreshBoard(bh.board);
+	refreshTop();*/
+	free();
+	column	= bh.column;
+	row		= bh.row;
+	winn	= bh.winn;
+	starsOn = bh.starsOn;
+	generate(bh.board, bh.top);
 	return *this;
 }
 
@@ -116,7 +129,7 @@ char BoardState::isOver() {
 void BoardState::nonFullColumn(shortv& nonFull) {
 	nonFull.clear();  // see if delete this will help?
 	for (short i = 0; i < column; ++i)
-		if (top[i] != row)
+		if (top[i] != starArea[i])
 			nonFull.push_back(i + 1);
 	// static int timer = 0;
 	// printf("nonfull %d ", ++timer);
@@ -264,4 +277,61 @@ void BoardState::customBoard(const short cl, const short ro, const short wi) {
 	row	   = ro;
 	winn   = wi;
 	generate();
+}
+
+void BoardState::areaTopTransform() {
+	for (short i = 0; i < column; ++i)
+		starArea[i] = 0;
+	for (short i = 0; i < column; ++i)
+		setATopWithTop(i, top[i]);
+
+	// then check for overflow
+	for (short i = 0; i < column; ++i)
+		if (starArea[i] > row)
+			starArea[i] = row;
+}
+
+void BoardState::areaTopRestore() {
+	for (short i = 0; i < column; ++i)
+		starArea[i] = row;
+}
+
+void BoardState::starShow() {
+	areaTopTransform();
+	short i = 1;
+	for (; i <= column && i <= 10; ++i)
+		printf(" %d", i);
+	for (; i <= column; ++i)
+		printf("%d", i);
+	printf("\n");
+	for (short i = row - 1; i > -1; --i) {
+		for (short j = 0; j < column; ++j) {
+			if (i < starArea[j])
+				printf("|%c", board[j][i]);
+			else
+				printf("|+");
+		}
+		printf("|\n");
+	}
+	areaTopRestore();
+}
+
+void BoardState::setATopWithTop(short i, short t) {
+	// important numbers here!
+	if (t == 0)
+		return;
+	setATopWithNumber(i - 2, t / 2 - 1);
+	setATopWithNumber(i - 1, t + 1);
+	setATopWithNumber(i, t + 2);
+	setATopWithNumber(i + 1, t + 1);
+	setATopWithNumber(i + 2, t / 2 - 1);
+}
+
+shortv BoardState::aTopFullColumn() {
+	areaTopTransform();
+	shortv list;
+	for (short i = 0; i < column;++i)
+		if (starArea[i]==0)
+			list.push_back(i + 1);
+	return list;
 }

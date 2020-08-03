@@ -4,6 +4,7 @@
 #include <string.h>
 #include <chrono>
 #include "boardRecord.h"
+#include "boardArea.h"
 
 using std::string;
 using namespace std::chrono;
@@ -23,7 +24,6 @@ public:
 	BoardAnalyse(BoardState board_) : state(board_) {}
 	BoardAnalyse(const short r, const short c, const short w) : state(r, c, w) {}
 
-	void show() { state.show(); }
 
 	// analyse function
 	/*
@@ -38,18 +38,21 @@ public:
 	void go(const char plr, const short move);
 	void reverse(const short column);
 
+
+	// is function
 	// getter
 	short getColTop(const short column) const { return state.top[column - 1]; }
 	short getColumn() const { return state.column; }
 	short getRow() const { return state.row; }
-
-	// is function
 	// else transfer
 	bool colIsFull(const short col) { return state.colIsFull(col); }
 	bool colIsEmpty(const short col) { return state.colIsEmpty(col); }
 	char gameIsOver() { return state.isOver(); }
 	bool boardIsFull() { return state.boardIsFull(); }
 	char rPlayer(const char plr) { return state.rPlayer(plr); }
+	// show
+	void show() { state.show(); }
+	void starShow() { state.starShow(); }
 
 	// custom board
 	void customBoard(const short cl, const short ro, const short wi) { state.customBoard(cl, ro, wi); }

@@ -1,7 +1,7 @@
 #include "BoardInterface.h"
 
 void BoardInterface::getStateFromInput() {
-	short  row = analyse->state.row, column = analyse->state.column;
+	short  row = analyse->getRow(), column = analyse->getColumn();
 	char** input = new char*[row];
 	short  minor = 0;
 	/*******************************temp code**********************************/
@@ -155,10 +155,16 @@ string BoardInterface::getInput(const string mode, char plr, double& inputTime) 
 			playBackMode();
 		else if (!strcmp(input, "p") || !strcmp(input, "play") || !strcmp(input, "play"))
 			playMode();
-		else if (!strcmp(input, "S") || !strcmp(input, "show"))
-			analyse->show();
-		else if (!strcmp(input, "save"))
+		else if (!strcmp(input, "S") || !strcmp(input, "show")) {
+			if (mode != "normal" && record.getSettings("inDebugMode", "starrySky"))
+				analyse->starShow();
+			else
+				analyse->show();
+		}
+		else if (!strcmp(input, "sv") || !strcmp(input, "save"))
 			record.saveGame(analyse->state);
+		else if (!strcmp(input, "sa") || !strcmp(input, "st") || !strcmp(input, "show area") || !strcmp(input, "show stars"))
+			analyse->starShow();
 		else if (!strcmp(input, "s") || !strcmp(input, "setting") || !strcmp(input, "settings"))
 			settingsMode();
 		else if (mode != "normal") {
@@ -345,7 +351,10 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 			printf("this %d is recommended\n", byPlayer.suggestion);
 
 		// show
-		analyse->show();
+		if (record.getSettings("inDebugMode", "starrySky"))
+			analyse->starShow();
+		else
+			analyse->show();
 		printf("\n");
 	}
 	printf("Exit from debug mode...\n");
@@ -542,7 +551,7 @@ void BoardInterface::playBackMode() {
 	vector<oneMove>::iterator iter			= newRecord.historyMove.begin();
 	while (iter != newRecord.historyMove.end()) {
 		// show
-		printf("This is step %lu/%zu\n", tempRecord.historyMove.size() + 1, newRecord.historyMove.size());
+		printf("This is step %zu/%zu\n", tempRecord.historyMove.size() + 1, newRecord.historyMove.size());
 		if (wentBack)
 			wentBack = false;
 		else {
@@ -634,9 +643,10 @@ string BoardInterface::getHelp(string mode) {
 		"h/help --------- show help message of the current mode\n" +
 		"p/play --------- into play mode\n" +
 		"P/play back ---- into play back mode\n" +
-		"save ----------- save the current game\n" +
 		"S/show --------- show the current board\n" +
 		"s/settings ----- view and change the settings\n" +
+		"st/show stars --- show debug analyse stars\n" +
+		"sv/save ----------- save the current game\n" +
 		"t/tips --------- tips I wrote to help other player (you) to play the game\n" +
 		"w/winn --------- show win number (4 by default)\n"
 		"i/info --------- information about the game\n\n" +
@@ -753,8 +763,7 @@ string BoardInterface::getHelp(string mode) {
 			"answer would be. Notice that, for example, in situation gameIsOver, if\n" +
 			"askToDebug is false but defaultDebug is true, then when game is over, we will\n" +
 			"went into debug mode immediately.\n" +
-			"Personally, I only let exitNormal:askToSaveBoard and whenSaveGame:askGiveName\n" +
-			"to be true, don't know why I wrote all those settings...\n";
+			"Most of them is turned down by default to keep it simple.\n";
 		return settings;
 	}
 	return reverse;
@@ -930,7 +939,7 @@ bool BoardInterface::isOver(const oneMove& move) {
 	if (analyse->gameIsOver() == move.player) {
 		analyse->show();
 		if (move.byComputer)
-			printf("Game is over, good luck next time!\n");
+			printf("Game is over, stars are gone.\n");
 		else
 			printf("Congratulations, you win!\n");
 		return true;

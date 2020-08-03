@@ -62,7 +62,8 @@ void BoardRecord::getFile() {
 			"	{\n" +
 			"		\"hintOn\" : false,\n" +
 			"		\"showCalculate\" : false,\n" +
-			"		\"showTime\" : false\n" +
+			"		\"showTime\" : false,\n" +
+			"		\"starrySky\" : false\n" +
 			"	},\n" +
 			"	\"inNormalMode\" : \n" +
 			"	{\n" +

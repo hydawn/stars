@@ -657,8 +657,9 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	 * Maybe it's better to move it to boardInterface
 	 */
 
-	shortv list, oppList;
+	shortv list, oppList, fullList, returnList;
 	double timeUsed = 0;
+
 
 	state.nonFullColumn(list);
 	if (list.empty())
@@ -666,6 +667,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
 		throw runtime_error("call respond with ended game!\n");
 
+	state.areaTopTransform();
 	system_clock::time_point start	 = system_clock::now();
 	string					 word	 = returnMove(plr, list, 3);
 	system_clock::time_point end	 = system_clock::now();
@@ -673,10 +675,15 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	timeUsed						 = elapsed.count();
 	string word0					 = returnMove(state.rPlayer(plr), oppList, 3);
 
+	// fullList = state.aTopFullColumn();
+	// mergeList(returnList, list, fullList);
+	// list = returnList;
+	state.areaTopRestore();
+
 	if (showCal) {
-		std::cout << "\nword = " << word << "\nlist = [ ";
+		cout << "\nword = " << word << "\nlist = [ ";
 		for (short c : list)
-			std::cout << c << " ";
+			cout << c << " ";
 		printf("]\n");
 	}
 	if (showTime)
