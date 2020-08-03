@@ -6,10 +6,11 @@ add_executable(
 	"${PROJECT_NAME}"
 	"main.cpp"
 	"lib/boardAnalyse.cpp"
-	"lib/boardHandle.cpp"
 	"lib/boardInterface.cpp"
 	"lib/boardRecord.cpp"
+	"lib/boardState.cpp"
 	"lib/jsoncpp.cpp"
+	"lib/shortList.cpp"
 )
 
 

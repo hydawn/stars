@@ -1,13 +1,13 @@
 #ifndef _BOARDHANDLE_H_
 #define _BOARDHANDLE_H_ 1
+
 #include <stdio.h>
 #include <time.h>
-
 #include <stdexcept>
 #include <string>
 #include <vector>
-
 #include "json.h"
+#include "shortList.h"
 
 using std::runtime_error;
 using std::string;
@@ -16,54 +16,55 @@ using std::vector;
 typedef vector<short>::iterator vIter;
 typedef vector<short> shortv;
 *****/
-#include "shortList.h"
 typedef ShortList::iterator vIter;
 typedef ShortList			shortv;
 
-class BoardHandle {
+class BoardState {
 	// handles the memory allocate and ways to change the board
 public:
 	char** board;
 	short* top;	 // 0~column, 0 means no piece, column means full
+	short* starArea;
 	short  row;
 	short  column;
 	short  winn;  // winning number?
+	bool   starsOn;
 	/************************debug***************************/
 	static int removeNumber;
 	static int addNumber;
 	/************************debug***************************/
 
-	BoardHandle() : row(8), column(8), winn(4) { generate(); }
-	BoardHandle(const BoardHandle& input) : row(input.row), column(input.column), winn(input.winn) { generate(input.board, input.top); }
-	BoardHandle(const Json::Value& root);
-	BoardHandle(const short r, const short c, const short w) : row(r), column(c), winn(w) { generate(); }
-	~BoardHandle() { free(); }
+	BoardState() : row(8), column(8), winn(4), starsOn(false) { generate(); }
+	BoardState(const BoardState& input) : row(input.row), column(input.column), winn(input.winn), starsOn(false) { generate(input.board, input.top); }
+	BoardState(const Json::Value& root);
+	BoardState(const short r, const short c, const short w) : row(r), column(c), winn(w), starsOn(false) { generate(); }
+	virtual ~BoardState() { free(); }
 
 	// construct
-	void generate();
+	virtual void generate();
 	void generate(char** b, const short* t);
 
 	// destruct
-	void free();
+	virtual void free();
 
 	// operator
-	BoardHandle& operator=(const BoardHandle& bh);
-				 operator Json::Value() {
-		 Json::Value root;
-		 root["board"]	= boardToJson();
-		 root["top"]	= topToJson();
-		 root["row"]	= row;
-		 root["column"] = column;
-		 root["winn"]	= winn;
-		 return root;
+	operator Json::Value() {
+		Json::Value root;
+		root["board"]  = boardToJson();
+		root["top"]	   = topToJson();
+		root["row"]	   = row;
+		root["column"] = column;
+		root["winn"]   = winn;
+		return root;
 	}
+	BoardState& operator=(const BoardState& bh);
 	Json::Value boardToJson();
 	template <typename T>
 	Json::Value arraryToJson(T a[], int n);
 	Json::Value topToJson();
 
 	// show
-	void show();
+	virtual void show();
 
 	// getter
 	short getRow() { return row; }
@@ -71,7 +72,7 @@ public:
 	short getWinn() { return winn; }
 
 	// is function
-	bool colIsFull(const short col) { return top[col - 1] == column; }
+	bool colIsFull(const short col) { return top[col - 1] == row; }
 	bool colIsEmpty(const short col) { return top[col - 1] == 0; }
 	bool boardIsFull();
 	bool winPieceNearBy(const short col, const short ro);
@@ -121,6 +122,17 @@ public:
 
 	// custom
 	void customBoard(const short cl, const short ro, const short wi);
+
+	// performance
+	void areaTopTransform();
+	void areaTopRestore();
+	void starShow();
+	void setATopWithTop(short i, short t);
+	void setATopWithNumber(short i, short n) {
+		if (i >= 0 && i < column && starArea[i] < n)
+			starArea[i] = n;
+	}
+	shortv aTopFullColumn();
 };
 
 #endif

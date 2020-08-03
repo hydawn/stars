@@ -1,9 +1,11 @@
-#include "boardHandle.h"
+#include "boardState.h"
 
-int BoardHandle::removeNumber;
-int BoardHandle::addNumber;
+int BoardState::removeNumber;
+int BoardState::addNumber;
 
-BoardHandle::BoardHandle(const Json::Value& root) : row(root["row"].asInt()), column(root["column"].asInt()), winn(root["winn"].asInt()) {
+BoardState::BoardState(const Json::Value& root)
+	: row(root["row"].asInt()), column(root["column"].asInt()), winn(root["winn"].asInt()) {
+	starsOn = false;
 	generate();
 	for (short i = 0; i < column; ++i) {
 		strcpy(board[i], root["board"][i].asCString());
@@ -11,45 +13,56 @@ BoardHandle::BoardHandle(const Json::Value& root) : row(root["row"].asInt()), co
 	}
 }
 
-void BoardHandle::generate() {
+void BoardState::generate() {
 	// TODO - is quite stupid, change this when have the chance
 	// it's best to use allocate?
-	board = new char*[column];
-	top	  = new short[column];
+	board	= new char*[column];
+	top		= new short[column];
+	starArea = new short[column];
 	for (short i = 0; i < column; ++i) {
-		top[i]	 = 0;
-		board[i] = new char[row + 1];
+		top[i]	   = 0;
+		starArea[i] = row;
+		board[i]   = new char[row + 1];
 		for (short j = 0; j < row; ++j)
 			board[i][j] = ' ';
 	}
 }
 
-void BoardHandle::generate(char** b, const short* t) {
-	board = new char*[column];
-	top	  = new short[column];
+void BoardState::generate(char** b, const short* t) {
+	board	= new char*[column];
+	top		= new short[column];
+	starArea = new short[column];
 	for (short i = 0; i < column; ++i) {
-		board[i] = new char[row + 1];
-		top[i]	 = t[i];
+		board[i]   = new char[row + 1];
+		top[i]	   = t[i];
+		starArea[i] = row;
 	}
 	refreshBoard(b);
 }
 
-void BoardHandle::free() {
+void BoardState::free() {
 	for (short i = 0; i < row; ++i)
 		delete[] board[i];
 	delete[] board;
 	delete[] top;
+	delete[] starArea;
 }
 
-BoardHandle& BoardHandle::operator=(const BoardHandle& bh) {
+BoardState& BoardState::operator=(const BoardState& bh) {
 	if (this == &bh)
 		return *this;
-	refreshBoard(bh.board);
-	refreshTop();
+	/*refreshBoard(bh.board);
+	refreshTop();*/
+	free();
+	column	= bh.column;
+	row		= bh.row;
+	winn	= bh.winn;
+	starsOn = bh.starsOn;
+	generate(bh.board, bh.top);
 	return *this;
 }
 
-Json::Value BoardHandle::boardToJson() {
+Json::Value BoardState::boardToJson() {
 	Json::Value root;
 	for (short i = 0; i < column; ++i) {
 		board[i][row] = '\0';
@@ -59,17 +72,17 @@ Json::Value BoardHandle::boardToJson() {
 	return root;
 }
 
-Json::Value BoardHandle::topToJson() { return arraryToJson(top, column); }
+Json::Value BoardState::topToJson() { return arraryToJson(top, column); }
 
 template <typename T>
-Json::Value BoardHandle::arraryToJson(T a[], int n) {
+Json::Value BoardState::arraryToJson(T a[], int n) {
 	Json::Value root;
 	for (int i = 0; i < n; ++i)
 		root.append(a[i]);
 	return root;
 }
 
-void BoardHandle::show() {
+void BoardState::show() {
 	short i = 1;
 	for (; i <= column && i <= 10; ++i)
 		printf(" %d", i);
@@ -83,7 +96,7 @@ void BoardHandle::show() {
 	}
 }
 
-bool BoardHandle::boardIsFull() {
+bool BoardState::boardIsFull() {
 	// static int timer = 0;
 	// ++timer;
 	// if (timer > 38815)
@@ -94,7 +107,7 @@ bool BoardHandle::boardIsFull() {
 	return true;
 }
 
-char BoardHandle::isOver() {
+char BoardState::isOver() {
 	// static int timer = 0;
 	// ++timer;
 	// if (timer > 5000)
@@ -113,22 +126,22 @@ char BoardHandle::isOver() {
 }
 
 // before call this, make sure nonFull is empty()
-void BoardHandle::nonFullColumn(shortv& nonFull) {
+void BoardState::nonFullColumn(shortv& nonFull) {
 	nonFull.clear();  // see if delete this will help?
 	for (short i = 0; i < column; ++i)
-		if (top[i] != row)
+		if (top[i] != starArea[i])
 			nonFull.push_back(i + 1);
 	// static int timer = 0;
 	// printf("nonfull %d ", ++timer);
 }
 
-char BoardHandle::rPlayer(const char plr) {
+char BoardState::rPlayer(const char plr) {
 	if (plr == 'X')
 		return '0';
 	return 'X';
 }
 
-short BoardHandle::randomMove() {
+short BoardState::randomMove() {
 	shortv list;
 	nonFullColumn(list);
 	if (list.empty())
@@ -136,7 +149,7 @@ short BoardHandle::randomMove() {
 	return randomMove(list);
 }
 
-short BoardHandle::randomMove(shortv& list) {
+short BoardState::randomMove(shortv& list) {
 	// debug
 	if (list.empty())
 		throw runtime_error("trying randomMove(shortv& list) in an empty list\n");
@@ -144,7 +157,7 @@ short BoardHandle::randomMove(shortv& list) {
 	return list[rand() % list.size()];
 }
 
-short BoardHandle::randomSuggestion(const char plr, shortv& list, const string& mode) {
+short BoardState::randomSuggestion(const char plr, shortv& list, const string& mode) {
 	shortv opp2, opp1, plr2, plr1;
 	char   opp = rPlayer(plr);
 	srand((unsigned)time(NULL));
@@ -165,31 +178,37 @@ short BoardHandle::randomSuggestion(const char plr, shortv& list, const string& 
 	}
 	short ran = rand() % 100;
 	if (mode == "progressive") {
+		if (!plr2.empty() && ran < 72)
+			return randomMove(plr2);
+		ran = rand() % 100;
 		if (!opp2.empty() && ran < 95)
 			return randomMove(opp2);
 		ran = rand() % 100;
-		if (!plr2.empty() && ran < 72)
-			return randomMove(plr2);
+		if (!plr1.empty() && ran < 95)
+			return randomMove(plr1);
+		ran = rand() % 100;
+		if (!opp1.empty() && ran < 57)
+			return randomMove(opp1);
 	} else if (mode == "defensive") {
 		if (!opp2.empty() && ran < 95)
 			return randomMove(opp2);
 		ran = rand() % 100;
 		if (!plr2.empty() && ran < 72)
 			return randomMove(plr2);
+		ran = rand() % 100;
+		if (!opp1.empty() && ran < 77)
+			return randomMove(opp1);
+		ran = rand() % 100;
+		if (!plr1.empty() && ran < 65)
+			return randomMove(plr1);
 	} else
 		throw runtime_error("no such mode.\n");
-	ran = rand() % 100;
-	if (!opp1.empty() && ran < 97)
-		return randomMove(opp1);
-	ran = rand() % 100;
-	if (!plr1.empty() && ran < 95)
-		return randomMove(plr1);
 	if (list.empty())
 		throw runtime_error("call randomSuggestion with empty list");
 	return randomMove(list);
 }
 
-short BoardHandle::randomSuggestion(const char plr, shortv& list, shortv oppList, const string& mode) {
+short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList, const string& mode) {
 	shortv tempList;
 	for (vIter i = list.begin(); i != list.end(); ++i)
 		for (vIter j = oppList.begin(); j != oppList.end(); ++j)
@@ -206,7 +225,7 @@ short BoardHandle::randomSuggestion(const char plr, shortv& list, shortv oppList
 	return randomSuggestion(plr, tempList, mode);
 }
 
-bool BoardHandle::winPieceNearBy(const short col, const short ro) {
+bool BoardState::winPieceNearBy(const short col, const short ro) {
 	// grow up, right, upright, downright
 	short i		  = 1;
 	char  present = board[col][ro];
@@ -243,13 +262,13 @@ bool BoardHandle::winPieceNearBy(const short col, const short ro) {
 	return false;
 }
 
-void BoardHandle::refreshBoard(char** hb) {
+void BoardState::refreshBoard(char** hb) {
 	for (short i = 0; i < column; ++i)
 		for (short j = 0; j < row; ++j)
 			board[i][j] = hb[i][j];
 }
 
-void BoardHandle::refreshTop() {
+void BoardState::refreshTop() {
 	for (short i = 0; i < column; ++i) {
 		short j = 0;
 		for (; j < row && board[i][j] != ' '; ++j)
@@ -258,10 +277,75 @@ void BoardHandle::refreshTop() {
 	}
 }
 
-void BoardHandle::customBoard(const short cl, const short ro, const short wi) {
+void BoardState::customBoard(const short cl, const short ro, const short wi) {
 	free();
 	column = cl;
 	row	   = ro;
 	winn   = wi;
 	generate();
+}
+
+void BoardState::areaTopTransform() {
+	for (short i = 0; i < column; ++i)
+		starArea[i] = 0;
+	for (short i = 0; i < column; ++i)
+		setATopWithTop(i, top[i]);
+
+	// check for bulks of piece
+	for (short i = 0; i < column - 1;++i){
+		if (top[i] && top[i+1]) {
+			setATopWithNumber(i + 3, 1);
+			setATopWithNumber(i - 2, 1);
+		}
+	}
+
+		// then check for overflow
+		for (short i = 0; i < column; ++i)
+			if (starArea[i] > row)
+				starArea[i] = row;
+}
+
+void BoardState::areaTopRestore() {
+	for (short i = 0; i < column; ++i)
+		starArea[i] = row;
+}
+
+void BoardState::starShow() {
+	areaTopTransform();
+	short i = 1;
+	for (; i <= column && i <= 10; ++i)
+		printf(" %d", i);
+	for (; i <= column; ++i)
+		printf("%d", i);
+	printf("\n");
+	for (short i = row - 1; i > -1; --i) {
+		for (short j = 0; j < column; ++j) {
+			if (i < starArea[j])
+				printf("|%c", board[j][i]);
+			else
+				printf("|+");
+		}
+		printf("|\n");
+	}
+	areaTopRestore();
+}
+
+void BoardState::setATopWithTop(short i, short t) {
+	// important numbers here!
+	if (t == 0)
+		return;
+	setATopWithNumber(i - 2, t / 2);
+	setATopWithNumber(i - 1, t + 1);
+	setATopWithNumber(i, t + 2);
+	setATopWithNumber(i + 1, t + 1);
+	setATopWithNumber(i + 2, t / 2);
+}
+
+shortv BoardState::aTopFullColumn() {
+	areaTopTransform();
+	shortv list;
+	for (short i = 0; i < column;++i)
+		if (starArea[i]==0)
+			list.push_back(i + 1);
+	return list;
 }

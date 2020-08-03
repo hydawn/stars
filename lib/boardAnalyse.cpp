@@ -36,92 +36,6 @@ shortv BoardAnalyse::firstPoint(const char plr, shortv& nfc) {
 	return fp;
 }
 
-// this is actually copied from the original analyse to cope with the
-// performance problem
-string BoardAnalyse::hiddenAnalyse(const char plr, shortv& list) {
-	// static int timer = 0;
-	// ++timer;
-	// printf("analyse %d ", timer);
-	// reform
-
-	shortv tempList, goodList, temp1, temp2, nonFull;
-	vIter  col;
-
-	state.nonFullColumn(nonFull);
-	list = firstPoint(plr, nonFull);
-	if (!list.empty())
-		return "good";
-
-	char opp = state.rPlayer(plr);
-	list	 = firstPoint(opp, nonFull);
-	if (list.size() > 1)
-		return "bad";
-	if (list.size() == 1) {
-		state.add(plr, list[0]);
-		temp1 = firstPoint(opp);
-		state.remove(list[0]);
-		if (!temp1.empty())
-			return "bad";
-		return "free";
-	}
-
-	// I'll go
-	list = nonFull;
-	col	 = list.begin();
-	while (col != list.end()) {
-		state.add(plr, *col);
-		state.nonFullColumn(nonFull);
-		tempList = firstPoint(opp, nonFull);
-		if (!tempList.empty()) {
-			state.remove(*col);
-			col = list.erase(col);
-			continue;
-		}
-		tempList = firstPoint(plr, nonFull);
-		if (tempList.size() > 1) {
-			goodList.push_back(*col);
-		} else if (tempList.size() == 1) {
-			state.add(opp, tempList[0]);
-			state.nonFullColumn(nonFull);
-			// it's my turn
-			temp1 = firstPoint(plr, nonFull);
-			if (!temp1.empty())
-				goodList.push_back(*col);
-			else {
-				temp1 = firstPoint(opp, nonFull);
-				if (temp1.size() > 1) {
-					state.remove(tempList[0]);
-					state.remove(*col);
-					col = list.erase(col);
-					continue;
-				}
-				if (temp1.size() == 1) {
-					state.add(plr, temp1[0]);
-					// shortv temp2 = firstPoint(opp);
-					temp2 = firstPoint(opp);
-					state.remove(temp1[0]);
-					if (!temp2.empty()) {
-						state.remove(tempList[0]);
-						state.remove(*col);
-						col = list.erase(col);
-						continue;
-					}
-				}
-			}
-			state.remove(tempList[0]);
-		}
-		state.remove(*col);
-		++col;
-	}
-	if (!goodList.empty()) {
-		list = goodList;
-		return "good";
-	}
-	if (list.empty())
-		return "bad";
-	return "free";
-}
-
 // check if game is over or board is full before call this
 // check if there are only one move
 // it's not well structured to read, but it is to perform
@@ -210,6 +124,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 }
 
 // check if game is over or board is full before call this
+// max depth == 9
 string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth) {
 	string word = analyse(plr, list);
 	if (word == "good" || word == "bad" || list.size() == 1)
@@ -552,10 +467,9 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	return "free";
 }
 
-// not so sure I still need this, after all, returnMove is quite big
-// go straight into loop and return word in player's perspective
 // check if game is over or board is full before call this, given list must not
 // be empty
+// this is not a recursive function
 string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
 	/****************************debug theory**********************************
 	this recursiveSituation is merely an infinite version of returnMove. If you
@@ -586,8 +500,8 @@ string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnM
 		if (word == "free") {
 			if (!list1.empty())
 				word = recursiveSituation(opp, list1, returnMoveDepth, recursiveCount, countTop);
-			else
-				printf("game is over, what do I do? ---- nothing I suppose.\n");
+			// else
+			// 	printf("game is over, what do I do? ---- nothing I suppose.\n");
 		}
 		if (word == "good") {
 			state.remove(*col);
@@ -612,6 +526,8 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short retu
 	Here is another version of recursiveSituation unfortunately, doesn't take
 	shortv isn't gonna work, so here we are. Now I can use for loop and
 	count and break! This will work faster than the last one.
+	But the problem is, this one doesn't tell you which col is good, it just
+	tells you this whole shortv is good or bad. So don't call this first.
 	This is basically the old recursiveSituation copied here
 	*****************************debug theory*********************************/
 	/*****************************debug action*********************************/
@@ -625,6 +541,7 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short retu
 	shortv list1;
 	string word;
 	short  badCount = 0;
+	// or use isGood and ditch the col != list.end()
 	vIter  col		= list.begin();
 	for (; col != list.end(); ++col) {
 		state.add(plr, *col);
@@ -632,8 +549,8 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short retu
 		if (word == "free") {
 			if (!list1.empty())
 				word = recursiveSituation(state.rPlayer(plr), list1, returnMoveDepth, recursiveCount, countTop);
-			else /*debug - delete this else for performance considerations*/
-				printf("game is over, what do I do? ---- nothing I suppose.\n");
+			// else /*debug - delete this else for performance considerations*/
+			// 	printf("game is over, what do I do? ---- nothing I suppose.\n");
 		}
 		if (word == "good")
 			++badCount;
@@ -657,8 +574,10 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	 * Maybe it's better to move it to boardInterface
 	 */
 
-	shortv list, oppList;
+	shortv list, oppList, fullList, returnList;
 	double timeUsed = 0;
+	short  returnMoveDepth = 2;
+	string word;
 
 	state.nonFullColumn(list);
 	if (list.empty())
@@ -666,21 +585,31 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
 		throw runtime_error("call respond with ended game!\n");
 
-	system_clock::time_point start	 = system_clock::now();
-	string					 word	 = returnMove(plr, list, 3);
-	system_clock::time_point end	 = system_clock::now();
-	auto					 elapsed = duration_cast<milliseconds>(end - start);
-	timeUsed						 = elapsed.count();
-	string word0					 = returnMove(state.rPlayer(plr), oppList, 3);
+	if (list.size() > 4)
+		state.areaTopTransform();
+	else
+		printf("Stars have lost their powers\n");
+	string word0 = returnMove(state.rPlayer(plr), oppList, returnMoveDepth);
+	while (timeUsed < 64 && returnMoveDepth < 10) {
+		timeUsed = returnTime(plr, list, returnMoveDepth, word);
+		++returnMoveDepth;
+	}
+	cout << "ReturnMoveDepth = " << returnMoveDepth << endl;
+
+	// fullList = state.aTopFullColumn();
+	// mergeList(returnList, list, fullList);
+	// list = returnList;
+	state.areaTopRestore();
 
 	if (showCal) {
-		std::cout << "\nword = " << word << "\nlist = [ ";
+		cout << "\nword = " << word << "\nlist = [ ";
 		for (short c : list)
-			std::cout << c << " ";
+			cout << c << " ";
 		printf("]\n");
 	}
-	if (showTime)
+	if (showTime) {
 		cout << "Computer time used: " << timeUsed << " ms\n";
+	}
 
 	thisMove.word = word;
 	thisMove.list = list;
@@ -696,4 +625,15 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	} else
 		throw runtime_error("what?\n");
 	return 0;
+}
+
+double BoardAnalyse::returnTime(const char plr, shortv& list, const short returnMoveDepth, string& word) {
+	double					 timeUsed;
+	system_clock::time_point start, end;
+	start		 = system_clock::now();
+	word		 = returnMove(plr, list, returnMoveDepth);
+	end			 = system_clock::now();
+	auto elapsed = duration_cast<milliseconds>(end - start);
+	timeUsed	 = elapsed.count();
+	return timeUsed;
 }
