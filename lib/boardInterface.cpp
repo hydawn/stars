@@ -389,6 +389,8 @@ void BoardInterface::normalMode() {
 			debugMode(byPlayer);
 			// maybe in debug mode, the player changes:
 			byOpponent.player = analyse->rPlayer(byPlayer.player);
+			if (isOver(byOpponent))
+				break;
 			continue;
 		}
 

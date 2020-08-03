@@ -590,7 +590,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	else
 		printf("Stars have lost their powers\n");
 	string word0 = returnMove(state.rPlayer(plr), oppList, returnMoveDepth);
-	while (timeUsed < 13 && returnMoveDepth < 10) {
+	while (timeUsed < 64 && returnMoveDepth < 10) {
 		timeUsed = returnTime(plr, list, returnMoveDepth, word);
 		++returnMoveDepth;
 	}
