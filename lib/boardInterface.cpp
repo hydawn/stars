@@ -38,8 +38,11 @@ void BoardInterface::getStateFromInput() {
 	char** temp = new char*[column];
 	for (short i = 0; i < column; ++i) {
 		temp[i] = new char[row];
-		for (short j = 0; j < row; ++j)
+		for (short j = 0; j < row; ++j){
+			if (input[row - j - 1][i * 2 + 1] == '+')
+				input[row - j - 1][i * 2 + 1] = ' ';
 			temp[i][j] = input[row - j - 1][i * 2 + 1];
+		}
 	}
 
 	analyse->state.refreshBoard(temp);
@@ -942,6 +945,14 @@ bool BoardInterface::isOver(const oneMove& move) {
 			printf("Game is over, stars are gone.\n");
 		else
 			printf("Congratulations, you win!\n");
+		return true;
+	}
+	if (analyse->gameIsOver() == analyse->rPlayer(move.player)) {
+		analyse->show();
+		if (move.byComputer)
+			printf("Congratulations, you win!\n");
+		else
+			printf("Game is over, stars are gone.\n");
 		return true;
 	}
 	if (analyse->boardIsFull()) {
