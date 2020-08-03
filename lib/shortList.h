@@ -35,7 +35,8 @@ public:
 	}
 
 	// op
-	short operator[](const short index) const { return data[index]; }
+	const short& operator[](const short index) const { return data[index]; }
+	short& operator[](const short index) { return data[index]; }
 	operator Json::Value() {
 	Json::Value root;
 	for (short i = 0; i < top; ++i)
@@ -43,5 +44,10 @@ public:
 	return root;
 	}
 };
+
+bool inList(ShortList& sl, short i);
+void sortList(ShortList& sl);
+void cpyList(ShortList& destination, ShortList& source);
+void mergeList(ShortList& destination, ShortList& source1, ShortList& source2);
 
 #endif

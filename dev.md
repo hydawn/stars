@@ -1,16 +1,114 @@
 well, this is clearly more organized than CharmedPython
 
+# perf test
+|+|+|+|+|+|+|+|+|
+|+|+|+|+| |+|+|+|
+|+|+|+| | | |+|+|
+|+|+|+| |X| |+|+|
+|+|+|+| |0| |+| |
+| |+|+| |0| | | |
+| | | | |0| | |0|
+|X| | | |X| | |X|
+I go 8
+
+Here is hint provided for you
+ReturnMoveDepth = 4
+Computer time used: 80 ms
+
+ReturnMoveDepth = 4
+Computer time used: 77 ms
+
+ReturnMoveDepth = 4
+Computer time used: 79 ms
+this 5 is recommended
+
 # TODO
 - 0 to exit a mode, quit to quit the whole game
-- add performance settings
-- improve performance - cut branches
+- add performance settings, set computer strategy : progressive (mainly build self) or defensive (mainly intercept)
 - add GUI?
-- set computer strategy : progressive (mainly build self) or defensive (mainly intercept)
-- set calculate depth
+- record calculate depth
+- add erase settings to avoid exception
+- return good bad, free changed to 1 0 2
 - Then I will stop
 
 # pre-release note - version 1.0 - Beta
 preRelease - total failure, no pause in bash, clock() is not working as expected, core dumped, returnSituation is never used, depth > 3 is never used.
+
+# areaTop (now starArea)
+I was thinking about cut branches lately, originally, I thought a little version of the current board would be useful ('cause I've been developing that kind board shape lately), like this:   
+if I want to analyse this:
+```
+| | | | | | | | |
+| | | | | | | | |
+| | | | | | | | |
+| | | | | | | | |
+| | | | | | | | |
+| | | | | | |X| |
+| | | | | | |X|0|
+| | | | | |X|0|0|
+```
+then I'll create a new little board like this:
+```
+| | | | | |
+| | | | | |
+| | | |X| |
+| | | |X|0|
+| | |X|0|0|
+```
+then I thought the shape isn't good, so, maybe this will do:
+```
+      | |  
+    | | | |
+    | |X| |
+| | | |X|0|
+| | |X|0|0|
+```
+but how should I create that? - maybe I should create a new class, and inherit it from class BoardState (formal BoardHandle), seems that inheritance is useful after all. So I got this:   
+```cpp
+class BoardArea : public BoardState {
+public:
+    short* areaTop;
+    BoardArea() { generate(); }
+    BoardArea(const BoardState& bs);
+    virtual ~BoardArea() { free(); }
+
+    virtual void show();
+    virtual bool colIsFull(const short col) { return areaTop[col - 1] == row; }
+    virtual void nonFullColumn(shortv& nonFull);
+    void refreshAreaTop();
+    virtual BoardArea& operator=(const BoardArea& ba);
+};
+```
+Then I found that this `BoardArea(const BoardState& bs)` function is quite annoying, it will call `BoardState()` first, but that will create a `(8, 8, 4)` type of board. I don't want that, so I'll have to free first before generate (afterward is when I realize that I should use `BoardArea::BoardArea(const BoardState& bs) : BoardState(bs)` instead, but I forgot). Even if I got it right, how am I gonna nest that into other board class? Change BoardState to BoardArea? then why should I have BoardState in the first place?   
+Anyway, it seems concise to just add a new item areaTop and change nonFullColumn instead of creating a new class. And that's what I choose.  
+
+## critics
+the first version was to add two above, add one in the side, and ad 1/2 on the side of the side:  
+```cpp
+void BoardState::setATopWithTop(short i, short t) {
+    if (t == 0)
+        return;
+    setATopWithNumber(i - 2, t / 2 - 1);
+    setATopWithNumber(i - 1, t + 1);
+    setATopWithNumber(i, t + 2);
+    setATopWithNumber(i + 1, t + 1);
+    setATopWithNumber(i + 2, t / 2 - 1);
+}
+```
+Doesn't end well in situation like this:  
+```
+ 1 2 3 4 5 6 7 8
+|+|+|+|+|+|+|+|+|
+|+|+|+|+|+|+|+|+|
+|+|+|+|+|+|+|+|+|
+|+| | |+|+|+|+|+|
+| | | | |+|+|+|+|
+| |0|0| | |+|+|+|
+|0|X|X|X| |+|+|+|
+|X|0|X|X| |+|+|+|
+```
+now the computer think it's safe - what if I go 5 or 6 ?
+
 
 # analyse testing board
 ## 2020-7-25-23:11
@@ -27,6 +125,88 @@ preRelease - total failure, no pause in bash, clock() is not working as expected
 if I let loose, I'm get all the correct answer: X=good=1,2; 0=free=1 (4969ms/100times)  
 but if I make it mo more than list4, I still got X=good=1 (993ms/100times)  
 and the performance is 5 times better, what should I do then?  
+
+## 2020-8-3 ???
+```
+ 1 2 3 4 5 6 7 8
+|0| |X|0|0| |+| |
+|0| |X|X|0| | | |
+|X| |X|0|0| | |0|
+|X| |0|0|X| | |0|
+|X| |X|0|X| | |X|
+|0| |X|X|0| | |X|
+|0| |0|X|0| |X|0|
+|X| |X|0|X| |0|X|
+```
+if X goes 2:
+```
+word = bad
+list = [ ]
+Computer time used: 1 ms
+
+0 goes here 7
+Player time used: 11541ms
+
+Here is hint provided for you
+ReturnMoveDepth = 10
+
+word = good
+list = [ 7 ]
+Computer time used: 0 ms
+This is going really well~
+this 7 is recommended
+```
+then I go 7 as instructed, and then
+```
+word = good
+list = [ 7 ]
+Computer time used: 0 ms
+This is going really well~
+this 7 is recommended
+ 1 2 3 4 5 6 7 8
+|0| |X|0|0| |+| |
+|0| |X|X|0| | | |
+|X| |X|0|0| | |0|
+|X| |0|0|X| | |0|
+|X| |X|0|X| | |X|
+|0| |X|X|0| |0|X|
+|0| |0|X|0| |X|0|
+|X|X|X|0|X| |0|X|
+
+
+In debug mode
+Player 'X' move> 7
+ReturnMoveDepth = 10
+
+word = bad
+list = [ ]
+Computer time used: 1 ms
+
+0 goes here 8
+Player time used: 12380ms
+
+Here is hint provided for you
+ReturnMoveDepth = 10
+
+word = free
+list = [ 8 ]
+Computer time used: 0 ms
+One move left, where can you go then?
+this 8 is recommended
+ 1 2 3 4 5 6 7 8
+|0| |X|0|0| | | |
+|0| |X|X|0| | |0|
+|X| |X|0|0| | |0|
+|X| |0|0|X| | |0|
+|X|%|X|0|X| |X|X|
+|0| |X|X|0| |0|X|
+|0| |0|X|0| |X|0|
+|X|X|X|0|X| |0|X|
+```
+what???
+I think it's the stars, if there are stars, then X will hit % point first, but if there aren't any stars, then 0 will hit % first. This explains why I suddenly goes from must win to must lose.
+
+Then I make the stars lost their powers when `nonFullList.size() < 5`, but `returnMove()` still cannot see that in this board, when X goes 7 in the first place, X is about to fail. Maybe it's time to use that recursive function. However, I forgot which one should I call, returnSituation or recursiveSituation, I even forgot why there's two situation in the first place??.
 
 # performance testing board
 ## nearly empty board

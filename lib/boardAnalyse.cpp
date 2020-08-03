@@ -585,7 +585,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
 		throw runtime_error("call respond with ended game!\n");
 
-	if (list.size() > 9)
+	if (list.size() > 4)
 		state.areaTopTransform();
 	else
 		printf("Stars have lost their powers\n");

@@ -178,25 +178,31 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 	}
 	short ran = rand() % 100;
 	if (mode == "progressive") {
+		if (!plr2.empty() && ran < 72)
+			return randomMove(plr2);
+		ran = rand() % 100;
 		if (!opp2.empty() && ran < 95)
 			return randomMove(opp2);
 		ran = rand() % 100;
-		if (!plr2.empty() && ran < 72)
-			return randomMove(plr2);
+		if (!plr1.empty() && ran < 95)
+			return randomMove(plr1);
+		ran = rand() % 100;
+		if (!opp1.empty() && ran < 57)
+			return randomMove(opp1);
 	} else if (mode == "defensive") {
 		if (!opp2.empty() && ran < 95)
 			return randomMove(opp2);
 		ran = rand() % 100;
 		if (!plr2.empty() && ran < 72)
 			return randomMove(plr2);
+		ran = rand() % 100;
+		if (!opp1.empty() && ran < 77)
+			return randomMove(opp1);
+		ran = rand() % 100;
+		if (!plr1.empty() && ran < 65)
+			return randomMove(plr1);
 	} else
 		throw runtime_error("no such mode.\n");
-	ran = rand() % 100;
-	if (!opp1.empty() && ran < 97)
-		return randomMove(opp1);
-	ran = rand() % 100;
-	if (!plr1.empty() && ran < 95)
-		return randomMove(plr1);
 	if (list.empty())
 		throw runtime_error("call randomSuggestion with empty list");
 	return randomMove(list);
@@ -285,10 +291,18 @@ void BoardState::areaTopTransform() {
 	for (short i = 0; i < column; ++i)
 		setATopWithTop(i, top[i]);
 
-	// then check for overflow
-	for (short i = 0; i < column; ++i)
-		if (starArea[i] > row)
-			starArea[i] = row;
+	// check for bulks of piece
+	for (short i = 0; i < column - 1;++i){
+		if (top[i] && top[i+1]) {
+			setATopWithNumber(i + 3, 1);
+			setATopWithNumber(i - 2, 1);
+		}
+	}
+
+		// then check for overflow
+		for (short i = 0; i < column; ++i)
+			if (starArea[i] > row)
+				starArea[i] = row;
 }
 
 void BoardState::areaTopRestore() {
@@ -320,11 +334,11 @@ void BoardState::setATopWithTop(short i, short t) {
 	// important numbers here!
 	if (t == 0)
 		return;
-	setATopWithNumber(i - 2, t / 2 - 1);
+	setATopWithNumber(i - 2, t / 2);
 	setATopWithNumber(i - 1, t + 1);
 	setATopWithNumber(i, t + 2);
 	setATopWithNumber(i + 1, t + 1);
-	setATopWithNumber(i + 2, t / 2 - 1);
+	setATopWithNumber(i + 2, t / 2);
 }
 
 shortv BoardState::aTopFullColumn() {
