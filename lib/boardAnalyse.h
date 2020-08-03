@@ -14,7 +14,6 @@ private:
 	// analyse
 	shortv firstPoint(const char plr);
 	shortv firstPoint(const char plr, shortv& nfc);
-	string hiddenAnalyse(const char plr, shortv& list);
 	string analyse(const char plr, shortv& list);
 	string recursiveSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 
@@ -30,8 +29,10 @@ public:
 	 * I should bear in mind that the whole concept of analyse function is to
 	 * narrow down the freeList, if not to gain "good" or "bad"
 	 */
-	string returnMove(const char plr, shortv& list, const short depth = 3);
+	string returnMove(const char plr, shortv& list, const short depth);
 	string returnSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
+	double returnTime(const char plr, shortv& list, const short depth, string& word);
+	double recursiveTime(const char plr, shortv& list, const short depth, string& word);
 	int	   respond(const char plr, oneMove& thisMove, bool showCal, bool showTime);
 
 	// change board
