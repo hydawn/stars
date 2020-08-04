@@ -80,12 +80,11 @@ string BoardInterface::getInput(const string mode) {
 		cin.getline(input, INTER_MAX_INPUT);
 
 		// excute
-		if (input[0] == '\0' || !strcmp(input, "0") || !strcmp(input, "q") || !strcmp(input, "exit") ||
-			!strcmp(input, "quit")) {
-			cout << "Exit from " << mode << " mode.\n";
-			input[0] = '\0';
-			return input;
-		} else if (!strcmp(input, "r") || !strcmp(input, "reverse")) {
+		if (input[0] == '\0' || !strcmp(input, "0") || !strcmp(input, "exit"))
+			return "exit";
+		else if (!strcmp(input, "quit") || !strcmp(input, "q"))
+			return "quit";
+		else if (!strcmp(input, "r") || !strcmp(input, "reverse")) {
 			if (mode != "add")
 				printf("We are already in reverse mode\n");
 			else
@@ -141,10 +140,9 @@ string BoardInterface::getInput(const string mode, char plr, double& inputTime) 
 		if (num > 0 && num <= analyse->getColumn() && !analyse->colIsFull(num))
 			return input;
 		// excute
-		if (!strcmp(input, "0") || !strcmp(input, "q") || !strcmp(input, "exit") || !strcmp(input, "quit")) {
-			input[0] = '\0';
+		if (!strcmp(input, "0") || !strcmp(input, "q") || !strcmp(input, "exit") || !strcmp(input, "quit"))
 			return input;
-		} else if (input[0] == '\0') {
+		else if (input[0] == '\0') {
 			++counter;
 			cout << "Invalid empty input, let\'s try again\n";
 		} else if (!strcmp(input, "C") || !strcmp(input, "custom"))
@@ -166,13 +164,16 @@ string BoardInterface::getInput(const string mode, char plr, double& inputTime) 
 		}
 		else if (!strcmp(input, "sv") || !strcmp(input, "save"))
 			record.saveGame(analyse->state);
-		else if (!strcmp(input, "sa") || !strcmp(input, "st") || !strcmp(input, "show area") || !strcmp(input, "show stars"))
+		else if (!strcmp(input, "sa") || !strcmp(input, "st") || !strcmp(input, "show area")
+			|| !strcmp(input, "show stars"))
 			analyse->starShow();
 		else if (!strcmp(input, "s") || !strcmp(input, "setting") || !strcmp(input, "settings"))
 			settingsMode();
 		else if (mode != "normal") {
-			if (!strcmp(input, "a") || !strcmp(input, "add"))
-				addMode();
+			if (!strcmp(input, "a") || !strcmp(input, "add")) {
+				if (!addMode())
+					return "quit";
+			}
 			else if (!strcmp(input, "d") || !strcmp(input, "debug"))
 				printf("We are already in debug mode\n");
 			else if (!strcmp(input, "H") || !strcmp(input, "hint"))
@@ -182,8 +183,10 @@ string BoardInterface::getInput(const string mode, char plr, double& inputTime) 
 				return input;
 			else if (!strcmp(input, "n") || !strcmp(input, "normal"))
 				normalMode();
-			else if (!strcmp(input, "r") || !strcmp(input, "reverse"))
-				reverseMode();
+			else if (!strcmp(input, "r") || !strcmp(input, "reverse")) {
+				if (!reverseMode())
+					return "quit";
+			}
 		}
 		// now mode == "normal"
 		else if ((!strcmp(input, "d") || !strcmp(input, "debug")) && mode != "debug")
@@ -212,14 +215,16 @@ short BoardInterface::getCustomInput(const string item) {
 	}
 }
 
-void BoardInterface::addMode() {
+string BoardInterface::addMode() {
 	string	input;
 	oneMove move;
 	move.mode = "add";
 	while (true) {
 		input = getInput("add");
-		if (input.empty())
-			return;
+		if (input == "exit")
+			return true;
+		if (input == "quit")
+			return false;
 		if (input[0] == '0')
 			move.player = input[0];
 		else
@@ -233,14 +238,16 @@ void BoardInterface::addMode() {
 	}
 }
 
-void BoardInterface::reverseMode() {
+string BoardInterface::reverseMode() {
 	string	input;
 	oneMove move;
 	move.mode = "reverse";
 	while (true) {
 		input = getInput("reverse");
-		if (input.empty())
+		if (input == "exit")
 			return;
+		else if (input == "quit")
+			return false;
 		move.move = atoi(input.c_str());
 		printf("remove %d as you like it:\n", move.move);
 		analyse->reverse(move.move);
@@ -249,7 +256,8 @@ void BoardInterface::reverseMode() {
 	}
 }
 
-void BoardInterface::debugMode(oneMove& byPlayer) {
+// situ=end or quit or exit
+string BoardInterface::debugMode(oneMove& byPlayer) {
 	// init
 	oneMove byOpponent;
 	byPlayer.mode		  = "debug";
@@ -288,9 +296,13 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 	while (true) {
 		// analyse->show();
 		input = getInput("debug", byPlayer.player, byPlayer.time);
-		if (input.empty())
+		if (input == "0" || input == "exit") {
+			situ = "exit";
 			break;
-		else if (input == "c" || input == "change") {
+		} else if (input == "q" || input == "quit") {
+			situ = "quit";
+			break;
+		} else if (input == "c" || input == "change") {
 			// change player
 			std::swap(byPlayer.player, byOpponent.player);
 			std::swap(byPlayer.word, byOpponent.word);
@@ -326,10 +338,14 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 			byPlayer.move = atoi(input.c_str());
 			analyse->go(byPlayer.player, byPlayer.move);
 			record.push_back(byPlayer);	 // byPlayer end here
-			if (isOver(byPlayer))
+			if (isOver(byPlayer)) {
+				situ = "end";
 				break;
-		} else if (isOver(byPlayer))
+			}
+		} else if (isOver(byPlayer)) {
+			situ = "end";
 			break;
+		}
 
 		// opp respond
 		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
@@ -340,8 +356,10 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 		record.push_back(byOpponent);
 		printf("\n%c goes here %d\n", byOpponent.player, byOpponent.move);
 		cout << "Player time used: " << byPlayer.time << "ms\n\n";
-		if (isOver(byOpponent))
+		if (isOver(byOpponent)) {
+			situ = "end";
 			break;
+		}
 
 		// recommend
 		byPlayer.hintOn		= record.getSettings("inDebugMode", "hintOn");
@@ -363,9 +381,9 @@ void BoardInterface::debugMode(oneMove& byPlayer) {
 	printf("Exit from debug mode...\n");
 }
 
-void BoardInterface::normalMode() {
+string BoardInterface::normalMode() {
 	// init
-	string	input;
+	string	input, debugSitu;
 	oneMove byPlayer, byOpponent;
 	byPlayer.player		  = 'X';
 	byPlayer.mode		  = "normal";
@@ -386,10 +404,10 @@ void BoardInterface::normalMode() {
 			byPlayer.list	  = byOpponent.list;
 			continue;
 		} else if (input == "d" || input == "debug") {
-			debugMode(byPlayer);
+			debugMode(byPlayer, debugSitu);
 			// maybe in debug mode, the player changes:
 			byOpponent.player = analyse->rPlayer(byPlayer.player);
-			if (isOver(byOpponent))
+			if (debugSitu == "end" || debugSitu == "quit")
 				break;
 			continue;
 		}
@@ -423,13 +441,13 @@ void BoardInterface::normalMode() {
 											   record.getSettings("inNormalMode", "showTime"));
 		printf("\n");
 	}
-	if (input.empty()) {
+	if (input == "exit" && debugSitu != "quit") {
 		// here is exit from game
 		if (record.getSettings("exitNormal", "askToDebug") &&
 			askToDebug(record.getSettings("exitNormal", "defaultDebug")))
-			debugMode(byPlayer);
+			debugMode(byPlayer, debugSitu);
 		else if (record.getSettings("exitNormal", "defaultDebug"))
-			debugMode(byPlayer);
+			debugMode(byPlayer, debugSitu);
 		if (record.getSettings("exitNormal", "askToSaveBoard"))
 			askToSaveBoard(record.getSettings("exitNormal", "defaultSaveBoard"));
 		else if (record.getSettings("exitNormal", "defaultSaveBoard"))
@@ -437,12 +455,14 @@ void BoardInterface::normalMode() {
 		printf("Exit from normal mode...\n");
 		return;
 	}
+	if (debugSitu == "quit")
+		return;
 	// below is game is over
 	if (record.getSettings("gameIsOver", "askToDebug") &&
 		askToDebug(record.getSettings("gameIsOver", "defaultDebug")))
-		debugMode(byPlayer);
+		debugMode(byPlayer, debugSitu);
 	else if (record.getSettings("gameIsOver", "defaultDebug"))
-		debugMode(byPlayer);
+		debugMode(byPlayer, debugSitu);
 
 	if (record.getSettings("gameIsOver", "askToSaveBoard"))
 		askToSaveBoard(record.getSettings("gameIsOver", "defaultSaveBoard"));
@@ -452,7 +472,7 @@ void BoardInterface::normalMode() {
 	printf("Exit from normal mode...\n");
 }
 
-void BoardInterface::settingsMode() {
+string BoardInterface::settingsMode() {
 	printf("We are in settings mode now:\n");
 	cout << "we have " << record.getSettingsItemNumber() << " situations and within them we have ";
 	cout << "multiple items each marked with tags\nbelow, type in tags to change ";
@@ -489,7 +509,7 @@ void BoardInterface::settingsMode() {
 	printf("Exit from settings mode.\n");
 }
 
-void BoardInterface::playMode() {
+string BoardInterface::playMode() {
 	if (!record.getNumberOfSavedBoard()) {
 		printf(
 			"No games has been recorded yet. If you want to try this mode, save a game first\nTill next "
@@ -523,7 +543,7 @@ void BoardInterface::playMode() {
 	printf("Exit from play mode...\n");
 }
 
-void BoardInterface::playBackMode() {
+string BoardInterface::playBackMode() {
 	if (!record.getNumberOfSavedBoard()) {
 		printf(
 			"No games has been recorded yet. If you want to try this mode, save a game first\nTill next "
@@ -602,7 +622,7 @@ void BoardInterface::playBackMode() {
 	printf("Exit from play back mode...\n");
 }
 
-void BoardInterface::customMode() {
+string BoardInterface::customMode() {
 	printf("In custom mode ...\n");
 	if (record.getSettings("inCustomMode", "askToSaveBoard"))
 		askToSaveBoard(record.getSettings("inCustomMode", "defaultSaveBoard"));
@@ -625,6 +645,34 @@ void BoardInterface::customMode() {
 	printf("Exit from custom mode ...\n");
 }
 
+void BoardInterface::controlMode() {
+	// need a new setting about which mode to go into by default
+	// now it's debugMode by default
+	oneMove byPlayer;
+	string advice = debugMode(byPlayer);
+	while (true) {
+		if (advice == "quit")
+			break;
+		else if (advice == "add")
+			advice = addMode();
+		else if (advice == "reverse")
+			advice = reverseMode();
+		else if (advice == "debug")
+			advice = debugMode(byPlayer);
+		else if (advice == "normal")
+			advice = normalMode();
+		else if (advice == "settings")
+			advice = settingsMode();
+		else if (advice == "play")
+			advice = playMode();
+		else if (advice == "play back")
+			advice = playBackMode();
+		else if (advice == "custom")
+			advice = customMode();
+	}
+	cout << "exit from controller\n";
+}
+
 string BoardInterface::getHelp(string mode) {
 	string enjoy  = "Enjoy!\n";
 	string addon  = "";
@@ -642,7 +690,8 @@ string BoardInterface::getHelp(string mode) {
 		"and see what the help information in debug mode have to say?\n" + enjoy + end;
 	string normal =
 		addon + "Type in numbers (1~8) to play, one who place four piece in a row first wins\n\n" +
-		"0/q/quit/exit -- exit from a certain mode or exit the game\n" +
+		"0/exit --------- exit from a certain mode\n" +
+		"q/quit --------- quit the whole game\n" +
 		"C/custom ------- custom board height, width and win number (4 by default)\n"
 		"d/debug -------- into debug mode\n" +
 		"h/help --------- show help message of the current mode\n" +
@@ -650,8 +699,8 @@ string BoardInterface::getHelp(string mode) {
 		"P/play back ---- into play back mode\n" +
 		"S/show --------- show the current board\n" +
 		"s/settings ----- view and change the settings\n" +
-		"st/show stars --- show debug analyse stars\n" +
-		"sv/save ----------- save the current game\n" +
+		"st/show stars -- show debug analyse stars\n" +
+		"sv/save -------- save the current game\n" +
 		"t/tips --------- tips I wrote to help other player (you) to play the game\n" +
 		"w/winn --------- show win number (4 by default)\n"
 		"i/info --------- information about the game\n\n" +

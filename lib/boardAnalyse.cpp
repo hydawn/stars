@@ -594,6 +594,15 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 		timeUsed = returnTime(plr, list, returnMoveDepth, word);
 		++returnMoveDepth;
 	}
+	// if (!list.empty() && returnMoveDepth == 10 && timeUsed!=0) {
+	// 	int returnSituationDepth = 1;
+	// 	printf("This recursive is entered");
+	// 	while (timeUsed < 32 && returnSituationDepth < 6) {
+	// 		timeUsed = recursiveTime(plr, list, returnMoveDepth, returnSituationDepth, word);
+	// 		++returnSituationDepth;
+	// 	}
+	// 	cout << "ReturnSituationDepth = " << returnSituationDepth << endl;
+	// }
 	cout << "ReturnMoveDepth = " << returnMoveDepth << endl;
 
 	// fullList = state.aTopFullColumn();
@@ -636,4 +645,16 @@ double BoardAnalyse::returnTime(const char plr, shortv& list, const short return
 	auto elapsed = duration_cast<milliseconds>(end - start);
 	timeUsed	 = elapsed.count();
 	return timeUsed;
+}
+
+double BoardAnalyse::recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word) { ;
+	double					 timeUsed;
+	system_clock::time_point start, end;
+	start		 = system_clock::now();
+	word		 = returnSituation(plr, list, returnMoveDepth, 0, countTop);
+	end			 = system_clock::now();
+	auto elapsed = duration_cast<milliseconds>(end - start);
+	timeUsed	 = elapsed.count();
+	return timeUsed;
+	;
 }

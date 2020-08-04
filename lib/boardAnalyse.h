@@ -32,7 +32,7 @@ public:
 	string returnMove(const char plr, shortv& list, const short depth);
 	string returnSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 	double returnTime(const char plr, shortv& list, const short depth, string& word);
-	double recursiveTime(const char plr, shortv& list, const short depth, string& word);
+	double recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
 	int	   respond(const char plr, oneMove& thisMove, bool showCal, bool showTime);
 
 	// change board

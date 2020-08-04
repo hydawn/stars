@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION "3.16.0")
 
-project("CharmedCpp")
+project("Stars")
 
 add_executable(
 	"${PROJECT_NAME}"
@@ -10,7 +10,6 @@ add_executable(
 	"lib/boardRecord.cpp"
 	"lib/boardState.cpp"
 	"lib/jsoncpp.cpp"
-	"lib/shortList.cpp"
 )
 
 

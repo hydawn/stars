@@ -25,14 +25,15 @@ public:
 	void   getStateFromInput();
 
 	// mode
-	void addMode();
-	void reverseMode();
-	void debugMode(oneMove& byPlayer);
-	void normalMode();
-	void settingsMode();
-	void playMode();
-	void playBackMode();
-	void customMode();
+	string addMode();
+	string reverseMode();
+	string debugMode(oneMove& byPlayer);
+	string normalMode();
+	string settingsMode();
+	string playMode();
+	string playBackMode();
+	string customMode();
+	void controlMode();
 
 	// ask & do
 	bool askToDebug(bool yes);	// if yes == true, then default yes
