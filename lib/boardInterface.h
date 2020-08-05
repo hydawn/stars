@@ -28,7 +28,7 @@ public:
 	string addMode();
 	string reverseMode();
 	string debugMode(oneMove& byPlayer);
-	string normalMode();
+	// string normalMode();
 	string settingsMode();
 	string playMode();
 	string playBackMode();

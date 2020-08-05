@@ -39,13 +39,6 @@ void BoardRecord::getFile() {
 			"		\"askToSaveBoard\" : false,\n" +
 			"		\"defaultSaveBoard\" : false\n" +
 			"	},\n" +
-			"	\"exitNormal\" : \n" +
-			"	{\n" +
-			"		\"askToDebug\" : false,\n" +
-			"		\"askToSaveBoard\" : true,\n" +
-			"		\"defaultDebug\" : false,\n" +
-			"		\"defaultSaveBoard\" : false\n" +
-			"	},\n" +
 			"	\"gameIsOver\" : \n" +
 			"	{\n" +
 			"		\"askToDebug\" : true,\n" +
@@ -65,22 +58,10 @@ void BoardRecord::getFile() {
 			"		\"showTime\" : false,\n" +
 			"		\"starrySky\" : false\n" +
 			"	},\n" +
-			"	\"inNormalMode\" : \n" +
-			"	{\n" +
-			"		\"showCalculate\" : false,\n" +
-			"		\"showTime\" : false\n" +
-			"	},\n" +
 			"	\"whenSaveGame\" : \n" +
 			"	{\n" +
 			"		\"askGiveName\" : true,\n" +
 			"		\"defaultGiveName\" : false\n" +
-			"	},\n" +
-			"	\"inToDebugMode\" : \n" +
-			"	{\n" +
-			"		\"askToImport\" : false,\n" +
-			"		\"askToSaveBoard\" : false,\n" +
-			"		\"defaultImport\" : false,\n" +
-			"		\"defaultSaveBoard\" : false\n" +
 			"	}\n" +
 			"}\n";
 		outSet << defaultSettings;

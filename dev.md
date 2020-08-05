@@ -2,14 +2,24 @@ well, this is clearly more organized than CharmedPython
 
 
 # ***first thing*** after return
-a new thought: control mode - "all mode are created equal" (except for control mode)  
+a new thought: control mode - "all mode are created equal" (except for control mode & debug mode & normal mode)  
 first thing: complete this thought when return   
+## add & reverse
+return debug add reverse
+## debug
+return exit
+return quit over add reverse play playBack custom
+## settings
+return debug quit
+## play playBack custom
+return debug quit
 ----
 # TODO
-- 0 to exit a mode, quit to quit the whole game
+- change getStateFromInput to fit all size of board
 - add GUI?
+- add icon
 - record calculate depth
-- add erase settings to avoid exception
+- add "erase settings" to avoid exception
 - Then I will stop
 
 - actually, seen that starArea + while returnMove is doing quite well, there's no need to use recursive function anymore - I was actually proud of that, few thing here that needed brain work. Now that it's useless, I suddenly lost interest in all of this stuff. No then I will stop, I'll stop right now.
