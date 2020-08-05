@@ -216,7 +216,7 @@ Json::Value* BoardRecord::showSavedGames() {
 		// date, name, board, (index)
 		printf("\ndate: %s\nname: %s\nboard:\n", (*iter)["date"].asCString(), (*iter)["name"].asCString());
 		showSavedBoard((*iter)["state"]);
-		printf("index number: %d\n> ", i++);
+		printf("index number: %d/%d\n> ", i++, games.size());
 
 		while (true) {
 			char input[8];
@@ -230,7 +230,7 @@ Json::Value* BoardRecord::showSavedGames() {
 			int number = atoi(input);
 			if (number && number <= getNumberOfSavedBoard())
 				return &games[number - 1];
-			cout << "Pardon?\n";
+			cout << "Pardon?\n> ";
 		}
 	}
 	return nullptr;

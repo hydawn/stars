@@ -52,16 +52,18 @@ hit 'Enter' to continue>
 In debug mode
 Player 'X' move>
 ```
-Then you're good to go.  
+Then you're good to go &#128076;  
 
 # other modes
 Other modes such as play back mode and custom mode just there to explore \~
 
-# known bugs for unknown reasons
+# known bugs for unknown memory reasons
 If it stopped when you didn't ask it to and you don't know why, calm down and follow these steps below:
 1. start up a new game
 2. play it like nothing has ever happened
-3. hope it won't suddenly stop in the middle of nowhere again👌
+3. hope it won't suddenly stop in the middle of nowhere again &#x1F602;   
+
+or you can tell me how it happened so that I might fix it one day &#129300; 
 
 # thanks
 [JsonCpp](https://github.com/open-source-parsers/jsoncpp) - from where those [json.h](./lib/json.h), [json-forwards.h](./lib/json-forwards.h) and [jsoncpp.cpp](./lib/jsoncpp.cpp) files in lib/ are apparently copied
