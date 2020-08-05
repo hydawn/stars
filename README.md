@@ -1,7 +1,7 @@
 # Stars |+|
 A 1v1 & 8x8 command line based board game
 
-![tag](./icon/tag3.jpg)
+![tag](./icon/tag.png)
 
 # introduction
 Type in number 1~8 to play, 0 to exit. Whoever to be the first to put 4 pieces in a row wins.
