@@ -41,7 +41,7 @@ void BoardState::generate(char** b, const short* t) {
 }
 
 void BoardState::free() {
-	for (short i = 0; i < row; ++i)
+	for (short i = 0; i < column; ++i)
 		delete[] board[i];
 	delete[] board;
 	delete[] top;
@@ -66,7 +66,6 @@ Json::Value BoardState::boardToJson() {
 	Json::Value root;
 	for (short i = 0; i < column; ++i) {
 		board[i][row] = '\0';
-		// root.append(arraryToJson(board[i], row));
 		root.append(board[i]);
 	}
 	return root;
@@ -125,7 +124,6 @@ char BoardState::isOver() {
 	return 'N';
 }
 
-// before call this, make sure nonFull is empty()
 void BoardState::nonFullColumn(shortv& nonFull) {
 	nonFull.clear();  // see if delete this will help?
 	for (short i = 0; i < column; ++i)
