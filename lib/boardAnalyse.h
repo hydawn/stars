@@ -15,7 +15,6 @@ private:
 	shortv firstPoint(const char plr);
 	shortv firstPoint(const char plr, shortv& nfc);
 	string analyse(const char plr, shortv& list);
-	string recursiveSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 
 public:
 	BoardState state;
@@ -30,10 +29,14 @@ public:
 	 * narrow down the freeList, if not to gain "good" or "bad"
 	 */
 	string returnMove(const char plr, shortv& list, const short depth);
-	string returnSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 	double returnTime(const char plr, shortv& list, const short depth, string& word);
 	double recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
 	int	   respond(const char plr, oneMove& thisMove, bool showCal, bool showTime);
+
+	// recursive analyse
+	// simple and elegant, but too powerful for this game
+	string returnSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
+	string recursiveSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 
 	// change board
 	void go(const char plr, const short move);
