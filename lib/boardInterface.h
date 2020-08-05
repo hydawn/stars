@@ -22,7 +22,7 @@ public:
 	string getInput(const string mode);
 	string getInput(const string mode, char plr, double& inputTime);
 	short  getCustomInput(const string item);
-	void   getStateFromInput();
+	bool   getStateFromInput();
 
 	// mode
 	string addMode();
