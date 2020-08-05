@@ -1,35 +1,33 @@
 well, this is clearly more organized than CharmedPython
 
-# perf test
-|+|+|+|+|+|+|+|+|
-|+|+|+|+| |+|+|+|
-|+|+|+| | | |+|+|
-|+|+|+| |X| |+|+|
-|+|+|+| |0| |+| |
-| |+|+| |0| | | |
-| | | | |0| | |0|
-|X| | | |X| | |X|
-I go 8
 
-Here is hint provided for you
-ReturnMoveDepth = 4
-Computer time used: 80 ms
-
-ReturnMoveDepth = 4
-Computer time used: 77 ms
-
-ReturnMoveDepth = 4
-Computer time used: 79 ms
-this 5 is recommended
-
+# ***first thing*** after return
+a new thought: control mode - "all mode are created equal" (except for control mode & debug mode & normal mode)  
+first thing: complete this thought when return   
+## add & reverse
+return debug add reverse
+## debug
+return exit
+return quit over add reverse play playBack custom
+## settings
+return debug quit
+## play playBack custom
+return debug quit
+----
 # TODO
-- 0 to exit a mode, quit to quit the whole game
-- add performance settings, set computer strategy : progressive (mainly build self) or defensive (mainly intercept)
+- change getStateFromInput to fit all size of board
 - add GUI?
+- add icon
 - record calculate depth
-- add erase settings to avoid exception
-- return good bad, free changed to 1 0 2
+- add "erase settings" to avoid exception
 - Then I will stop
+
+- actually, seen that starArea + while returnMove is doing quite well, there's no need to use recursive function anymore - I was actually proud of that, few thing here that needed brain work. Now that it's useless, I suddenly lost interest in all of this stuff. No then I will stop, I'll stop right now.
+
+wait, I got a new idea  
+the last time I got a new idea (starArea) was yesterday when taking a walk. Just a few minutes ago, when I was taking a shower, thinking about giving up the project and start writing my essay, it occurred to me that I can record every "route" that in the end produce something (like good or bad), and record that route, after hundreds of times of "letting-computer-play-with-itself", I should gathered enough data to produce a conclusion about how to decide which area should be the star area.  
+That sounds ... interesting?   
+I can use a tree, never used a tree (explicitly?) before.   
 
 # pre-release note - version 1.0 - Beta
 preRelease - total failure, no pause in bash, clock() is not working as expected, core dumped, returnSituation is never used, depth > 3 is never used.

@@ -78,7 +78,7 @@ public:
 	bool winPieceNearBy(const short col, const short ro);
 	char isOver();
 
-	// return vector
+	// small tools
 	void nonFullColumn(shortv& nonFull);
 	char rPlayer(const char plr);
 

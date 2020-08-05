@@ -16,13 +16,13 @@ BoardState::BoardState(const Json::Value& root)
 void BoardState::generate() {
 	// TODO - is quite stupid, change this when have the chance
 	// it's best to use allocate?
-	board	= new char*[column];
-	top		= new short[column];
+	board	 = new char*[column];
+	top		 = new short[column];
 	starArea = new short[column];
 	for (short i = 0; i < column; ++i) {
-		top[i]	   = 0;
+		top[i]		= 0;
 		starArea[i] = row;
-		board[i]   = new char[row + 1];
+		board[i]	= new char[row + 1];
 		for (short j = 0; j < row; ++j)
 			board[i][j] = ' ';
 	}
@@ -41,7 +41,7 @@ void BoardState::generate(char** b, const short* t) {
 }
 
 void BoardState::free() {
-	for (short i = 0; i < row; ++i)
+	for (short i = 0; i < column; ++i)
 		delete[] board[i];
 	delete[] board;
 	delete[] top;
@@ -51,8 +51,6 @@ void BoardState::free() {
 BoardState& BoardState::operator=(const BoardState& bh) {
 	if (this == &bh)
 		return *this;
-	/*refreshBoard(bh.board);
-	refreshTop();*/
 	free();
 	column	= bh.column;
 	row		= bh.row;
@@ -66,7 +64,6 @@ Json::Value BoardState::boardToJson() {
 	Json::Value root;
 	for (short i = 0; i < column; ++i) {
 		board[i][row] = '\0';
-		// root.append(arraryToJson(board[i], row));
 		root.append(board[i]);
 	}
 	return root;
@@ -125,7 +122,6 @@ char BoardState::isOver() {
 	return 'N';
 }
 
-// before call this, make sure nonFull is empty()
 void BoardState::nonFullColumn(shortv& nonFull) {
 	nonFull.clear();  // see if delete this will help?
 	for (short i = 0; i < column; ++i)
@@ -138,7 +134,9 @@ void BoardState::nonFullColumn(shortv& nonFull) {
 char BoardState::rPlayer(const char plr) {
 	if (plr == 'X')
 		return '0';
-	return 'X';
+	if (plr == '0')
+		return 'X';
+	throw runtime_error("No such player exist!\n");
 }
 
 short BoardState::randomMove() {

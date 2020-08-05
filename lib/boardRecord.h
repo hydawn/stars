@@ -70,7 +70,6 @@ private:
 	Json::Value strategy;
 	string		gamesFileName;
 	string		settingsFileName;
-	string		strategyFileName;
 
 	// file control
 	void getFile();
@@ -80,7 +79,8 @@ private:
 public:
 	vector<oneMove> historyMove;
 	Json::Value		games;
-	BoardRecord() : historyMove(vector<oneMove>()), gamesFileName("test_games.json"), settingsFileName("test_settings.json"), strategyFileName("test_strategy.json") { getFile(); }
+	BoardRecord() : historyMove(vector<oneMove>()), gamesFileName("Stars_games.json"),
+		settingsFileName("Stars_settings.json") { getFile(); }
 
 	// record
 	void push_back(const oneMove &om) { historyMove.push_back(om); }
@@ -94,21 +94,7 @@ public:
 	void clearHistoryMove() { historyMove.clear(); }
 
 	// settings
-	bool getSettings(const string &situ, const string &item) {
-		// ass come checkers here!
-		if (settings.isMember(situ)) {
-			if (settings[situ].isMember(item))
-				return settings[situ][item].asBool();
-			else {
-				cout << "situ = " << situ << " item = " << item << endl;
-				throw runtime_error("no such item in settings.json");
-			}
-		} else {
-			cout << "situ = " << situ << endl;
-			throw runtime_error("no such situation in settings.json");
-		}
-	}
-	// show settings
+	bool getSettings(const string &situ, const string &item);
 	int	 getSettingsItemNumber() { return settings.size(); }
 	void showSettingsWithTags();
 	bool changeSettingsUsingTags(int tag1, int tag2);
@@ -117,10 +103,8 @@ public:
 	int			 getNumberOfSavedBoard() { return games.size(); }
 	void		 showSavedBoard(const Json::Value &state);
 	Json::Value *showSavedGames();
-	// display index number, date, name and final board
-	// return 0 to exit
-	void		refreshHistoryMove(const Json::Value &hm);
-	BoardState getState(const int &index) { return games[index]["state"]; }
+	void		 refreshHistoryMove(const Json::Value &hm);
+	BoardState	 getState(const int &index) { return games[index]["state"]; }
 };
 
 #endif
