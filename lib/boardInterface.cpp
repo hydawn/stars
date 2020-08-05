@@ -211,12 +211,12 @@ short BoardInterface::getCustomInput(const string item) {
 	char  input[16];
 	short customNumber;
 	while (true) {
-		cout << item << " (1~" << SHORTV_LENGTH - 1 << ") = ";
+		cout << item << " (2~" << SHORTV_LENGTH - 1 << ") = ";
 		cin.getline(input, 16);
 		if (!strcmp(input, "0") || !strcmp(input, "exit"))
 			return 0;
 		customNumber = atoi(input);
-		if (customNumber > 0 && customNumber < SHORTV_LENGTH - 1)
+		if (customNumber > 1 && customNumber < SHORTV_LENGTH - 1)
 			return customNumber;
 		cout << "Let's try again\n";
 	}
@@ -337,7 +337,8 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		// opp respond
 		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
 			record.getSettings("inDebugMode", "showCalculate"),
-			record.getSettings("inDebugMode", "showTime"));
+			record.getSettings("inDebugMode", "showTime"),
+			record.getSettings("inDebugMode", "starsOn"));
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
@@ -353,7 +354,8 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		if (byPlayer.hintOn)
 			cout << "Here is hint provided for you\n";
 		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer, byPlayer.hintOn,
-			record.getSettings("inDebugMode", "showTime"));
+			record.getSettings("inDebugMode", "showTime"),
+			record.getSettings("inDebugMode", "starsOn"));
 		showComment(byPlayer);
 		if (byPlayer.hintOn)
 			printf("this %d is recommended\n", byPlayer.suggestion);
@@ -624,7 +626,8 @@ string BoardInterface::playBackMode() {
 
 string BoardInterface::customMode() {
 	printf("In custom mode ...\n");
-	printf("Note that the more width you set, the clumsier the computer will be.\n");
+	printf("Note that the more width you set, the clumsier the computer will be\n");
+	printf("It is recommended to set the width lesser than 16\n");
 	if (record.getSettings("inCustomMode", "askToSaveBoard"))
 		askToSaveBoard(record.getSettings("inCustomMode", "defaultSaveBoard"));
 	else if (record.getSettings("inCustomMode", "defaultSaveBoard"))
@@ -714,7 +717,7 @@ string BoardInterface::getHelp(string mode) {
 		addon + "Type in numbers (1~8) to play, one who place four piece in a row first wins\n\n" +
 		"0/exit ---------- exit from a certain mode\n" +
 		"q/quit ---------- quit the whole game\n" +
-		"C/custom -------- custom board height, width and win number (4 by default)\n"
+		"C/custom -------- custom board height, width and win number (4 by default)\n" +
 		"h/help ---------- show help message of the current mode\n" +
 		"p/play ---------- into play mode\n" +
 		"P/play back ----- into play back mode\n" +
@@ -723,14 +726,13 @@ string BoardInterface::getHelp(string mode) {
 		"st/show stars --- show debug analyse stars\n" +
 		"sv/save --------- save the current game\n" +
 		"t/tips ---------- tips I wrote to help other player (you) to play the game\n" +
-		"w/winn ---------- show win number (4 by default)\n"
-		"i/info ---------- information about the game\n\n" +
-		enterForMore;
+		"w/winn ---------- show win number (4 by default) in case you forgot it\n" +
+		"i/info ---------- information about the game\n\n" + enterForMore;
 	vector<string> moreDebug = {
 		addon + "You are in debug mode now, It's quite the same with normal mode, just that you\n" +
 			"can get some hint from the computer from time to time. If the computer says\n" +
-			"word=good, then you'll win in a few steps, just take the step within the list\n" +
-			"that follows, then you will win - if there's no bugs :-)\n" + enterForMore,
+			"word = good, then you'll win (if starsOn is false) in a few steps if you chose\n" +
+			"to take the step within the list that follows, and if there's no bugs :-)\n" + enterForMore,
 		addon + "If word=free, list=[1, 5] but you can see that there are plenty of column that\n" +
 			"is not full but out side of that [1, 5] list, it is recommended that you take\n" +
 			"the step within the list for every Move outside the safe list is risky.\n"
@@ -744,8 +746,8 @@ string BoardInterface::getHelp(string mode) {
 			"m/move     - force the computer to take a move now\n" +
 			"r/reverse  - into reverse mode: reverse some moves\n" +
 			"Knowing that one can reverse an action might discourage one from thinking\n" +
-			"carefully before one take a move, plus that \"hint\" one get from the computer,\n" +
-			"it's easy to get bored playing games.\n" + enjoy + end
+			"carefully before one take a move. It's easy to get bored playing games like\n"
+			"that.\n" + enjoy + end
 		};
 	if (mode == "debug") {
 		cout << normal;
@@ -786,6 +788,8 @@ string BoardInterface::getHelp(string mode) {
 			"answer would be. Notice that, for example, in situation gameIsOver, if\n" +
 			"askToDebug is false but defaultDebug is true, then when game is over, we will\n" +
 			"went into debug mode immediately.\n" +
+			"If starsOn is true, then stars will fall down from the sky then make the\n" +
+			"computer think fast and reckless.\n" +
 			"Most of them is turned down by default to keep it simple.\n";
 		return settings;
 	}

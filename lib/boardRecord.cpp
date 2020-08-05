@@ -1,5 +1,41 @@
 #include "boardRecord.h"
 
+// hard core show
+string addon		   = "";
+string defaultSettings = addon +
+	"{\n" +
+	"	\"changeBoard\" : \n" +
+	"	{\n" +
+	"		\"askToSaveBoard\" : false,\n" +
+	"		\"defaultSaveBoard\" : false\n" +
+	"	},\n" +
+	"	\"gameIsOver\" : \n" +
+	"	{\n" +
+	"		\"askToDebug\" : true,\n" +
+	"		\"askToSaveBoard\" : true,\n" +
+	"		\"defaultDebug\" : false,\n" +
+	"		\"defaultSaveBoard\" : false\n" +
+	"	},\n" +
+	"	\"inCustomMode\":\n" +
+	"	{\n" +
+	"		\"askToSaveBoard\" : false,\n" +
+	"		\"defaultSaveBoard\" : false\n" +
+	"	},\n" +
+	"	\"inDebugMode\" : \n" +
+	"	{\n" +
+	"		\"hintOn\" : false,\n" +
+	"		\"showCalculate\" : false,\n" +
+	"		\"showTime\" : false,\n" +
+	"		\"starrySky\" : false,\n" +
+	"		\"starsOn\" : false\n" +
+	"	},\n" +
+	"	\"whenSaveGame\" : \n" +
+	"	{\n" +
+	"		\"askGiveName\" : true,\n" +
+	"		\"defaultGiveName\" : false\n" +
+	"	}\n" +
+	"}\n";
+
 std::ostream& operator<<(std::ostream& os, oneMove& move) {
 	os << "mode = " << move.mode << "\n";
 	if (move.mode == "normal" || move.mode == "debug") {
@@ -30,44 +66,9 @@ void BoardRecord::getFile() {
 		cout << "failed to open file \"" << settingsFileName << "\" to read\n";
 		cout << "creating a new file\n";
 		std::ofstream outSet(settingsFileName);
-		// hard core show
-		string addon		   = "";
-		string defaultSettings = addon +
-			"{\n" +
-			"	\"changeBoard\" : \n" +
-			"	{\n" +
-			"		\"askToSaveBoard\" : false,\n" +
-			"		\"defaultSaveBoard\" : false\n" +
-			"	},\n" +
-			"	\"gameIsOver\" : \n" +
-			"	{\n" +
-			"		\"askToDebug\" : true,\n" +
-			"		\"askToSaveBoard\" : true,\n" +
-			"		\"defaultDebug\" : false,\n" +
-			"		\"defaultSaveBoard\" : false\n" +
-			"	},\n" +
-			"	\"inCustomMode\":\n" +
-			"	{\n" +
-			"		\"askToSaveBoard\" : false,\n" +
-			"		\"defaultSaveBoard\" : false\n" +
-			"	},\n" +
-			"	\"inDebugMode\" : \n" +
-			"	{\n" +
-			"		\"hintOn\" : false,\n" +
-			"		\"showCalculate\" : false,\n" +
-			"		\"showTime\" : false,\n" +
-			"		\"starrySky\" : false\n" +
-			"	},\n" +
-			"	\"whenSaveGame\" : \n" +
-			"	{\n" +
-			"		\"askGiveName\" : true,\n" +
-			"		\"defaultGiveName\" : false\n" +
-			"	}\n" +
-			"}\n";
 		outSet << defaultSettings;
-		if (!outSet.is_open()) {
+		if (!outSet.is_open())
 			throw runtime_error("failed to create file, mission aborted\n ");
-		}
 		outSet.close();
 		std::ifstream in(settingsFileName);
 		in >> settings;
@@ -128,6 +129,43 @@ void BoardRecord::saveGame(const string& gameName, BoardState& state) {
 	writeGames();
 }
 
+bool BoardRecord::getSettings(const string& situ, const string& item) {
+	int i = 0;
+	while (i < 3) {
+		if (settings.isMember(situ)) {
+			if (settings[situ].isMember(item))
+				return settings[situ][item].asBool();
+			else if (i < 2) {
+				std::ofstream outSet(settingsFileName);
+				outSet << defaultSettings;
+				outSet.close();
+				std::ifstream in(settingsFileName);
+				in >> settings;
+				++i;
+				continue;
+			}
+			else {
+				cout << "situ = " << situ << " item = " << item << endl;
+				throw runtime_error("no such item in Stars_settings.json\n");
+			}
+		}
+		else if (i < 2) {
+			std::ofstream outSet(settingsFileName);
+			outSet << defaultSettings;
+			outSet.close();
+			std::ifstream in(settingsFileName);
+			in >> settings;
+			++i;
+			continue;
+		}
+		else {
+			cout << "situ = " << situ << endl;
+			throw runtime_error("no such situation in Stars_settings.json\n");
+		}
+	}
+	throw runtime_error("getSettings flow to the end\n");
+}
+
 void BoardRecord::showSettingsWithTags() {
 	members member = settings.getMemberNames();
 	cout << "situation\t"
@@ -142,7 +180,7 @@ void BoardRecord::showSettingsWithTags() {
 		for (members::iterator j = inset.begin(); j != inset.end(); ++j) {
 			if ((*j).size() > 15)
 				cout << *i << "\t" << *j << "\t" << settings[*i][*j] << "\t\t" << x << y++ << endl;
-			else if ((*j).size() < 7)
+			else if ((*j).size() < 8)
 				cout << *i << "\t" << *j << "\t\t\t" << settings[*i][*j] << "\t\t" << x << y++ << endl;
 			else
 				cout << *i << "\t" << *j << "\t\t" << settings[*i][*j] << "\t\t" << x << y++ << endl;
@@ -185,7 +223,7 @@ Json::Value* BoardRecord::showSavedGames() {
 			cin.getline(input, 8);
 			if (input[0] == '\0')
 				break;
-			if (!strcmp(input, "0") || !strcmp(input, "q") || !strcmp(input, "exit") || !strcmp(input, "quit"))
+			if (!strcmp(input, "0") || !strcmp(input, "exit"))
 				return nullptr;
 			if (!strcmp(input, "c") || !strcmp(input, "current"))
 				return &(*iter);
