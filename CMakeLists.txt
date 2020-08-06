@@ -7,9 +7,11 @@ MESSAGE(STATUS "operation system is ${CMAKE_SYSTEM}")
 IF (CMAKE_SYSTEM_NAME MATCHES "Linux")
 	MESSAGE(STATUS "current platform: Linux ")
 	set(jsoncpp_DIR "~/vcpkg/installed/x64-linux/share/jsoncpp")
+	set(CMAKE_INSTALL_PREFIX "/usr/local")
 	set(CMAKE_TOOLCHAIN_FILE "~/vcpkg/scripts/buildsystems/vcpkg.cmake")
 ELSEIF (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	MESSAGE(STATUS "current platform: Windows")
+	set(CMAKE_INSTALL_PREFIX "D:\\Program Files\\Stars")
 	set(jsoncpp_DIR "C:\\dev\\vcpkg\\installed\\x64-windows\\share\\jsoncpp")
 ENDIF (CMAKE_SYSTEM_NAME MATCHES "Linux")
 
@@ -40,21 +42,27 @@ target_link_libraries(${PROJECT_NAME}
 		jsoncpp_lib
 )
 
-
 # Install - quite a failure
 # Binaries
 install (TARGETS ${PROJECT_NAME}
-    DESTINATION bin)
-
-# Library
-install (TARGETS stars_lib
-	LIBRARY DESTINATION lib
-	ARCHIVE DESTINATION lib
-	RUNTIME DESTINATION bin
+	DESTINATION bin
 )
 
+# Library
+# install (TARGETS stars_lib
+# 	LIBRARY DESTINATION lib
+# 	ARCHIVE DESTINATION lib
+# 	RUNTIME DESTINATION bin
+# )
+
+# install (TARGETS jsoncpp_lib
+#	LIBRARY DESTINATION lib
+#	ARCHIVE DESTINATION lib
+#	RUNTIME DESTINATION bin
+#)
+
 # Header files
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ 
-	DESTINATION include)
+# install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ 
+# 	DESTINATION include)
 
 include(CPack)
