@@ -3,6 +3,7 @@ build/
 lbuild/
 release/
 test/
+jsoncpp/
 .clang-format
-Stars.exe
+Stars*
 test_*
