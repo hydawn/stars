@@ -4,7 +4,6 @@
 #include <string.h>
 #include <chrono>
 #include "boardRecord.h"
-#include "boardArea.h"
 
 using std::string;
 using namespace std::chrono;

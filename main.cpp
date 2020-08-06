@@ -1,5 +1,4 @@
-#include "lib/boardInterface.h"
-#include <stdlib.h>
+#include "boardInterface.h"
 
 int main() {
 	BoardAnalyse   boardAnalyser;
@@ -12,7 +11,7 @@ int main() {
 	// there was something normal going on here, but not anymore
 	boardInterface.controlMode();
 
-	cout << "Over.\n";
-	system("pause");
+	cout << "Over\nType in anything to continue...";
+	cin.get();
 	return 0;
 }

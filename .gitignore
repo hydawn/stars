@@ -1,0 +1,8 @@
+.vscode/
+build/
+lbuild/
+release/
+test/
+.clang-format
+Stars.exe
+test_*
