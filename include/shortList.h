@@ -1,6 +1,6 @@
 #ifndef _SHORTLIST_H_GUARD_
 #define _SHORTLIST_H_GUARD_ 1
-#include <json/json.h>
+#include "json/json.h"
 #define SHORTV_LENGTH 32
 
 // some of this code can be improved - like short erase

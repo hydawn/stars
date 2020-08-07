@@ -11,7 +11,7 @@ int main() {
 	// there was something normal going on here, but not anymore
 	boardInterface.controlMode();
 
-	cout << "Over\nType in anything to continue...";
+	cout << "Over\nHit 'Enter' to continue...";
 	cin.get();
 	return 0;
 }

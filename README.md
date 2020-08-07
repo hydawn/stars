@@ -66,6 +66,6 @@ If it stopped when you didn't ask it to and you don't know why, calm down and fo
 or you can tell me how it happened so that I might fix it one day &#129300; 
 
 # thanks
-[JsonCpp](https://github.com/open-source-parsers/jsoncpp) - from where those json.h, json-forwards.h and jsoncpp.cpp files are originally copied but now deleted
+[JsonCpp](https://github.com/open-source-parsers/jsoncpp) - from where those dependencies files are copied  
 
 My roommate - from whom I learned about this little game which was actually his homework. But the original instruction was to write in python, so no worries about copying and stuff ;-)
