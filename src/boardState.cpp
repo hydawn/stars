@@ -209,6 +209,7 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	shortv intersectionList;
 	// preference No.1: take what can bring me winn-1 in a row, and what can
 	// interrupt opponent's three in a row
+	// but some times it block itself which is rather stupid
 	shortv plrTList = makeThreeCols(plr, list), oppTList = makeThreeCols(rPlayer(plr), oppList);
 	MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
 	if (intersectionList.empty()) {
@@ -391,7 +392,7 @@ int BoardState::threeRowCount(const char plr, shortv& safeList) {
 	// count how many "first point"
 	for (short i = 0; i < cols; ++i)
 		for (short j = 0; j < top[i]; ++j)
-			if (winPieceNearBy(i, j))
+			if (specialPiece(i, j))
 				++rax;
 	winn++;
 	return rax;
@@ -409,6 +410,49 @@ shortv BoardState::makeThreeCols(const char plr, shortv& safeList) {
 			rax.push_back(i);
 	}
 	return rax;
+}
+
+bool BoardState::specialPiece(const short col, const short ro) {
+	// grow up, right, upright, downright
+	short i		  = 1;
+	char  present = board[col][ro];
+	bool  canUp = ro <= top[col] - winn, canRight = col <= cols - winn, canDown = ro >= winn - 1;
+	if (canRight) {
+		// right
+		for (i = 1; i < winn; ++i)
+			if (board[col + i][ro] != present)
+				break;
+		if (i == winn && ((col + i <= cols && board[col + i][ro] == ' ') ||
+			(col > 0 && board[col - 1][ro] == ' ')))
+			return true;
+		// up & right
+		for (i = 1; i < winn; ++i)
+			if (board[col + i][ro + i] != present)
+				break;
+		if (i == winn && ((col + i <= cols && ro + i <= rows &&
+			board[col + i][ro + i] == ' ') ||
+			(col > 0 && ro > 0 && board[col - 1][ro - 1] == ' ')))
+			return true;
+		if (canDown) {
+			// down & right
+			for (i = 1; i < winn; ++i)
+				if (board[col + i][ro - i] != present)
+					break;
+			if (i == winn && ((col + i <= cols && ro - i >= 0 &&
+				board[col + i][ro - i] == ' ') ||
+				(col > 0 && ro + 1 <= rows && board[col - 1][ro + 1] == ' ')))
+				return true;
+		}
+	}
+	if (canUp) {
+		// up
+		for (i = 1; i < winn; ++i)
+			if (board[col][ro + i] != present)
+				return false;
+		if ((ro > 0 && board[col][ro - 1] == ' ') || (ro + i <= rows && board[col][ro + i] == ' '))
+			return true;
+	}
+	return false;
 }
 
 void BoardState::retInit(vector<oneMove>& his) {

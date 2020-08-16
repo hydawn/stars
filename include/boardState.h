@@ -188,6 +188,7 @@ public:
 	int	   starNumber();
 	int	   threeRowCount(const char plr, shortv& safeList);
 	shortv makeThreeCols(const char plr, shortv& safeList);
+	bool   specialPiece(const short col, const short ro);
 
 	// history move
 	void retInit(vector<oneMove>& his);
