@@ -33,7 +33,7 @@ public:
 	string playMode();
 	string playBackMode();
 	string customMode();
-	void controlMode();
+	bool controlMode();
 
 	// ask & do
 	bool askToDebug(bool yes);	// if yes == true, then default yes

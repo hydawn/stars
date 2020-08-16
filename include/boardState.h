@@ -18,6 +18,59 @@ typedef vector<short> shortv;
 typedef ShortList::iterator vIter;
 typedef ShortList			shortv;
 
+class oneMove {
+public:
+	/*
+	respond can give oneMove player, word,
+	list, time(by computer),
+	mode function can give oneMove mode, move, time(by a person), byComputer,
+	suggestion, player(reverse & add), then push back to boardRecord
+	*/
+	/*
+	debug has them all
+	normal doesn't have suggestion
+	add mode just have mode, move and player
+	reverse mode just have mode and move
+	*/
+	bool   byComputer;	// is this move taken by the computer
+	bool   hintOn;
+	shortv list;
+	string mode;
+	short  move;  // the move that is actually been taken after the computer analyse
+	char   player;
+	short  suggestion;	// suggested move by the computer
+	double time;		// time taken for the computer to respond
+	string word;
+
+	oneMove() : byComputer(true), hintOn(true), list(shortv()), mode(string()),
+				player(' '), suggestion(0), time(0), word(string()) {}
+	oneMove(Json::Value root) {
+		byComputer = root["byComputer"].asBool();
+		hintOn	   = root["hintOn"].asBool();
+		list	   = root["list"];
+		mode	   = root["mode"].asString();
+		move	   = root["move"].asInt();
+		player	   = root["player"].asInt();
+		suggestion = root["suggestion"].asInt();
+		time	   = root["time"].asDouble();
+		word	   = root["word"].asString();
+	}
+	operator Json::Value() {
+		Json::Value root;
+		root["byComputer"] = byComputer;
+		root["hintOn"]	   = hintOn;
+		root["list"]	   = list;
+		root["mode"]	   = mode;
+		root["move"]	   = move;
+		root["player"]	   = player;
+		root["suggestion"] = suggestion;
+		root["time"]	   = time;
+		root["word"]	   = word;
+		return root;
+	}
+	friend std::ostream &operator<<(std::ostream &os, oneMove &move);
+};
+
 class BoardState {
 	// handles the memory allocate and ways to change the board
 public:
@@ -37,14 +90,14 @@ public:
 	BoardState(const BoardState& input) : row(input.row), column(input.column), winn(input.winn), starsOn(false) { generate(input.board, input.top); }
 	BoardState(const Json::Value& root);
 	BoardState(const short r, const short c, const short w) : row(r), column(c), winn(w), starsOn(false) { generate(); }
-	virtual ~BoardState() { free(); }
+	~BoardState() { free(); }
 
 	// construct
-	virtual void generate();
+	void generate();
 	void generate(char** b, const short* t);
 
 	// destruct
-	virtual void free();
+	void free();
 
 	// operator
 	operator Json::Value() {
@@ -63,7 +116,7 @@ public:
 	Json::Value topToJson();
 
 	// show
-	virtual void show();
+	void show();
 
 	// getter
 	short getRow() { return row; }
@@ -93,6 +146,8 @@ public:
 		// debug, feel free to remove this for performance reasons
 		if (top[col - 1] == row)
 			throw runtime_error("trying to add to a full column.\n");
+		if (plr != 'X' && plr != '0')
+			throw runtime_error("wrong player!\n");
 		++addNumber;
 		/*****************************debug**********************************/
 		board[col - 1][top[col - 1]++] = plr;
@@ -132,6 +187,9 @@ public:
 			starArea[i] = n;
 	}
 	shortv aTopFullColumn();
+
+	// history move
+	void retInit(vector<oneMove>& his);
 };
 
 #endif

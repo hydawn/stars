@@ -255,8 +255,10 @@ string BoardInterface::reverseMode() {
 		if (input == "quit" || input == "add")
 			return input;
 		move.move = atoi(input.c_str());
-		printf("remove %d as you like it:\n", move.move);
+		// record which move is reversed
+		move.player = analyse->state.board[move.move - 1][analyse->state.top[move.move - 1] - 1];
 		analyse->reverse(move.move);
+		printf("remove %d as you like it:\n", move.move);
 		record.push_back(move);
 		analyse->show();
 	}
@@ -279,7 +281,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		// analyse->show();
 		input = getInput("debug", byPlayer.player, byPlayer.time);
 		if (input == "exit" || input == "quit") {
-			printf("Exit from debug mode...\n");
+			printf("Exit from debug mode\n");
 			return input;
 		}
 		if (input == "add" || input == "reverse" || input == "settings" || input == "custom" ||
@@ -325,16 +327,17 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			analyse->go(byPlayer.player, byPlayer.move);
 			record.push_back(byPlayer);	 // byPlayer end here
 			if (isOver(byPlayer)) {
-				printf("Exit from debug mode...\n");
+				printf("Exit from debug mode\n");
 				return "over";
 			}
 		}
 		else if (isOver(byPlayer)) {
-			printf("Exit from debug mode...\n");
+			printf("Exit from debug mode\n");
 			return "over";
 		}
 
 		// opp respond
+		printf("info for the computer:\n");
 		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
 			record.getSettings("inDebugMode", "showCalculate"),
 			record.getSettings("inDebugMode", "showTime"),
@@ -342,23 +345,23 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
-		printf("\n%c goes here %d\n", byOpponent.player, byOpponent.move);
-		cout << "Player time used: " << byPlayer.time << "ms\n\n";
+		cout << "\tinput time used: " << byPlayer.time << "ms\n";
+		printf("\t%c goes here %d\n", byOpponent.player, byOpponent.move);
 		if (isOver(byOpponent)) {
-			printf("Exit from debug mode...\n");
+			printf("Exit from debug mode\n");
 			return "over";
 		}
 
 		// recommend
 		byPlayer.hintOn	= record.getSettings("inDebugMode", "hintOn");
 		if (byPlayer.hintOn)
-			cout << "Here is hint provided for you\n";
+			cout << "\nHere is hint provided for you\n";
 		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer, byPlayer.hintOn,
 			record.getSettings("inDebugMode", "showTime"),
 			record.getSettings("inDebugMode", "starsOn"));
 		showComment(byPlayer);
 		if (byPlayer.hintOn)
-			printf("this %d is recommended\n", byPlayer.suggestion);
+			printf("\tthis %d is recommended\n", byPlayer.suggestion);
 
 		// show
 		if (record.getSettings("inDebugMode", "starrySky"))
@@ -521,23 +524,30 @@ string BoardInterface::playMode() {
 	printf("one of those games. Or type c to continue to play the board that is currently\ndisplayed. ");
 	printf("Use 0 to exit.\n");
 	printf("Explore!\n");
-	Json::Value* game = record.showSavedGames();
-	if (!game) {
+	Json::Value game;
+	string result = record.showSavedGames(game);
+
+	if (result == "exit") {
 		printf("Exit from play mode...\n");
 		return "debug";
 	}
+	if (result == "quit") {
+		printf("Exit from play mode...\n");
+		return "quit";
+	}
 
 	// set up a new game
-	BoardAnalyse   analyser((*game)["state"]);
+	BoardAnalyse   analyser(game["state"]);
 	BoardInterface interface(analyser);
 	BoardRecord	   newRecord;
-	newRecord.refreshHistoryMove((*game)["historyMove"]);
+	newRecord.refreshHistoryMove(game["historyMove"]);
 	interface.refreshRecord(newRecord);
 	printf("Into a new control mode:\n");
 	printf("Use 1~8 to place a piece, h for help, 0 to exit.\n");
 	printf("Game is on->\n");
-	interface.controlMode();
 
+	if(!interface.controlMode())
+		return "quit";
 	printf("Exit from play mode...\n");
 	return "debug";
 }
@@ -556,18 +566,25 @@ string BoardInterface::playBackMode() {
 	printf("or type c to see the play back of the board that is currently displayed.\n");
 	printf("Use 0 to exit.\n");
 	printf("Explore!\n");
-	Json::Value* game = record.showSavedGames();
-	if (!game) {
+	Json::Value game;
+	string result = record.showSavedGames(game);
+	if (result == "exit") {
 		printf("Exit from play back mode...\n");
 		return "debug";
 	}
+	if (result == "quit") {
+		printf("Exit from play back mode...\n");
+		return "quit";
+	}
 
-	// set up a new game
-	BoardAnalyse analyser((*game)["state"]["row"].asInt(),
-						(*game)["state"]["column"].asInt(),
-						(*game)["state"]["winn"].asInt());
+	// set up a new game and play back the moves
+	BoardState	 state = game["state"];
 	BoardRecord	 newRecord, tempRecord;
-	newRecord.refreshHistoryMove((*game)["historyMove"]);
+	newRecord.refreshHistoryMove(game["historyMove"]);
+	// return to the initial state
+	state.retInit(newRecord.historyMove);
+	BoardAnalyse analyser(state);
+
 	printf("Here's the play back of an old game:\n");
 	printf("Use c to cut in and play, h for help, b to go back to the previous step, 0\nto exit.\n");
 	char					  input[16];
@@ -585,7 +602,7 @@ string BoardInterface::playBackMode() {
 			if (iter->mode != "reverse")
 				analyser.go(iter->player, iter->move);
 			else {
-				reversePlayer = analyser.state.board[iter->move][analyser.state.top[iter->move - 1] - 1];
+				reversePlayer = analyser.state.board[iter->move - 1][analyser.state.top[iter->move - 1] - 1];
 				analyser.reverse(iter->move);
 			}
 		}
@@ -594,14 +611,17 @@ string BoardInterface::playBackMode() {
 		// get input
 		printf("> ");
 		cin.getline(input, 16);
-		if (!strcmp(input, "0") || !strcmp(input, "q") || !strcmp(input, "quit") || !strcmp(input, "exit"))
+		if (!strcmp(input, "0") || !strcmp(input, "exit"))
 			break;
+		if (!strcmp(input, "q") || !strcmp(input, "quit"))
+			return "quit";
 		else if (!strcmp(input, "c") || !strcmp(input, "cut") || !strcmp(input, "cut in")) {
 			BoardAnalyse   tempAnalyser = analyser;
 			BoardInterface interface(tempAnalyser);
 			interface.refreshRecord(tempRecord);
 			printf("Go into a new control mode:\n");
-			interface.controlMode();
+			if(!interface.controlMode())
+				return "quit";
 			printf("We're back in play back mode again\n");
 		}
 		else if (!strcmp(input, "b") || !strcmp(input, "back") || !strcmp(input, "go back")) {
@@ -618,6 +638,9 @@ string BoardInterface::playBackMode() {
 				continue;
 			}
 		}
+		else if (!strcmp(input, "h") || !strcmp(input, "help"))
+			printf("b to go back to the previous move, c to cut in and play, q to quit\n");
+			printf("the whole game, 0 to exit this mode\n");
 		++iter;
 	}
 	printf("Exit from play back mode...\n");
@@ -650,7 +673,7 @@ string BoardInterface::customMode() {
 	return "debug";
 }
 
-void BoardInterface::controlMode() {
+bool BoardInterface::controlMode() {
 	oneMove byPlayer;
 	byPlayer.player = 'X';
 	string	advice	= debugMode(byPlayer);
@@ -693,10 +716,11 @@ void BoardInterface::controlMode() {
 	if (i == 100)
 		throw runtime_error("too much unhandled advice\n");
 	if (advice == "quit")
-		return;
-	else if (advice == "exit")
-		;
+		return false;
+	// else if (advice == "exit")
+	// 	;
 	cout << "Exit from controller\n";
+	return true;
 }
 
 string BoardInterface::getHelp(string mode) {

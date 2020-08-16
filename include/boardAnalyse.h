@@ -21,15 +21,14 @@ public:
 	BoardAnalyse(BoardState board_) : state(board_) {}
 	BoardAnalyse(const short r, const short c, const short w) : state(r, c, w) {}
 
-
 	// analyse function
 	/*
 	 * I should bear in mind that the whole concept of analyse function is to
 	 * narrow down the freeList, if not to gain "good" or "bad"
 	 */
 	string returnMove(const char plr, shortv& list, const short depth);
-	double returnTime(const char plr, shortv& list, const short depth, string& word);
-	double recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
+	long long returnTime(const char plr, shortv& list, const short depth, string& word);
+	long long recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
 	int	   respond(const char plr, oneMove& thisMove, bool showCal, bool showTime, bool starsOn);
 
 	// recursive analyse
@@ -40,7 +39,6 @@ public:
 	// change board
 	void go(const char plr, const short move);
 	void reverse(const short column);
-
 
 	// is function
 	// getter

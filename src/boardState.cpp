@@ -347,3 +347,15 @@ shortv BoardState::aTopFullColumn() {
 			list.push_back(i + 1);
 	return list;
 }
+
+void BoardState::retInit(vector<oneMove>& his) {
+	// return the state to the 'initial state' accroding to the history move
+	for (vector<oneMove>::reverse_iterator riter = his.rbegin(); riter != his.rend();++riter) {
+		if (riter->mode=="debug"||riter->mode=="add"||riter->mode=="normal")
+			remove(riter->move);
+		else if (riter->mode=="reverse")
+			add(riter->player, riter->move);
+		else
+			throw runtime_error("unexpected, unhandled mode in retInit in boardState.h\n");
+	}
+}

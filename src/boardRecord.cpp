@@ -210,13 +210,14 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 	return false;
 }
 
-Json::Value* BoardRecord::showSavedGames() {
-	int i = 1;
-	for (Json::Value::iterator iter = games.begin(); iter != games.end(); ++iter) {
+// return "yes", "exit", "quit"
+string BoardRecord::showSavedGames(Json::Value& ret) {
+	unsigned int i = 0;
+	while (i < games.size()) {
 		// date, name, board, (index)
-		printf("\ndate: %s\nname: %s\nboard:\n", (*iter)["date"].asCString(), (*iter)["name"].asCString());
-		showSavedBoard((*iter)["state"]);
-		printf("index number: %d/%d\n> ", i++, games.size());
+		printf("\ndate: %s\nname: %s\nboard:\n", games[i]["date"].asCString(), games[i]["name"].asCString());
+		showSavedBoard(games[i]["state"]);
+		printf("index number: %d/%d\n> ", i + 1, games.size());
 
 		while (true) {
 			char input[8];
@@ -224,16 +225,29 @@ Json::Value* BoardRecord::showSavedGames() {
 			if (input[0] == '\0')
 				break;
 			if (!strcmp(input, "0") || !strcmp(input, "exit"))
-				return nullptr;
-			if (!strcmp(input, "c") || !strcmp(input, "current"))
-				return &(*iter);
+				return "exit";
+			if (!strcmp(input, "q") || !strcmp(input, "quit"))
+				return "quit";
+			if (!strcmp(input, "c") || !strcmp(input, "current")) {
+				ret = games[i];
+				return "yes";
+			}
+			else if (!strcmp(input, "d") || !strcmp(input, "rm") || !strcmp(input, "delete")) {
+				Json::Value removed;
+				games.removeIndex(i--, &removed);
+				writeGames();
+				break;
+			}
 			int number = atoi(input);
-			if (number && number <= getNumberOfSavedBoard())
-				return &games[number - 1];
+			if (number && number <= getNumberOfSavedBoard()) {
+				ret = games[number - 1];
+				return "yes";
+			}
 			cout << "Pardon?\n> ";
 		}
+		++i;
 	}
-	return nullptr;
+	return "exit";
 }
 
 void BoardRecord::showSavedBoard(const Json::Value& state) {

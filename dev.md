@@ -1,19 +1,16 @@
 well, this is clearly more organized than CharmedPython
 
+# cmt code
+## 001
+- major bug in BoardAnalyse::respond fixed line 572
+- fix play back mode can't handle input board
+- rm feature added to play mode and play back mode
+- print message reorganized
+- quit and help in play mode and play back mode added
+- BoardRecord::showSavedGames reorganized
+- return type changed
+- note deleted
 
-# ***first thing*** after return
-a new thought: control mode - "all mode are created equal" (except for control mode & debug mode & normal mode)  
-first thing: complete this thought when return   
-## add & reverse
-return debug add reverse
-## debug
-return exit
-return quit over add reverse play playBack custom
-## settings
-return debug quit
-## play playBack custom
-return debug quit
-----
 # TODO
 - change getStateFromInput to fit all size of board
 - add GUI?
@@ -205,6 +202,22 @@ what???
 I think it's the stars, if there are stars, then X will hit % point first, but if there aren't any stars, then 0 will hit % first. This explains why I suddenly goes from must win to must lose.
 
 Then I make the stars lost their powers when `nonFullList.size() < 5`, but `returnMove()` still cannot see that in this board, when X goes 7 in the first place, X is about to fail. Maybe it's time to use that recursive function. However, I forgot which one should I call, returnSituation or recursiveSituation, I even forgot why there's two situation in the first place??.
+
+# 2020-8-16-17:41 more depth less time
+```
+| | | | | | | | |
+| | | | | | | | |
+| | | | | | | | |
+| |0|0| | | | | |
+| |X|X| | | | | |
+| |X|X|0| | | | |
+| |0|0|X|X| | | |
+| |0|X|0|0| | |X|
+```
+if X go 4:   
+depth = 5, time used = 1451ms, word = "free"   
+depth = 6, time used = 42ms, word = "bad"   
+so, how should I use this?   
 
 # performance testing board
 ## nearly empty board
