@@ -43,8 +43,8 @@ public:
 	// is function
 	// getter
 	short getColTop(const short column) const { return state.top[column - 1]; }
-	short getColumn() const { return state.column; }
-	short getRow() const { return state.row; }
+	short getCols() const { return state.cols; }
+	short getRows() const { return state.rows; }
 	// else transfer
 	bool colIsFull(const short col) { return state.colIsFull(col); }
 	bool colIsEmpty(const short col) { return state.colIsEmpty(col); }

@@ -77,8 +77,8 @@ public:
 	char** board;
 	short* top;	 // 0~column, 0 means no piece, column means full
 	short* starArea;
-	short  row;
-	short  column;
+	short  rows;
+	short  cols;
 	short  winn;  // winning number?
 	bool   starsOn;
 	/************************debug***************************/
@@ -86,10 +86,10 @@ public:
 	static int addNumber;
 	/************************debug***************************/
 
-	BoardState() : row(8), column(8), winn(4), starsOn(false) { generate(); }
-	BoardState(const BoardState& input) : row(input.row), column(input.column), winn(input.winn), starsOn(false) { generate(input.board, input.top); }
+	BoardState() : rows(8), cols(8), winn(4), starsOn(false) { generate(); }
+	BoardState(const BoardState& input) : rows(input.rows), cols(input.cols), winn(input.winn), starsOn(false) { generate(input.board, input.top); }
 	BoardState(const Json::Value& root);
-	BoardState(const short r, const short c, const short w) : row(r), column(c), winn(w), starsOn(false) { generate(); }
+	BoardState(const short r, const short c, const short w) : rows(r), cols(c), winn(w), starsOn(false) { generate(); }
 	~BoardState() { free(); }
 
 	// construct
@@ -104,8 +104,8 @@ public:
 		Json::Value root;
 		root["board"]  = boardToJson();
 		root["top"]	   = topToJson();
-		root["row"]	   = row;
-		root["column"] = column;
+		root["row"]	   = rows;
+		root["column"] = cols;
 		root["winn"]   = winn;
 		return root;
 	}
@@ -119,12 +119,10 @@ public:
 	void show();
 
 	// getter
-	short getRow() { return row; }
-	short getColumn() { return column; }
 	short getWinn() { return winn; }
 
 	// is function
-	bool colIsFull(const short col) { return top[col - 1] == row; }
+	bool colIsFull(const short col) { return top[col - 1] == rows; }
 	bool colIsEmpty(const short col) { return top[col - 1] == 0; }
 	bool boardIsFull();
 	bool winPieceNearBy(const short col, const short ro);
@@ -144,7 +142,7 @@ public:
 	void add(const char plr, const short col) {
 		/*****************************debug**********************************/
 		// debug, feel free to remove this for performance reasons
-		if (top[col - 1] == row)
+		if (top[col - 1] == rows)
 			throw runtime_error("trying to add to a full column.\n");
 		if (plr != 'X' && plr != '0')
 			throw runtime_error("wrong player!\n");
@@ -183,11 +181,12 @@ public:
 	void starShow();
 	void setATopWithTop(short i, short t);
 	void setATopWithNumber(short i, short n) {
-		if (i >= 0 && i < column && starArea[i] < n)
+		if (i >= 0 && i < cols && starArea[i] < n)
 			starArea[i] = n;
 	}
 	shortv aTopFullColumn();
 	int	   starNumber();
+	int	   threeRowCount();
 
 	// history move
 	void retInit(vector<oneMove>& his);

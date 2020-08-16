@@ -1,7 +1,7 @@
 #include "BoardInterface.h"
 
 bool BoardInterface::getStateFromInput() {
-	short  row = analyse->getRow(), column = analyse->getColumn();
+	short  row = analyse->getRows(), column = analyse->getCols();
 	short  minor = 0;
 	/*******************************temp code**********************************/
 	// don't really know why I need this eater
@@ -104,7 +104,7 @@ string BoardInterface::getInput(const string mode) {
 			printf("Why don't we try this in debug mode to see what it does?\n");
 		else if (mode != "add") {
 			int num = atoi(input);
-			if (num > 0 && num <= analyse->getColumn() && !analyse->colIsEmpty(num))
+			if (num > 0 && num <= analyse->getCols() && !analyse->colIsEmpty(num))
 				return input;
 			cout << "Invalid " << mode << " mode number input, let\'s try again\n";
 		} else if (mode != "reverse") {
@@ -112,7 +112,7 @@ string BoardInterface::getInput(const string mode) {
 			strcpy(temp, input + 2);
 			int num = atoi(temp);
 			if ((input[0] == 'X' || input[0] == 'x' || input[0] == '0') && num > 0 &&
-				num <= analyse->getColumn() && !analyse->colIsFull(num))
+				num <= analyse->getCols() && !analyse->colIsFull(num))
 				return input;
 		}
 	}
@@ -137,7 +137,7 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 		inputTime	 = elapsed.count();
 
 		int num = atoi(input);
-		if (num > 0 && num <= analyse->getColumn() && !analyse->colIsFull(num))
+		if (num > 0 && num <= analyse->getCols() && !analyse->colIsFull(num))
 			return input;
 		// excute
 		if (!strcmp(input, "0") || !strcmp(input, "exit"))
