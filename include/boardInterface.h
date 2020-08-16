@@ -20,7 +20,7 @@ public:
 
 	// general
 	string getInput(const string mode);
-	string getInput(const string mode, char plr, double& inputTime);
+	string getInput(char plr, double& inputTime);
 	short  getCustomInput(const string item);
 	bool   getStateFromInput();
 

@@ -306,11 +306,18 @@ void BoardState::areaTopTransform() {
 	if(stars % 2 == 0)
 		return;
 	// randomly chose a non-full column and add it
-	shortv starNotzero;
-	for (short i = 0; i < column; ++i)
+	shortv starNotZero, starNotFull, inter;
+	for (short i = 0; i < column; ++i) {
+		if (starArea[i])
+			starNotFull.push_back(i + 1); // not full of stars(maybe doesn't have stars)
 		if (row != starArea[i])
-			starNotzero.push_back(i + 1);
-	++starArea[randomMove(starNotzero) - 1];
+			starNotZero.push_back(i + 1); // have stars but may be full of stars
+	}
+	MyShortList::shortIntersection(inter, starNotFull, starNotZero);
+	if (inter.empty())
+		++starArea[randomMove(starNotZero) - 1];
+	else
+		++starArea[randomMove(inter) - 1];
 }
 
 void BoardState::areaTopRestore() {

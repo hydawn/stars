@@ -16,10 +16,11 @@ target_include_directories(json_lib
 )
 
 add_library(stars_lib STATIC
-	"src/boardAnalyse.cpp"
-	"src/boardInterface.cpp"
-	"src/boardRecord.cpp"
-	"src/boardState.cpp"
+	src/boardAnalyse.cpp
+	src/boardInterface.cpp
+	src/boardRecord.cpp
+	src/boardState.cpp
+	src/shortList.cpp
 )
 
 target_include_directories(stars_lib

@@ -11,12 +11,19 @@ well, this is clearly more organized than CharmedPython
 - return type changed
 - note deleted
 
+## 002
+- normal erased
+- dev updated
+- star even improved
+- shortList.cpp added
+- other minor fix
+
 # TODO
+- fix stars-2:1. make more column available to make stars even is not good, bad side is also not good
+- change short to char
 - change getStateFromInput to fit all size of board
 - add GUI?
-- add icon
 - record calculate depth
-- add "erase settings" to avoid exception
 - Then I will stop
 
 - actually, seen that starArea + while returnMove is doing quite well, there's no need to use recursive function anymore - I was actually proud of that, few thing here that needed brain work. Now that it's useless, I suddenly lost interest in all of this stuff. No then I will stop, I'll stop right now.

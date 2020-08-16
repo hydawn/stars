@@ -6,9 +6,7 @@ int main() {
 	printf("Use numbers to place a piece, h for help, 0 to exit.\n");
 	printf("The game is on ->\n");
 
-	// boardInterface.normalMode();
-
-	// there was something normal going on here, but not anymore
+	// there was something normal going on here
 	boardInterface.controlMode();
 
 	cout << "Over\nHit 'Enter' to continue...";
