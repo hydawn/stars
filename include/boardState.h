@@ -186,7 +186,8 @@ public:
 	}
 	shortv aTopFullColumn();
 	int	   starNumber();
-	int	   threeRowCount();
+	int	   threeRowCount(const char plr, shortv& safeList);
+	shortv makeThreeCols(const char plr, shortv& safeList);
 
 	// history move
 	void retInit(vector<oneMove>& his);

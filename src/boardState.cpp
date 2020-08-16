@@ -206,8 +206,24 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 }
 
 short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList, const string& mode) {
-	// preference No.2: take the opponent's safe list
 	shortv intersectionList;
+	// preference No.1: take what can bring me winn-1 in a row, and what can
+	// interrupt opponent's three in a row
+	shortv plrTList = makeThreeCols(plr, list), oppTList = makeThreeCols(rPlayer(plr), oppList);
+	MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
+	if (intersectionList.empty()) {
+		if (plrTList.empty()) {
+			if (!oppTList.empty())
+				return randomSuggestion(plr, oppTList, mode);
+		}
+		else
+			return randomSuggestion(plr, plrTList, mode);
+	}
+	else
+		return randomSuggestion(plr, intersectionList, mode);
+
+	// else if everything is empty
+	// preference No.2: take the opponent's safe list
 	MyShortList::shortIntersection(intersectionList, list, oppList);
 	if (intersectionList.empty()) {
 		if (list.empty())
@@ -215,8 +231,6 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 		return randomSuggestion(plr, list, mode);
 	}
 	return randomSuggestion(plr, intersectionList, mode);
-	// preference No.1: take what can bring me winn-1 in a row, and what can
-	// interrupt opponent's three in a row
 }
 
 bool BoardState::winPieceNearBy(const short col, const short ro) {
@@ -367,6 +381,34 @@ int BoardState::starNumber() {
 	for (int i = 0; i < cols;++i)
 		sum += rows - starArea[i];
 	return sum;
+}
+
+// count how many three in a row is there in the board, just like winPieceNearBy
+// with the winn set to winn - 1
+int BoardState::threeRowCount(const char plr, shortv& safeList) {
+	int rax = 0;
+	winn--;
+	// count how many "first point"
+	for (short i = 0; i < cols; ++i)
+		for (short j = 0; j < top[i]; ++j)
+			if (winPieceNearBy(i, j))
+				++rax;
+	winn++;
+	return rax;
+}
+
+shortv BoardState::makeThreeCols(const char plr, shortv& safeList) {
+	shortv rax;
+	int	   counter;
+	for (short i : safeList) {
+		counter = threeRowCount(plr, safeList);
+		add(plr, i);
+		counter -= threeRowCount(plr, safeList);
+		remove(i);
+		if (counter < 0)
+			rax.push_back(i);
+	}
+	return rax;
 }
 
 void BoardState::retInit(vector<oneMove>& his) {
