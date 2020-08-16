@@ -933,9 +933,9 @@ string BoardInterface::getInfo(string input) {
 void BoardInterface::showComment(oneMove& move) {
 	// comment
 	if ((move.word == "good" && move.byComputer) || (move.word == "bad" && !move.byComputer))
-		cout << "Not a promising future I'm afraid.\n";
+		cout << "\tNot a promising future I'm afraid.\n";
 	else if ((move.word == "bad" && move.byComputer) || (move.word == "good" && !move.byComputer))
-		cout << "This is going really well~\n";
+		cout << "\tThis is going really well~\n";
 	else {
 		shortv non;
 		analyse->state.nonFullColumn(non);

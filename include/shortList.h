@@ -12,7 +12,7 @@ private:
 public:
 	ShortList() { top = 0; }
 	ShortList(const Json::Value root) {
-		for (short i = 0; i < root.size(); ++i)
+		for (unsigned short i = 0; i < root.size(); ++i)
 			data[i] = root[i].asInt();
 		top = root.size();
 	}

@@ -148,7 +148,6 @@ short BoardState::randomMove() {
 }
 
 short BoardState::randomMove(shortv& list) {
-	// debug
 	if (list.empty())
 		throw runtime_error("trying randomMove(shortv& list) in an empty list\n");
 	srand((unsigned)time(NULL));
@@ -297,10 +296,21 @@ void BoardState::areaTopTransform() {
 		}
 	}
 
-		// then check for overflow
-		for (short i = 0; i < column; ++i)
-			if (starArea[i] > row)
-				starArea[i] = row;
+	// then check for overflow
+	for (short i = 0; i < column; ++i)
+		if (starArea[i] > row)
+			starArea[i] = row;
+	
+	// check if stars are even
+	int stars = starNumber();
+	if(stars % 2 == 0)
+		return;
+	// randomly chose a non-full column and add it
+	shortv starNotzero;
+	for (short i = 0; i < column; ++i)
+		if (row != starArea[i])
+			starNotzero.push_back(i + 1);
+	++starArea[randomMove(starNotzero) - 1];
 }
 
 void BoardState::areaTopRestore() {
@@ -346,6 +356,13 @@ shortv BoardState::aTopFullColumn() {
 		if (starArea[i]==0)
 			list.push_back(i + 1);
 	return list;
+}
+
+int BoardState::starNumber() {
+	int sum = 0;
+	for (int i = 0; i < column;++i)
+		sum += row - starArea[i];
+	return sum;
 }
 
 void BoardState::retInit(vector<oneMove>& his) {

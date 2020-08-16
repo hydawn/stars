@@ -554,7 +554,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	// list for myself
 	shortv list, oppList, nonFullList;
 	long long timeUsed		  = 0;
-	short	  returnMoveDepth = 6;
+	short	  returnMoveDepth = 2;
 	string word;
 
 	// pre-test
@@ -572,6 +572,11 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	do {
 		timeUsed = returnTime(plr, list, returnMoveDepth++, word);
 	} while (word == "free" && timeUsed < 81 && returnMoveDepth < 10);
+	// this opp list is for the random suggestion functions
+	if (returnMoveDepth > 2)
+		returnMove(state.rPlayer(plr), oppList, returnMoveDepth - 1);
+	else
+		returnMove(state.rPlayer(plr), oppList, returnMoveDepth);
 	// if (!list.empty() && returnMoveDepth == 10 && timeUsed!=0) {
 	// 	int returnSituationDepth = 1;
 	// 	printf("This recursive is entered");
@@ -589,17 +594,12 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 		while (timeUsed < 64 && returnMoveDepth < 10) {
 			timeUsed = returnTime(plr, list, ++returnMoveDepth, word);
 		}
-		// this opp list is for the random suggestion functions
-		if (returnMoveDepth > 2)
-			returnMove(state.rPlayer(plr), oppList, returnMoveDepth - 1);
-		else
-			returnMove(state.rPlayer(plr), oppList, returnMoveDepth);
-		cout << "\treturnMoveDepth without stars = " << returnMoveDepth << endl;
+		cout << "\treturnMoveDepth without stars = " << returnMoveDepth - 1 << endl;
 	}
 	else if (starsOn && list.size() > 4)
-		cout << "\treturnMoveDepth with stars = " << returnMoveDepth << endl;
+		cout << "\treturnMoveDepth with stars = " << returnMoveDepth - 1 << endl;
 	else  // starsOn == false
-		cout << "\treturnMoveDepth without stars = " << returnMoveDepth << endl;
+		cout << "\treturnMoveDepth without stars = " << returnMoveDepth - 1 << endl;
 
 	// show info if needed
 	if (showCal) {

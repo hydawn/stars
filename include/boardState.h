@@ -187,6 +187,7 @@ public:
 			starArea[i] = n;
 	}
 	shortv aTopFullColumn();
+	int	   starNumber();
 
 	// history move
 	void retInit(vector<oneMove>& his);
