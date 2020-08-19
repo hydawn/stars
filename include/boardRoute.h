@@ -1,14 +1,13 @@
-#pragma once
+#ifndef _BOARDROUTE_H_
+#define _BOARDROUTE_H_ 1
 #include <vector>
 #include <stdexcept>
 #include <iostream>
-#include <string>
 #include "shortList.h"
 
 using std::cout;
 using std::endl;
 using std::runtime_error;
-using std::string;
 using std::vector;
 
 class RouteNode {
@@ -18,7 +17,7 @@ public:
 	RouteNode* prev;
 	vector<RouteNode*> next;
 
-	RouteNode() : data(0), print(true), prev(nullptr), next(vector<RouteNode*>()){}
+	RouteNode() : data(0), print(true), prev(nullptr), next(vector<RouteNode*>()) {}
 
 	bool	   listNextIs(vector<RouteNode*>& list, int data);
 	bool	   masked(vector<RouteNode*>& list);  // if all of list isn't printable
@@ -42,10 +41,10 @@ public:
 	bool match() { return head == crnt; }
 
 	// init
-	void	   free(RouteNode* node);
-	void	   free(vector<RouteNode*> list);
-	void	   clear();
-	void	   init();
+	void free(RouteNode* node);
+	void free(vector<RouteNode*> list);
+	void clear();
+	void init();
 
 	// move
 	void forward();
@@ -58,13 +57,6 @@ public:
     // change
 	void add(short data);
 	void add(ShortList& list);
-	RouteNode* erase() { crnt = erase(crnt); }
-	RouteNode* erase(RouteNode* node);
-        // if node == crnt, return crnt
-        // if has next node, return next node
-        // else if has prev, return prev
-        // else return nullptr
-	// void add(RouteNode& node);
 
     // related to show
 	void showRoute();	  // for boardAnalyse
@@ -77,8 +69,6 @@ public:
 	// counter
 	int getBranches(int flag=1);
 	void branchCounter(RouteNode* node);
-
-	// org
-	// void organize();
-	// void organize(RouteNode* node);
 };
+
+#endif

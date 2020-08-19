@@ -7,9 +7,7 @@ namespace MyShortList {
 				return true;
 		return false;
 	}
-	// void sortList(ShortList& sl);
-	// void cpyList(ShortList& destination, ShortList& source);
-	// void mergeList(ShortList& destination, ShortList& source1, ShortList& source2);
+
 	void shortIntersection(ShortList& dest, ShortList& sour1, ShortList& sour2) {
 		dest.clear();
 		if(sour1.empty())

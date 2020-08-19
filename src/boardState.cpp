@@ -14,8 +14,6 @@ BoardState::BoardState(const Json::Value& root)
 }
 
 void BoardState::generate() {
-	// TODO - is quite stupid, change this when have the chance
-	// it's best to use allocate?
 	board	 = new char*[cols];
 	top		 = new short[cols];
 	starArea = new short[cols];
@@ -94,10 +92,6 @@ void BoardState::show() {
 }
 
 bool BoardState::boardIsFull() {
-	// static int timer = 0;
-	// ++timer;
-	// if (timer > 38815)
-	//     printf("isOver %d ", timer);
 	for (short i = 1; i <= cols; ++i)
 		if (!colIsFull(i))
 			return false;
@@ -105,30 +99,18 @@ bool BoardState::boardIsFull() {
 }
 
 char BoardState::isOver() {
-	// static int timer = 0;
-	// ++timer;
-	// if (timer > 5000)
-	//     printf("isOver %d ", timer);
-	// if (boardIsFull())
-	//     return 'F';
-	// check if there is winn in line
 	for (short i = 0; i < cols; ++i)
 		for (short j = 0; j < top[i]; ++j)
-			// assume that there is only one winn in line in the board
-			if (winPieceNearBy(i, j)) {
-				// printf("debug - column=%d, row=%d\n", i, j);
+			if (winPieceNearBy(i, j))
 				return board[i][j];
-			}
 	return 'N';
 }
 
 void BoardState::nonFullColumn(shortv& nonFull) {
-	nonFull.clear();  // see if delete this will help?
+	nonFull.clear();
 	for (short i = 0; i < cols; ++i)
 		if (top[i] != starArea[i])
 			nonFull.push_back(i + 1);
-	// static int timer = 0;
-	// printf("nonfull %d ", ++timer);
 }
 
 char BoardState::rPlayer(const char plr) {
@@ -211,17 +193,21 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	// interrupt opponent's three in a row
 	// but some times it block itself which is rather stupid
 	shortv plrTList = makeThreeCols(plr, list), oppTList = makeThreeCols(rPlayer(plr), oppList);
-	MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
-	if (intersectionList.empty()) {
-		if (plrTList.empty()) {
-			if (!oppTList.empty())
-				return randomSuggestion(plr, oppTList, mode);
+	srand((unsigned)time(NULL));
+	if (rand() % 100 > 85) {
+		MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
+		if (intersectionList.empty()) {
+			if (plrTList.empty()) {
+				MyShortList::shortIntersection(intersectionList, list, oppTList);
+				if (!intersectionList.empty())
+					return randomSuggestion(plr, intersectionList, mode);
+			}
+			else
+				return randomSuggestion(plr, plrTList, mode);
 		}
 		else
-			return randomSuggestion(plr, plrTList, mode);
+			return randomSuggestion(plr, intersectionList, mode);
 	}
-	else
-		return randomSuggestion(plr, intersectionList, mode);
 
 	// else if everything is empty
 	// preference No.2: take the opponent's safe list

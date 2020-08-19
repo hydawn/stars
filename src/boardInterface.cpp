@@ -239,7 +239,7 @@ string BoardInterface::addMode() {
 		else
 			move.player = 'X';
 		move.move = atoi(input.c_str() + 2);
-		printf("player '%c' goes move '%d' as you like it:\n", move.player, move.move);
+		printf("Player '%c' is added to '%d' as you like it:\n", move.player, move.move);
 		analyse->go(move.player, move.move);
 		analyse->show();
 		record.push_back(move);
@@ -260,7 +260,7 @@ string BoardInterface::reverseMode() {
 		// record which move is reversed
 		move.player = analyse->state.board[move.move - 1][analyse->state.top[move.move - 1] - 1];
 		analyse->reverse(move.move);
-		printf("remove %d as you like it:\n", move.move);
+		printf("Remove %d as you like it:\n", move.move);
 		record.push_back(move);
 		analyse->show();
 	}
@@ -283,7 +283,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		// analyse->show();
 		input = getInput(byPlayer.player, byPlayer.time);
 		if (input == "exit" || input == "quit") {
-			printf("exit from debug mode\n");
+			printf("Exit from debug mode ...\n");
 			return input;
 		}
 		if (input == "add" || input == "reverse" || input == "settings" ||
@@ -329,12 +329,12 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			analyse->go(byPlayer.player, byPlayer.move);
 			record.push_back(byPlayer);	 // byPlayer end here
 			if (isOver(byPlayer)) {
-				printf("exit from debug mode\n");
+				printf("Exit from debug mode ...\n");
 				return "over";
 			}
 		}
 		else if (isOver(byPlayer)) {
-			printf("exit from debug mode\n");
+			printf("Exit from debug mode ...\n");
 			return "over";
 		}
 
@@ -355,7 +355,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		cout << "    input time used: " << byPlayer.time << "ms\n";
 		printf("    %c goes here %d\n", byOpponent.player, byOpponent.move);
 		if (isOver(byOpponent)) {
-			printf("Exit from debug mode\n");
+			printf("Exit from debug mode ...\n");
 			return "over";
 		}
 
@@ -703,7 +703,7 @@ string BoardInterface::showRouteMode() {
 
 	// print
 	routeBranches = analyse->routes.getBranches(num - 3);
-	if (routeBranches > 55) {
+	if (routeBranches > 64) {
 		cout << "There are " << routeBranches
 			<< " branches, sure you want to print them all?\n"
 			<< "(yes/No)> ";
@@ -719,9 +719,9 @@ string BoardInterface::showRouteMode() {
 string BoardInterface::getHelp(string mode) {
 	string enjoy  = "Enjoy!\n";
 	string addon  = "";
-	string end	  = "------------------------------------ The End -----------------------------------\n";
+	string end	  = "------------------------------------ The End ----------------------------------\n";
 	string enterForMore =
-		"------------------------- 'Enter' for more, 0 to quit --------------------------\n";
+		"------------------------- 'Enter' for more, 0 to quit -------------------------\n";
 	string add = addon + "Type in player (X or 0) and move (1~8) to place a piece, for example, type in\n" +
 		"X 3\nwill place a pice X in column 3, you can also type x-7 if you want. Just make\n" +
 		"sure there's one and only one character between player and its move.\n" +
@@ -817,7 +817,7 @@ string BoardInterface::getHelp(string mode) {
 string BoardInterface::getInfo(string input) {
 	string addon = "";
 	string enjoy = "Enjoy!\n";
-	string end	 = "----------------------------------- The End ------------------------------------\n";
+	string end	 = "----------------------------------- The End -----------------------------------\n";
 	string tips	 = addon + "Tips from CharmedPython:\n" +
 		"So the trick is to build yourself as high as possible, but don't make hugh\n" +
 		"chunks, leave some room between them. Here are some good examples:\n" +
@@ -827,21 +827,17 @@ string BoardInterface::getInfo(string input) {
 		"1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" + "| |0| | | | | | |\n" +
 		"| |0| | | | | | |\n" + "| |X| | |0| | | |\n" + "| |X| |0|X| | | |\n" +
 		"| |X| |X|X| | | |\n" + "| |0| |X|X| | | |\n" + "|0|0| |X|0|X|0|0|\n" +
-		"------------------------- 'Enter' for more, q to quit --------------------------\n";
+		"------------------------- 'Enter' for more, q to quit -------------------------\n";
 	string moreTips = addon +
 		"This type of layout will give you a lot of advantage. However, this program is\n" +
 		"designed to prevent you from building yourself too high - it's always trying to\n" +
-		"interrupt but don't worry, build it anyway. It's quite easy to win if you go\n" +
-		"first, which gives you lots of advantage. And you always have debug mode to\n" +
-		"reverse an action, get performance detail from the computer, etc. But that's for\n" +
-		"debugging originally. Em, I wonder what other functions it can perform for other\n" +
-		"players. Difficult to answer without actual practice wouldn't you say?\n" + enjoy +
-		"Good luck\n" + end;
+		"interrupt but build it anyway. Actually, trying to build any kind of three\n" +
+		"piece in a row is helpful.\nGood luck!\n" + end;
 	string info = addon +
 		"A 1v1 & 8x8 command line based board game\n" +
-		"\n------------------------------ version 1.1 - Beta ------------------------------\n" +
-		"                                                                    by DuanHanyu\n" +
-		"                                                                        2020-8-5";
+		"\n-------------------------------- version 1.0.2 --------------------------------\n" +
+		"                                                                   by DuanHanyu\n" +
+		"                                                                      2020-8-19";
 	vector<string> story = {
 		addon +
 		"Out of a few random try, you finally get yourself an Easter Egg! But I'm afraid\n" +
@@ -869,7 +865,7 @@ string BoardInterface::getInfo(string input) {
 		"developed? Maybe I should have set a goal, a point, where once it was met, I\n" +
 		"stop. Maybe I should do that whenever I start to do anything?\n" + "So... where should I stop?\n" +
 		"\n" + "Well, one have to admit, typing that IS refreshing. The developer is OK now.\n" +
-		"Sorry you have to see all these irrelevant crap. Have a nice day\n" + end
+		"Sorry you have to see all these irrelevant crap. Have a nice day!\n" + end
 };
 	if (input == "t" || input == "tips") {
 		cout << tips;
@@ -889,9 +885,8 @@ string BoardInterface::getInfo(string input) {
 			printf("Pardon?\n");
 			++wrongInput;
 			if (wrongInput > 8) {
-				printf(
-					"There might be an overflow here, please don't enter more than 15 characters at "
-					"a\ntime\n");
+				cout << "There might be an overflow here, please don't enter "
+					 << "more than 15 characters at a\ntime\n";
 				cin.clear();
 				wrongInput = 0;
 			}
@@ -945,13 +940,14 @@ void BoardInterface::showComment(oneMove& move) {
 }
 
 bool BoardInterface::askToDebug(bool yes) {
-	char msg[8];
+	char input[8];
 	if (yes)
-		printf("Care for a debug mode? (default yes) (Yes/no)> ");
+		printf("Care for new debug mode? (default yes) (Yes/no)> ");
 	else
-		printf("Care for a debug mode? (default no) (yes/No)> ");
-	cin.getline(msg, 8);
-	if ((yes && !strlen(msg)) || !strcmp(msg, "Y") || !strcmp(msg, "yes") || !strcmp(msg, "y")) {
+		printf("Care for new debug mode? (default no) (yes/No)> ");
+	cin.getline(input, 8);
+	if ((yes && !strlen(input)) || !strcmp(input, "Y") || !strcmp(input, "yes")
+		|| !strcmp(input, "y")) {
 		printf("As you wish\n");
 		return true;
 	} else
@@ -960,13 +956,14 @@ bool BoardInterface::askToDebug(bool yes) {
 }
 
 void BoardInterface::askToSaveBoard(bool yes) {
-	char msg[8];
+	char input[8];
 	if (yes)
 		printf("Save the old game? (yes as default) (Yes/no)> ");
 	else
 		printf("Save the old game? (no as default) (yes/No)> ");
-	cin.getline(msg, 8);
-	if ((yes && !strlen(msg)) || !strcmp(msg, "Y") || !strcmp(msg, "yes") || !strcmp(msg, "y"))
+	cin.getline(input, 8);
+	if ((yes && !strlen(input)) || !strcmp(input, "Y") || !strcmp(input, "yes")
+		|| !strcmp(input, "y"))
 		record.saveGame(analyse->state);
 }
 

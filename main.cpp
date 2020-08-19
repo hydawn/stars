@@ -3,13 +3,17 @@
 int main() {
 	BoardAnalyse   boardAnalyser;
 	BoardInterface boardInterface(boardAnalyser);
-	printf("Use numbers to place a piece, h for help, 0 to exit.\n");
-	printf("The game is on ->\n");
+	cout << "Use numbers to place a piece, h for help, 0 to exit.\n";
+	cout << "The game is on ->\n";
 
 	// there was something normal going on here
-	boardInterface.controlMode();
+	try {
+		boardInterface.controlMode();
+	} catch (const std::runtime_error& err) {
+		cout << endl << err.what() << "- a bug perhaps\n";
+	}
 
-	cout << "Over\nHit 'Enter' to continue...";
+	cout << "Over\nHit 'Enter' to close ...";
 	cin.get();
 	return 0;
 }

@@ -108,7 +108,6 @@ void RouteTree::forward() {
 void RouteTree::forward(short data) {
 	if (crnt->next.empty())
 		throw runtime_error("reached the end of the tree!\n");
-	// vRi iter = std::find_if(crnt->next.begin(), crnt->next.end(), tempComp);
 	vector<RouteNode *>::iterator iter = crnt->next.begin();
 	for (; iter != crnt->next.end();++iter)
 		if ((*iter)->data == data) {
@@ -121,7 +120,6 @@ void RouteTree::forward(short data) {
 void RouteTree::nextNode() {
 	if (crnt->prev->next.empty())
 		throw runtime_error("reached the end of the tree!\n");
-	// vRi iter = std::find(crnt->prev->next.begin(), crnt->prev->next.end(), crnt);
 	vRi iter = crnt->prev->next.begin();
 	for (; iter != crnt->prev->next.end() && *iter != crnt;++iter)
 		;
