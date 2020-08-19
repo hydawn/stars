@@ -33,9 +33,9 @@ public:
 	 */
 	string returnMove(const char plr, shortv& list, const short depth);
 	string returnMoveDebug(const char plr, shortv& list, const short depth);
-	long long returnTime(const char plr, shortv& list, const short depth, string& word);
+	long long returnTime(const char plr, shortv& list, const short depth, string& word, bool trackRoute);
 	long long recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
-	int	   respond(const char plr, oneMove& thisMove, bool showCal, bool showTime, bool starsOn);
+	int		  respond(const char plr, oneMove& thisMove, bool showCal, bool showTime, bool starsOn, bool trackRoute);
 
 	// recursive analyse
 	// simple and elegant, but too powerful for this game

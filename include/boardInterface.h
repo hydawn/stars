@@ -2,7 +2,7 @@
 #define _BOARDINTERFACE_H_ 1
 #include "boardAnalyse.h"
 
-#define INTER_MAX_INPUT 64
+#define INTER_MAX_INPUT 256
 
 using std::cin;
 using std::string;
@@ -37,6 +37,7 @@ public:
 	string playBackMode();
 	string customMode();
 	bool controlMode();
+	string showRouteMode();
 
 	// ask & do
 	bool askToDebug(bool yes);	// if yes == true, then default yes

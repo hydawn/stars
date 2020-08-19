@@ -24,7 +24,8 @@ string inFileSettings = addon +
 	"			\"showCalculate\": false,\n" +
 	"			\"showTime\": false,\n" +
 	"			\"starrySky\": false,\n" +
-	"			\"starsOn\": false\n" +
+	"			\"starsOn\": false,\n" +
+	"			\"trackRoutes\": false\n" +
 	"		},\n" +
 	"		\"whenSaveGame\": {\n" +
 	"			\"askGiveName\": true,\n" +

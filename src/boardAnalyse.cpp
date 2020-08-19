@@ -445,13 +445,15 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 }
 
 string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short depth) {
-	string word = analyse(plr, list);
-	if (word == "good" || word == "bad" || list.size() == 1)
-		return word;
-
 	/*********************************debug************************************/
 	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
+	routes.clear();
 	/*********************************debug************************************/
+	string word = analyse(plr, list);
+	if (word == "good" || word == "bad" || list.size() == 1) {
+		return word;
+	}
+
 	char   opp = state.rPlayer(plr);
 	shortv list1, goodList;
 	vIter  col = list.begin();
@@ -593,6 +595,7 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 															bool   isBad7	  = false;
 															short  goodCount7 = 0;
 															vIter col7 = list7.begin();
+															routes.add(list7);
 															for (routes.forward(*col7); col7 != list7.end(); ++col7, routes.nextNode()) {
 																state.add(opp, *col7);
 																word = analyse(plr, list8);
@@ -611,6 +614,7 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																	bool   isGood8	 = false;
 																	short  badCount8 = 0;
 																	vIter col8 = list8.begin();
+																	routes.add(list8);
 																	for (routes.forward(*col8); col8 != list8.end(); ++col8, routes.nextNode()) {
 																		state.add(plr, *col8);
 																		word = analyse(opp, list9);
@@ -629,6 +633,7 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																			bool   isBad9	  = false;
 																			short  goodCount9 = 0;
 																			vIter col9 = list9.begin();
+																			routes.add(list9);
 																			for (routes.forward(*col9); col9 != list9.end(); ++col9, routes.nextNode()) {
 																				state.add(opp, *col9);
 																				word = analyse(plr, list10);
@@ -642,6 +647,8 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																					isBad9 = true;
 																					break;
 																				}
+																				else
+																					routes.add(freeNode);
 																				state.remove(*col9);
 																			}
 																			routes.backward();
@@ -653,6 +660,8 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																				break;
 																			}
 																		}
+																		else
+																			routes.add(freeNode);
 																		state.remove(*col8);
 																	}
 																	routes.backward();
@@ -664,6 +673,8 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																		break;
 																	}
 																}
+																else
+																	routes.add(freeNode);
 																state.remove(*col7);
 															}
 															routes.backward();
@@ -675,6 +686,8 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																break;
 															}
 														}
+														else
+															routes.add(freeNode);
 														state.remove(*col6);
 													}
 													routes.backward();
@@ -686,6 +699,8 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 														break;
 													}
 												}
+												else
+													routes.add(freeNode);
 												state.remove(*col5);
 											}
 											routes.backward();
@@ -715,9 +730,13 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 												routes.add(badNode);
 												++badCount4;
 											}
+											else
+												routes.add(freeNode);
 											state.remove(list5[0]);
 											routes.backward();
 										}
+										else
+											routes.add(freeNode);
 										state.remove(*col4);
 									}
 									routes.backward();
@@ -764,18 +783,24 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 											routes.add(goodNode);
 											++goodCount3;
 										}
+										else
+											routes.add(freeNode);
 										routes.backward(); // list5
 										state.remove(list5[0]);
 									}
-									routes.backward(); // list4
+									else
+										routes.add(freeNode);
+									routes.backward();	// list4
 									state.remove(list4[0]);
 								}
+								else
+									routes.add(freeNode);
 								state.remove(*col3);
 							}
 							routes.backward();
 							if (isBad3)
 								++badCount2;
-							if (goodCount3 == list3.size()) {
+							else if (goodCount3 == list3.size()) {
 								state.remove(*col2);
 								isGood2 = true;
 								break;
@@ -837,15 +862,23 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 										++goodCount1;
 										break;
 									}
+									else
+										routes.add(freeNode);
 									routes.backward();
 									state.remove(list5[0]);
 								}
+								else
+									routes.add(freeNode);
 								routes.backward();
 								state.remove(list4[0]);
 							}
+							else
+								routes.add(freeNode);
 							routes.backward();
 							state.remove(list3[0]);
 						}
+						else
+							routes.add(freeNode);
 						state.remove(*col2);
 					}
 					routes.backward();
@@ -854,9 +887,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 						isBad1 = true;
 						break;
 					}
-					if (isGood2)
+					else if (isGood2)
 						++goodCount1;
 				}
+				else
+					routes.add(freeNode);
 				state.remove(*col1);
 			}
 			routes.backward();
@@ -865,9 +900,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 				col = list.erase(col);
 				continue;
 			}
-			if (goodCount1 == list1.size())
+			else if (goodCount1 == list1.size())
 				goodList.push_back(*col);
 		}
+		else
+			routes.add(freeNode);
 		state.remove(*col);
 		++col;
 	}
@@ -895,109 +932,107 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 // check if game is over or board is full before call this, given list must not
 // be empty
 // this is not a recursive function
-// string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
-// 	/****************************debug theory**********************************
-// 	this recursiveSituation is merely an infinite version of returnMove. If you
-// 	can see this, you will soon find a flaw in this function: there are no
-// 	'break;'! in returnMove, I won't always prepare a goodCount and badCount, I
-// 	always define a count and a isGood/isBad before going into a loop. Now, why
-// 	should I define a goodList to track all the good col? I will never use them
-// 	anyway! And in this case, most recursiveSituation is actually called by
-// 	another recursiveSituation where 'another recursiveSituation doesn't care
-// 	what our goodList are! Therefore, I wrote another version of
-// 	recursiveSituation which doesn't take shortv as an argument, and
-// 	change this formal recursiveSituation's name as returnSituation, and the
-// 	newly defined recursiveSituationInline as recursiveSituation
-// 	****************************debug theory**********************************/
-// 	if (list.empty()) {
-// 		throw runtime_error("recursiveSituation: given list is empty!\n");
-// 		return "end";
-// 	}
+string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
+	/****************************debug theory**********************************
+	this recursiveSituation is merely an infinite version of returnMove. If you
+	can see this, you will soon find a flaw in this function: there are no
+	'break;'! in returnMove, I won't always prepare a goodCount and badCount, I
+	always define a count and a isGood/isBad before going into a loop. Now, why
+	should I define a goodList to track all the good col? I will never use them
+	anyway! And in this case, most recursiveSituation is actually called by
+	another recursiveSituation where 'another recursiveSituation doesn't care
+	what our goodList are! Therefore, I wrote another version of
+	recursiveSituation which doesn't take shortv as an argument, and
+	change this formal recursiveSituation's name as returnSituation, and the
+	newly defined recursiveSituationInline as recursiveSituation
+	****************************debug theory**********************************/
+	if (list.empty()) {
+		throw runtime_error("recursiveSituation: given list is empty!\n");
+		return "end";
+	}
 
-// 	// a loop
-// 	vIter  col = list.begin();
-// 	char   opp = state.rPlayer(plr);
-// 	shortv goodList, list1;
-// 	string word;
-// 	while (col != list.end()) {
-// 		state.add(plr, *col);
-// 		word = returnMove(opp, list1, returnMoveDepth);
-// 		if (word == "free") {
-// 			if (!list1.empty())
-// 				word = recursiveSituation(opp, list1, returnMoveDepth, recursiveCount, countTop);
-// 			// else
-// 			// 	printf("game is over, what do I do? ---- nothing I suppose.\n");
-// 		}
-// 		if (word == "good") {
-// 			state.remove(*col);
-// 			col = list.erase(col);
-// 			continue;
-// 		} else if (word == "bad")
-// 			goodList.push_back(*col);
-// 		state.remove(*col);
-// 		++col;
-// 	}
-// 	if (!goodList.empty()) {
-// 		list = goodList;
-// 		return "good";
-// 	} else if (list.empty())
-// 		return "bad";
-// 	return "free";
-// }
+	// a loop
+	vIter  col = list.begin();
+	char   opp = state.rPlayer(plr);
+	shortv goodList, list1;
+	string word;
+	while (col != list.end()) {
+		state.add(plr, *col);
+		word = returnMove(opp, list1, returnMoveDepth);
+		if (word == "free") {
+			if (!list1.empty())
+				word = recursiveSituation(opp, list1, returnMoveDepth, recursiveCount, countTop);
+			// else
+			// 	printf("game is over, what do I do? ---- nothing I suppose.\n");
+		}
+		if (word == "good") {
+			state.remove(*col);
+			col = list.erase(col);
+			continue;
+		} else if (word == "bad")
+			goodList.push_back(*col);
+		state.remove(*col);
+		++col;
+	}
+	if (!goodList.empty()) {
+		list = goodList;
+		return "good";
+	} else if (list.empty())
+		return "bad";
+	return "free";
+}
 
-// // shouldn't call this with an emptylist
-// string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
-// 	/*****************************debug theory*********************************
-// 	Here is another version of recursiveSituation unfortunately, doesn't take
-// 	shortv isn't gonna work, so here we are. Now I can use for loop and
-// 	count and break! This will work faster than the last one.
-// 	But the problem is, this one doesn't tell you which col is good, it just
-// 	tells you this whole shortv is good or bad. So don't call this first.
-// 	This is basically the old recursiveSituation copied here
-// 	*****************************debug theory*********************************/
-// 	/*****************************debug action*********************************/
-// 	if (list.empty()) {
-// 		throw runtime_error("recursiveSituation: given list is empty!\n");
-// 		return "end";
-// 	}
-// 	/*****************************debug action*********************************/
+// shouldn't call this with an emptylist
+string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
+	/*****************************debug theory*********************************
+	Here is another version of recursiveSituation unfortunately, doesn't take
+	shortv isn't gonna work, so here we are. Now I can use for loop and
+	count and break! This will work faster than the last one.
+	But the problem is, this one doesn't tell you which col is good, it just
+	tells you this whole shortv is good or bad. So don't call this first.
+	This is basically the old recursiveSituation copied here
+	*****************************debug theory*********************************/
+	/*****************************debug action*********************************/
+	if (list.empty()) {
+		throw runtime_error("recursiveSituation: given list is empty!\n");
+		return "end";
+	}
+	/*****************************debug action*********************************/
 
-// 	// main
-// 	shortv list1;
-// 	string word;
-// 	short  badCount = 0;
-// 	// or use isGood and ditch the col != list.end()
-// 	vIter  col		= list.begin();
-// 	for (; col != list.end(); ++col) {
-// 		state.add(plr, *col);
-// 		word = returnMove(state.rPlayer(plr), list1, returnMoveDepth);
-// 		if (word == "free") {
-// 			if (!list1.empty())
-// 				word = recursiveSituation(state.rPlayer(plr), list1, returnMoveDepth, recursiveCount, countTop);
-// 			// else /*debug - delete this else for performance considerations*/
-// 			// 	printf("game is over, what do I do? ---- nothing I suppose.\n");
-// 		}
-// 		if (word == "good")
-// 			++badCount;
-// 		else if (word == "bad") {
-// 			state.remove(*col);
-// 			break;
-// 		}
-// 		state.remove(*col);
-// 	}
-// 	if (col != list.end())
-// 		// this is actually based on a fact that list.empty() == false, which is
-// 		// not always the case if the function isn't called properly
-// 		return "good";
-// 	else if (badCount == list.size())
-// 		return "bad";
-// 	return "free";
-// }
+	// main
+	shortv list1;
+	string word;
+	short  badCount = 0;
+	// or use isGood and ditch the col != list.end()
+	vIter  col		= list.begin();
+	for (; col != list.end(); ++col) {
+		state.add(plr, *col);
+		word = returnMove(state.rPlayer(plr), list1, returnMoveDepth);
+		if (word == "free") {
+			if (!list1.empty())
+				word = recursiveSituation(state.rPlayer(plr), list1, returnMoveDepth, recursiveCount, countTop);
+			// else /*debug - delete this else for performance considerations*/
+			// 	printf("game is over, what do I do? ---- nothing I suppose.\n");
+		}
+		if (word == "good")
+			++badCount;
+		else if (word == "bad") {
+			state.remove(*col);
+			break;
+		}
+		state.remove(*col);
+	}
+	if (col != list.end())
+		// this is actually based on a fact that list.empty() == false, which is
+		// not always the case if the function isn't called properly
+		return "good";
+	else if (badCount == list.size())
+		return "bad";
+	return "free";
+}
 
-int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool showTime, bool starsOn) {
-	/*
-	 * Maybe it's better to move it to boardInterface
-	 */
+int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
+	bool showTime, bool starsOn, bool trackRoute) {
 	// list for myself
 	shortv list, oppList, nonFullList;
 	long long timeUsed		  = 0;
@@ -1014,38 +1049,27 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	// analyse
 	if (starsOn && nonFullList.size() > 4)
 		state.areaTopTransform();
-	// else
-	// 	printf("Stars have lost their powers\n");
 	do {
-		timeUsed = returnTime(plr, list, returnMoveDepth++, word);
+		timeUsed = returnTime(plr, list, returnMoveDepth++, word, trackRoute);
 	} while (word == "free" && timeUsed < maxcaltime && returnMoveDepth < 10);
 	// this opp list is for the random suggestion functions
 	if (returnMoveDepth > 2)
 		returnMove(state.rPlayer(plr), oppList, returnMoveDepth - 1);
 	else
 		returnMove(state.rPlayer(plr), oppList, returnMoveDepth);
-	// if (!list.empty() && returnMoveDepth == 10 && timeUsed!=0) {
-	// 	int returnSituationDepth = 1;
-	// 	printf("This recursive is entered");
-	// 	while (timeUsed < 32 && returnSituationDepth < 6) {
-	// 		timeUsed = recursiveTime(plr, list, returnMoveDepth, returnSituationDepth, word);
-	// 		++returnSituationDepth;
-	// 	}
-	// 	cout << "ReturnSituationDepth = " << returnSituationDepth << endl;
-	// }
 	state.areaTopRestore();
 
 	// in case something unpleasent happens:
 	if (starsOn && returnMoveDepth > 8 && timeUsed < 81 && nonFullList.size() < 12) {
 		returnMoveDepth = 2;
 		while (timeUsed < maxcaltime && returnMoveDepth < 10) {
-			timeUsed = returnTime(plr, list, ++returnMoveDepth, word);
+			timeUsed = returnTime(plr, list, ++returnMoveDepth, word, trackRoute);
 		}
 		cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
 	}
 	else if (starsOn && list.size() > 4)
 		cout << "    calculation depth with stars = " << returnMoveDepth - 1 << endl;
-	else  // starsOn == false
+	else
 		cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
 
 	// show info if needed
@@ -1080,11 +1104,14 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	return 0;
 }
 
-long long BoardAnalyse::returnTime(const char plr, shortv& list, const short returnMoveDepth, string& word) {
+long long BoardAnalyse::returnTime(const char plr, shortv& list, const short returnMoveDepth, string& word, bool trackRoute) {
 	long long				 timeUsed;
 	system_clock::time_point start, end;
 	start		 = system_clock::now();
-	word		 = returnMove(plr, list, returnMoveDepth);
+	if (trackRoute)
+		word = returnMoveDebug(plr, list, returnMoveDepth);
+	else
+		word = returnMove(plr, list, returnMoveDepth);
 	end			 = system_clock::now();
 	auto elapsed = duration_cast<milliseconds>(end - start);
 	timeUsed	 = elapsed.count();

@@ -14,38 +14,31 @@ bool BoardInterface::getStateFromInput() {
 	short  minor = 0;
 	/*******************************temp code**********************************/
 	// don't really know why I need this eater
-	char* inputEater = new char[SHORTV_LENGTH * 2 + 2];
-	cin.getline(inputEater, SHORTV_LENGTH * 2 + 2);
-	if (strlen(inputEater) != column * 2 + 1) {
-		cout << "Note that the imported board must fit in with the current board size.\n";
+	char* inputEater = new char[INTER_MAX_INPUT];
+	cin.getline(inputEater, INTER_MAX_INPUT);
+	if (!strcmp(inputEater, "0") || !strcmp(inputEater, "exit")) {
 		delete[] inputEater;
 		return false;
 	}
-	char** input = new char*[row];
+	if (strlen(inputEater) != column * 2 + 1) {
+		cout << "Note that the imported board must fit in with the current "
+			<< "board size.\n";
+		delete[] inputEater;
+		return false;
+	}
+	char** input = new char*[INTER_MAX_INPUT];
 	if (inputEater[0] == '\0')
 		printf("inputEater=='\\0' and why?\n");
 	else {
-		input[0] = new char[column * 2 + 2];
+		input[0] = new char[INTER_MAX_INPUT];
 		strcpy(input[0], inputEater);
 		minor = 1;
 	}
 	delete[] inputEater;
-	/*******************************temp code**********************************/
-	/***************************************************************************
-	this will be much faster if I let BoardInterface change char** board
-	directly
-	for (short i = 0; i < row; ++i)
-	{
-		char *temp = new char[column * 2 + 2];
-		cin.getline(temp, column * 2 + 2);
-		for (short j = 0; j < column; ++j)
-			analyse->board.board[j][row-i-1] = temp[j * 2 + 1];
-		delete[] temp;
-	}
-	***************************************************************************/
+
 	for (short i = 0 + minor; i < row; ++i) {
-		input[i] = new char[column * 2 + 2];
-		cin.getline(input[i], column * 2 + 2);
+		input[i] = new char[INTER_MAX_INPUT];
+		cin.getline(input[i], INTER_MAX_INPUT);
 	}
 
 	char** temp = new char*[column];
@@ -205,6 +198,10 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 			analyse->starShow();
 		else if (!strcmp(input, "sv") || !strcmp(input, "save"))
 			record.saveGame(analyse->state);
+		else if (!strcmp(input, "sr") || !strcmp(input, "show routes")) {
+			if (showRouteMode() == "quit")
+				return "quit";
+		}
 		else if (!strcmp(input, "w") || !strcmp(input, "winn"))
 			cout << "winn = " << analyse->state.winn << endl;
 		else
@@ -346,7 +343,12 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
 			record.getDefaultSettings("inDebugMode", "showCalculate"),
 			record.getDefaultSettings("inDebugMode", "showTime"),
-			record.getDefaultSettings("inDebugMode", "starsOn"));
+			record.getDefaultSettings("inDebugMode", "starsOn"),
+			record.getDefaultSettings("inDebugMode", "trackRoutes"));
+		// debug
+		if (!byOpponent.list.empty() &&
+			!MyShortList::inList(byOpponent.list, byOpponent.move))
+			throw runtime_error("suggestion not in safe list\n");
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
@@ -361,9 +363,10 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		byPlayer.hintOn	= record.getDefaultSettings("inDebugMode", "hintOn");
 		if (byPlayer.hintOn)
 			cout << "\nHere is hint provided for you\n";
-		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer, byPlayer.hintOn,
+		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer,
+			byPlayer.hintOn,
 			record.getDefaultSettings("inDebugMode", "showTime"),
-			record.getDefaultSettings("inDebugMode", "starsOn"));
+			record.getDefaultSettings("inDebugMode", "starsOn"), false);
 		showComment(byPlayer);
 		if (byPlayer.hintOn && byPlayer.word != "bad")
 			printf("    %d is recommended\n", byPlayer.suggestion);
@@ -681,6 +684,38 @@ bool BoardInterface::controlMode() {
 	return true;
 }
 
+string BoardInterface::showRouteMode() {
+	long long routeBranches = analyse->routes.getBranches();
+	cout << "The computer examined " << routeBranches
+		 << " kinds of possibilities\n" << analyse->routes.getBranches(-2)
+		 << " of them is free, " << analyse->routes.getBranches(-1)
+		 << " of them is good and " << analyse->routes.getBranches(0)
+		 << " of them is bad for the computer\n";
+	cout << "We'll be showing:\n1. free routes\n2. good routes\n3. bad "
+		 << "routes\n4. all routes\n> ";
+	char in[8];
+	cin.getline(in, 8);
+	if (!strcmp(in, "q") || !strcmp(in, "quit"))
+		return "quit";
+	int num = atoi(in);
+	if (num < 1 || num > 4)
+		return "debug";
+
+	// print
+	routeBranches = analyse->routes.getBranches(num - 3);
+	if (routeBranches > 55) {
+		cout << "There are " << routeBranches
+			<< " branches, sure you want to print them all?\n"
+			<< "(yes/No)> ";
+		cin.getline(in, 8);
+		if (!strcmp(in, "yes") || !strcmp(in, "y") || !strcmp(in, "Y"))
+			analyse->routes.showRoute(num - 3);
+	}
+	else
+		analyse->routes.showRoute(num - 3);
+	return "debug";
+}
+
 string BoardInterface::getHelp(string mode) {
 	string enjoy  = "Enjoy!\n";
 	string addon  = "";
@@ -707,6 +742,7 @@ string BoardInterface::getHelp(string mode) {
 		"s/settings ------ view and change the settings\n" +
 		"st/show stars --- show debug analyse stars\n" +
 		"sv/save --------- save the current game\n" +
+		"sr/show routes -- show routes that the computer has examined\n" +
 		"t/tips ---------- tips I wrote to help other player (you) to play the game\n" +
 		"w/winn ---------- show win number (4 by default) in case you forgot\n" +
 		"i/info ---------- information about the game\n\n" + enterForMore;
@@ -970,3 +1006,4 @@ bool BoardInterface::isOver(const oneMove& move) {
 	}
 	return false;
 }
+

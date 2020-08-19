@@ -19,6 +19,7 @@ add_library(stars_lib STATIC
 	src/boardAnalyse.cpp
 	src/boardInterface.cpp
 	src/boardRecord.cpp
+	src/boardRoute.cpp
 	src/boardState.cpp
 	src/shortList.cpp
 )
