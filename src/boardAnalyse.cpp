@@ -365,7 +365,7 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 								isGood2 = true;
 								break;
 							}
-						} else if (list3.size() == 1) {	 // if opp has to go here
+						} else if (list3.size() == 1) {
 							state.add(opp, list3[0]);
 							shortv list4;
 							word = analyse(plr, list4);
@@ -393,7 +393,6 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 									if (word == "bad") {
 										++badCount2;
 									} else if (word == "good") {
-										printf("finally!, comething good!\n\n");
 										state.remove(list5[0]);
 										state.remove(list4[0], list3[0], *col2);
 										++goodCount1;
@@ -435,6 +434,454 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	if (addNumber1 != removeNumber1)
 		throw runtime_error("add and remove didn't match!\n");
+	/*******************************debug**********************************/
+	if (!goodList.empty()) {
+		list = goodList;
+		return "good";
+	}
+	if (list.empty())
+		return "bad";
+	return "free";
+}
+
+string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short depth) {
+	string word = analyse(plr, list);
+	if (word == "good" || word == "bad" || list.size() == 1)
+		return word;
+
+	/*********************************debug************************************/
+	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
+	/*********************************debug************************************/
+	char   opp = state.rPlayer(plr);
+	shortv list1, goodList;
+	vIter  col = list.begin();
+	short goodNode = -1, badNode = 0, freeNode = -2;
+
+	routes.add(list);
+	// one big loop ahead of us
+	for (routes.forward(*col); col != list.end(); routes.nextNode()) {
+		state.add(plr, *col);
+		word = analyse(opp, list1);
+		if (word == "good") {
+			routes.add(badNode);
+			state.remove(*col);
+			col = list.erase(col);
+			continue;
+		}
+		else if (word == "bad") {
+			routes.add(goodNode);
+			goodList.push_back(*col);
+		}
+		else if (!list1.empty()){
+			shortv list2;
+			short  goodCount1 = 0;
+			bool   isBad1	  = false;
+
+			routes.add(list1);
+			vIter col1 = list1.begin();
+			for (routes.forward(*col1); col1 != list1.end(); ++col1, routes.nextNode()) {
+				state.add(opp, *col1);
+				word = analyse(plr, list2);
+				if (word == "bad") {
+					routes.add(badNode);
+					state.remove(*col1);
+					isBad1 = true;
+					break;
+				}
+				else if (word == "good") {
+					routes.add(goodNode);
+					++goodCount1;
+				}
+				else if (!list2.empty()) {
+					shortv list3;
+					short  badCount2 = 0;
+					short  isGood2	 = false;
+					vIter  col2		 = list2.begin();
+					routes.add(list2);
+					for (routes.forward(*col2); col2 != list2.end(); ++col2, routes.nextNode()) {
+						state.add(plr, *col2);
+						word = analyse(opp, list3);
+						if (word == "good") {
+							routes.add(badNode);
+							++badCount2;
+						}
+						else if (word == "bad") { // good
+							routes.add(goodNode);
+							state.remove(*col2);
+							isGood2 = true;
+							break;
+						}
+						else if (depth > 2 && !list3.empty()) {
+							shortv list4;
+							short  goodCount3 = 0;
+							bool   isBad3	  = false;
+							vIter col3 = list3.begin();
+							routes.add(list3);
+							for (routes.forward(*col3); col3 != list3.end(); ++col3, routes.nextNode()) {
+								state.add(opp, *col3);
+								word = analyse(plr, list4);
+								if (word == "bad") {  // bad
+									routes.add(badNode);
+									state.remove(*col3);
+									isBad3 = true;
+									break;	// straight into 'if after while'
+								}
+								else if (word == "good") {
+									routes.add(goodNode);
+									++goodCount3;
+								}
+								else if (depth > 3 && !list4.empty()) {
+									shortv list5;
+									bool   isGood4	 = false;
+									short  badCount4 = 0;
+									vIter col4 = list4.begin();
+									routes.add(list4);
+									for (routes.forward(*col4); col4 != list4.end(); ++col4, routes.nextNode()) {
+										state.add(plr, *col4);
+										word = analyse(opp, list5);
+										if (word == "bad") {  // good
+											routes.add(goodNode);
+											isGood4 = true;
+											state.remove(*col4);
+											break;
+										}
+										else if (word == "good") {
+											routes.add(badNode);
+											++badCount4;
+										}
+										else if (depth > 4 && !list5.empty()) {
+											shortv list6;
+											bool   isBad5	  = false;
+											short  goodCount5 = 0;
+											vIter col5 = list5.begin();
+											routes.add(list5);
+											for (routes.forward(*col5); col5 != list5.end(); ++col5, routes.nextNode()) {
+												state.add(opp, *col5);
+												word = analyse(plr, list6);
+												if (word == "good") {
+													routes.add(goodNode);
+													++goodCount5;
+												}
+												else if (word == "bad") {
+													routes.add(badNode);
+													state.remove(*col5);
+													isBad5 = true;
+													break;
+												}
+												else if (depth > 5 && !list6.empty()) {
+													shortv list7;
+													bool   isGood6	 = false;
+													short  badCount6 = 0;
+													vIter  col6		 = list6.begin();
+													routes.add(list6);
+													for (routes.forward(*col6); col6 != list6.end(); ++col6, routes.nextNode()) {
+														state.add(plr, *col6);
+														word = analyse(opp, list7);
+														if (word == "bad") {  // good
+															routes.add(goodNode);
+															state.remove(*col6);
+															isGood6 = true;
+															break;
+														}
+														else if (word == "good") {
+															routes.add(badNode);
+															++badCount6;
+														}
+														else if (depth > 6 && !list7.empty()) {
+															// this is gonna be a disaster, it's just too much for a function
+															shortv list8;
+															bool   isBad7	  = false;
+															short  goodCount7 = 0;
+															vIter col7 = list7.begin();
+															for (routes.forward(*col7); col7 != list7.end(); ++col7, routes.nextNode()) {
+																state.add(opp, *col7);
+																word = analyse(plr, list8);
+																if (word == "good") {
+																	routes.add(goodNode);
+																	++goodCount7;
+																}
+																else if (word == "bad") {
+																	routes.add(badNode);
+																	state.remove(*col7);
+																	isBad7 = true;
+																	break;
+																}
+																else if (depth > 7 && !list8.empty()) {
+																	shortv list9;
+																	bool   isGood8	 = false;
+																	short  badCount8 = 0;
+																	vIter col8 = list8.begin();
+																	for (routes.forward(*col8); col8 != list8.end(); ++col8, routes.nextNode()) {
+																		state.add(plr, *col8);
+																		word = analyse(opp, list9);
+																		if (word == "good") {
+																			routes.add(badNode);
+																			++badCount8;  // bad for me
+																		}
+																		else if (word == "bad") {
+																			routes.add(goodNode);
+																			isGood8 = true;
+																			state.remove(*col8);
+																			break;
+																		}
+																		else if (depth > 8 && !list9.empty()) {
+																			shortv list10;
+																			bool   isBad9	  = false;
+																			short  goodCount9 = 0;
+																			vIter col9 = list9.begin();
+																			for (routes.forward(*col9); col9 != list9.end(); ++col9, routes.nextNode()) {
+																				state.add(opp, *col9);
+																				word = analyse(plr, list10);
+																				if (word == "good") {
+																					routes.add(goodNode);
+																					++goodCount9;
+																				}
+																				else if (word == "bad") {
+																					routes.add(badNode);
+																					state.remove(*col9);
+																					isBad9 = true;
+																					break;
+																				}
+																				state.remove(*col9);
+																			}
+																			routes.backward();
+																			if (isBad9)
+																				++badCount8;
+																			else if (goodCount9 == list9.size() && goodCount9 != 0) {
+																				isGood8 = true;
+																				state.remove(*col8);
+																				break;
+																			}
+																		}
+																		state.remove(*col8);
+																	}
+																	routes.backward();
+																	if (isGood8)
+																		++goodCount7;
+																	else if (badCount8 == list8.size()) {
+																		state.remove(*col7);
+																		isBad7 = true;
+																		break;
+																	}
+																}
+																state.remove(*col7);
+															}
+															routes.backward();
+															if (isBad7)
+																++badCount6;
+															else if (goodCount7 == list7.size()) {
+																state.remove(*col6);
+																isGood6 = true;
+																break;
+															}
+														}
+														state.remove(*col6);
+													}
+													routes.backward();
+													if (isGood6)
+														++goodCount5;
+													else if (badCount6 == list6.size()) {
+														state.remove(*col5);
+														isBad5 = true;
+														break;
+													}
+												}
+												state.remove(*col5);
+											}
+											routes.backward();
+											if (isBad5)
+												++badCount4;
+											else if (goodCount5 == list5.size()) {
+												isGood4 = true;
+												state.remove(*col4);
+												break;
+											}
+										}
+										else if (list5.size() == 1) {
+											shortv list6;
+											state.add(opp, list5[0]);
+											word = analyse(plr, list6);
+											routes.add(list5);
+											routes.forward(list5[0]);
+											if (word == "good") {
+												routes.add(goodNode);
+												routes.backward();
+												state.remove(list5[0]);
+												state.remove(*col4);
+												isGood4 = true;
+												break;
+											}
+											else if (word == "bad"){
+												routes.add(badNode);
+												++badCount4;
+											}
+											state.remove(list5[0]);
+											routes.backward();
+										}
+										state.remove(*col4);
+									}
+									routes.backward();
+									if (isGood4)
+										++goodCount3;
+									else if (badCount4 == list4.size() && !list4.empty()) {
+										state.remove(*col3);
+										isBad3 = true;
+										break;	// straight into 'if after while'
+									}
+								}
+								else if (list4.size() == 1) {
+									state.add(plr, list4[0]);
+									shortv list5;
+									word = analyse(opp, list5);
+									routes.add(list4);
+									routes.forward(list4[0]);
+									if (word == "good") {
+										routes.add(badNode);
+										routes.backward();
+										state.remove(list4[0]);
+										state.remove(*col3);
+										isBad3 = true;
+										break;
+									}
+									else if (word == "bad") {
+										routes.add(goodNode);
+										++goodCount3;
+									}
+									else if (list5.size() == 1) {
+										shortv list6;
+										state.add(opp, list5[0]);
+										word = analyse(plr, list6);
+										routes.add(list5);
+										routes.forward(list5[0]);
+										if (word == "bad") {
+											routes.backward(); // list5
+											routes.backward(); // list4
+											state.remove(list5[0], list4[0], *col3);
+											isBad3 = true;
+											break;
+										}
+										else if (word == "good") {
+											routes.add(goodNode);
+											++goodCount3;
+										}
+										routes.backward(); // list5
+										state.remove(list5[0]);
+									}
+									routes.backward(); // list4
+									state.remove(list4[0]);
+								}
+								state.remove(*col3);
+							}
+							routes.backward();
+							if (isBad3)
+								++badCount2;
+							if (goodCount3 == list3.size()) {
+								state.remove(*col2);
+								isGood2 = true;
+								break;
+							}
+						}
+						else if (list3.size() == 1) {
+							state.add(opp, list3[0]);
+							shortv list4;
+							word = analyse(plr, list4);
+							routes.add(list3);
+							routes.forward(list3[0]);
+							if (word == "bad") {
+								routes.add(badNode);
+								++badCount2;
+							}
+							else if (word == "good") {
+								routes.add(goodNode);
+								routes.backward();
+								state.remove(list3[0]);
+								state.remove(*col2);
+								++goodCount1;
+								break;
+							}
+							else if (list4.size() == 1) {
+								state.add(plr, list4[0]);
+								shortv list5;
+								word = analyse(opp, list5);
+								routes.add(list4);
+								routes.forward(list4[0]);
+								if (word == "good") {
+									routes.add(badNode);
+									++badCount2;
+								}
+								else if (word == "bad") {
+									routes.add(goodNode);
+									routes.backward();
+									routes.backward();
+									state.remove(list4[0], list3[0], *col2);
+									++goodCount1;
+									break;
+								}
+								else if (list5.size() == 1) {
+									state.add(opp, list5[0]);
+									shortv list6;
+									word = analyse(plr, list6);
+									routes.add(list5);
+									routes.forward(list5[0]);
+									if (word == "bad") {
+										routes.add(badNode);
+										++badCount2;
+									}
+									else if (word == "good") {
+										routes.add(goodNode);
+										routes.backward();
+										routes.backward();
+										routes.backward();
+										state.remove(list5[0]);
+										state.remove(list4[0], list3[0], *col2);
+										++goodCount1;
+										break;
+									}
+									routes.backward();
+									state.remove(list5[0]);
+								}
+								routes.backward();
+								state.remove(list4[0]);
+							}
+							routes.backward();
+							state.remove(list3[0]);
+						}
+						state.remove(*col2);
+					}
+					routes.backward();
+					if (badCount2 == list2.size()) {
+						state.remove(*col1);
+						isBad1 = true;
+						break;
+					}
+					if (isGood2)
+						++goodCount1;
+				}
+				state.remove(*col1);
+			}
+			routes.backward();
+			if (isBad1) {
+				state.remove(*col);
+				col = list.erase(col);
+				continue;
+			}
+			if (goodCount1 == list1.size())
+				goodList.push_back(*col);
+		}
+		state.remove(*col);
+		++col;
+	}
+	routes.backward();
+
+	/*******************************debug**********************************/
+	addNumber1	  = state.getAddNumber() - addNumber1;
+	removeNumber1 = state.getRemoveNumber() - removeNumber1;
+	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
+	if (addNumber1 != removeNumber1)
+		throw runtime_error("add and remove didn't match!\n");
+	if (!routes.match())
+		throw runtime_error("forward and backward didn't match!\n");
+	// routes.showRoute();
 	/*******************************debug**********************************/
 	if (!goodList.empty()) {
 		list = goodList;
@@ -567,11 +1014,11 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	// analyse
 	if (starsOn && nonFullList.size() > 4)
 		state.areaTopTransform();
-	else
-		printf("Stars have lost their powers\n");
+	// else
+	// 	printf("Stars have lost their powers\n");
 	do {
 		timeUsed = returnTime(plr, list, returnMoveDepth++, word);
-	} while (word == "free" && timeUsed < 81 && returnMoveDepth < 10);
+	} while (word == "free" && timeUsed < maxcaltime && returnMoveDepth < 10);
 	// this opp list is for the random suggestion functions
 	if (returnMoveDepth > 2)
 		returnMove(state.rPlayer(plr), oppList, returnMoveDepth - 1);
@@ -591,25 +1038,25 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 	// in case something unpleasent happens:
 	if (starsOn && returnMoveDepth > 8 && timeUsed < 81 && nonFullList.size() < 12) {
 		returnMoveDepth = 2;
-		while (timeUsed < 64 && returnMoveDepth < 10) {
+		while (timeUsed < maxcaltime && returnMoveDepth < 10) {
 			timeUsed = returnTime(plr, list, ++returnMoveDepth, word);
 		}
-		cout << "\treturnMoveDepth without stars = " << returnMoveDepth - 1 << endl;
+		cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
 	}
 	else if (starsOn && list.size() > 4)
-		cout << "\treturnMoveDepth with stars = " << returnMoveDepth - 1 << endl;
+		cout << "    calculation depth with stars = " << returnMoveDepth - 1 << endl;
 	else  // starsOn == false
-		cout << "\treturnMoveDepth without stars = " << returnMoveDepth - 1 << endl;
+		cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
 
 	// show info if needed
 	if (showCal) {
-		cout << "\tword = " << word << "\n\tlist = [ ";
+		cout << "    word = " << word << ", list = [ ";
 		for (short c : list)
 			cout << c << " ";
 		printf("]\n");
 	}
 	if (showTime)
-		cout << "\tcalculate time used: " << timeUsed << " ms\n";
+		cout << "    calculate time used: " << timeUsed << " ms\n";
 
 	// record, suggest and return
 	thisMove.word = word;
@@ -619,8 +1066,12 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal, bool 
 		return state.randomSuggestion(plr, list, oppList);
 	else if (word == "bad") {
 		word = analyse(plr, list);
-		if (word == "bad")
-			return state.randomMove();
+		if (word == "bad") {
+			oppList = firstPoint(rPlayer(plr));
+			if (oppList.empty())
+				return state.randomMove();
+			return state.randomMove(oppList);
+		}
 		else
 			return state.randomSuggestion(plr, list, oppList);
 	}

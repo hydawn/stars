@@ -13,8 +13,9 @@ private:
 	BoardRecord	  record;
 
 public:
-	BoardInterface() { generate(8, 8, 4); }
+	BoardInterface();
 	BoardInterface(BoardAnalyse& hb) { analyse = &hb; }
+	~BoardInterface();
 
 	void generate(short c, short r, short w) { analyse = new BoardAnalyse; }
 
@@ -30,6 +31,8 @@ public:
 	string debugMode(oneMove& byPlayer);
 	// string normalMode();
 	string settingsMode();
+	string defaultSettings();
+	string otherSettings();
 	string playMode();
 	string playBackMode();
 	string customMode();

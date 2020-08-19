@@ -4,6 +4,7 @@
 #include <string.h>
 #include <chrono>
 #include "boardRecord.h"
+#include "boardRoute.h"
 
 using std::string;
 using namespace std::chrono;
@@ -17,9 +18,13 @@ private:
 
 public:
 	BoardState state;
-	BoardAnalyse() : state(8, 8, 4) {}
-	BoardAnalyse(BoardState board_) : state(board_) {}
-	BoardAnalyse(const short r, const short c, const short w) : state(r, c, w) {}
+	int maxcaltime;
+	RouteTree routes;
+	BoardAnalyse() : state(8, 8, 4), routes(RouteTree()) {maxcaltime = 81;}
+	BoardAnalyse(BoardState board_) : state(board_),
+		routes(RouteTree()) {maxcaltime = 81;}
+	BoardAnalyse(const short r, const short c, const short w) : state(r, c, w),
+		routes(RouteTree()) {maxcaltime = 81;}
 
 	// analyse function
 	/*
@@ -27,6 +32,7 @@ public:
 	 * narrow down the freeList, if not to gain "good" or "bad"
 	 */
 	string returnMove(const char plr, shortv& list, const short depth);
+	string returnMoveDebug(const char plr, shortv& list, const short depth);
 	long long returnTime(const char plr, shortv& list, const short depth, string& word);
 	long long recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
 	int	   respond(const char plr, oneMove& thisMove, bool showCal, bool showTime, bool starsOn);

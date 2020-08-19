@@ -1,5 +1,14 @@
 #include "BoardInterface.h"
 
+BoardInterface::BoardInterface() {
+	generate(8, 8, 4);
+	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
+}
+
+BoardInterface::~BoardInterface() {
+	record.getOtherSettings("maxcaltime") = analyse->maxcaltime;
+}
+
 bool BoardInterface::getStateFromInput() {
 	short  row = analyse->getRows(), column = analyse->getCols();
 	short  minor = 0;
@@ -126,7 +135,7 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 	system_clock::time_point end;
 	string					 getter;
 	while (true) {
-		if (counter > 64)
+		if (counter > 32)
 			cin.clear();
 		cout << "\nIn debug mode\nPlayer '" << plr << "' move> ";
 		char input[INTER_MAX_INPUT];
@@ -142,14 +151,16 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 		// excute
 		if (!strcmp(input, "0") || !strcmp(input, "exit"))
 			return "exit";
-		else if (!strcmp(input, "q") || !strcmp(input, "quit"))
-			return "quit";
 		else if (input[0] == '\0') {
 			++counter;
 			cout << "Invalid empty input, let\'s try again\n";
 		}
+		else if (!strcmp(input, "a") || !strcmp(input, "add"))
+			return "add";
 		else if (!strcmp(input, "C") || !strcmp(input, "custom"))
 			return "custom";
+		else if (!strcmp(input, "H") || !strcmp(input, "hint"))
+			return input;
 		else if (!strcmp(input, "h") || !strcmp(input, "help")) {
 			getter = getHelp("debug");
 			if (getter != "quit")
@@ -157,41 +168,43 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 			else
 				return getter;
 		}
-		else if (!strcmp(input, "i") || !strcmp(input, "info") || !strcmp(input, "story") ||
-				!strcmp(input, "t") || !strcmp(input, "tips") || !strcmp(input, "a song, please")) {
-			getter = getInfo("debug");
+		else if (!strcmp(input, "i") || !strcmp(input, "info") ||
+			!strcmp(input, "story") || !strcmp(input, "t") ||
+			!strcmp(input, "tips") || !strcmp(input, "a song, please")) {
+			getter = getInfo(input);
 			if (getter != "quit")
 				cout << getter << endl;
 			else
 				return getter;
 		}
-		else if (!strcmp(input, "P") || !strcmp(input, "play back") || !strcmp(input, "playback"))
+		else if (!strcmp(input, "m") || !strcmp(input, "move") ||
+			!strcmp(input, "I") || !strcmp(input, "import") ||
+			!strcmp(input, "c") || !strcmp(input, "change"))
+			return input;
+		else if (!strcmp(input, "P") || !strcmp(input, "play back") ||
+			!strcmp(input, "playback"))
 			return "playBack";
-		else if (!strcmp(input, "p") || !strcmp(input, "play") || !strcmp(input, "play"))
+		else if (!strcmp(input, "p") || !strcmp(input, "play") ||
+			!strcmp(input, "play"))
 			return "play";
+		else if (!strcmp(input, "q") || !strcmp(input, "quit"))
+			return "quit";
+		else if (!strcmp(input, "r") || !strcmp(input, "reverse"))
+			return "reverse";
 		else if (!strcmp(input, "S") || !strcmp(input, "show")) {
-			if (record.getSettings("inDebugMode", "starrySky"))
+			if (record.getDefaultSettings("inDebugMode", "starrySky"))
 				analyse->starShow();
 			else
 				analyse->show();
 		}
+		else if (!strcmp(input, "s") || !strcmp(input, "setting") ||
+			!strcmp(input, "settings"))
+			return "settings";
+		else if (!strcmp(input, "sa") || !strcmp(input, "st") ||
+			!strcmp(input, "show stars"))
+			analyse->starShow();
 		else if (!strcmp(input, "sv") || !strcmp(input, "save"))
 			record.saveGame(analyse->state);
-		else if (!strcmp(input, "sa") || !strcmp(input, "st") || !strcmp(input, "show stars"))
-			analyse->starShow();
-		else if (!strcmp(input, "s") || !strcmp(input, "setting") || !strcmp(input, "settings"))
-			return "settings";
-		else if (!strcmp(input, "a") || !strcmp(input, "add"))
-			return "add";
-		else if (!strcmp(input, "d") || !strcmp(input, "debug"))
-			printf("We are already in debug mode\n");
-		else if (!strcmp(input, "H") || !strcmp(input, "hint"))
-			return input;
-		else if (!strcmp(input, "m") || !strcmp(input, "move") || !strcmp(input, "I") ||
-					!strcmp(input, "import") || !strcmp(input, "c") || !strcmp(input, "change"))
-			return input;
-		else if (!strcmp(input, "r") || !strcmp(input, "reverse"))
-			return "reverse";
 		else if (!strcmp(input, "w") || !strcmp(input, "winn"))
 			cout << "winn = " << analyse->state.winn << endl;
 		else
@@ -273,11 +286,11 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		// analyse->show();
 		input = getInput(byPlayer.player, byPlayer.time);
 		if (input == "exit" || input == "quit") {
-			printf("Exit from debug mode\n");
+			printf("exit from debug mode\n");
 			return input;
 		}
-		if (input == "add" || input == "reverse" || input == "settings" || input == "custom" ||
-			input == "play" || input == "playBack")
+		if (input == "add" || input == "reverse" || input == "settings" ||
+			input == "custom" || input == "play" || input == "playBack")
 			return input;
 		if (input == "c" || input == "change") {
 			// change player
@@ -287,7 +300,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			std::swap(byPlayer.suggestion, byOpponent.suggestion);
 
 			// print hint
-			if (record.getSettings("inDebugMode", "hintOn")) {
+			if (record.getDefaultSettings("inDebugMode", "hintOn")) {
 				printf("Here was %c's word, list, and suggestion:\n", byPlayer.player);
 				cout << "word = " << byPlayer.word << "\nlist = [ ";
 				for (short move : byPlayer.list)
@@ -297,9 +310,9 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			continue;
 		}
 		else if (input == "I" || input == "import") {
-			if (record.getSettings("changeBoard", "askToSaveBoard"))
-				askToSaveBoard(record.getSettings("changeBoard", "defaultSaveBoard"));
-			else if (record.getSettings("changeBoard", "defaultSaveBoard"))
+			if (record.getDefaultSettings("changeBoard", "askToSaveBoard"))
+				askToSaveBoard(record.getDefaultSettings("changeBoard", "defaultSaveBoard"));
+			else if (record.getDefaultSettings("changeBoard", "defaultSaveBoard"))
 				record.saveGame(analyse->state);
 			// new board
 			importNewBoard();
@@ -319,44 +332,45 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			analyse->go(byPlayer.player, byPlayer.move);
 			record.push_back(byPlayer);	 // byPlayer end here
 			if (isOver(byPlayer)) {
-				printf("Exit from debug mode\n");
+				printf("exit from debug mode\n");
 				return "over";
 			}
 		}
 		else if (isOver(byPlayer)) {
-			printf("Exit from debug mode\n");
+			printf("exit from debug mode\n");
 			return "over";
 		}
 
 		// opp respond
-		printf("info for the computer:\n");
+		printf("Info for the computer:\n");
 		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
-			record.getSettings("inDebugMode", "showCalculate"),
-			record.getSettings("inDebugMode", "showTime"),
-			record.getSettings("inDebugMode", "starsOn"));
+			record.getDefaultSettings("inDebugMode", "showCalculate"),
+			record.getDefaultSettings("inDebugMode", "showTime"),
+			record.getDefaultSettings("inDebugMode", "starsOn"));
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
-		cout << "\tinput time used: " << byPlayer.time << "ms\n";
-		printf("\t%c goes here %d\n", byOpponent.player, byOpponent.move);
+		cout << "    input time used: " << byPlayer.time << "ms\n";
+		printf("    %c goes here %d\n", byOpponent.player, byOpponent.move);
 		if (isOver(byOpponent)) {
 			printf("Exit from debug mode\n");
 			return "over";
 		}
 
 		// recommend
-		byPlayer.hintOn	= record.getSettings("inDebugMode", "hintOn");
+		byPlayer.hintOn	= record.getDefaultSettings("inDebugMode", "hintOn");
 		if (byPlayer.hintOn)
 			cout << "\nHere is hint provided for you\n";
 		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer, byPlayer.hintOn,
-			record.getSettings("inDebugMode", "showTime"),
-			record.getSettings("inDebugMode", "starsOn"));
+			record.getDefaultSettings("inDebugMode", "showTime"),
+			record.getDefaultSettings("inDebugMode", "starsOn"));
 		showComment(byPlayer);
-		if (byPlayer.hintOn)
-			printf("\tthis %d is recommended\n", byPlayer.suggestion);
+		if (byPlayer.hintOn && byPlayer.word != "bad")
+			printf("    %d is recommended\n", byPlayer.suggestion);
 
 		// show
-		if (record.getSettings("inDebugMode", "starrySky"))
+		printf("\n");
+		if (record.getDefaultSettings("inDebugMode", "starrySky"))
 			analyse->starShow();
 		else
 			analyse->show();
@@ -366,19 +380,20 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 	return "quit";
 }
 
-string BoardInterface::settingsMode() {
-	printf("We are in settings mode now:\n");
-	cout << "we have " << record.getSettingsItemNumber() << " situations and within them we have ";
-	cout << "multiple items each marked with tags\nbelow, type in tags to change ";
-	cout << "these settings, 0 to exit, S/show to show current\nsettings, h/help for help\n";
+string BoardInterface::defaultSettings() {
+	cout << "We have " << record.getDefaultSettingsItemNum() << " situations and "
+		 << "within them we have multiple items each marked with tags\n"
+		 << "below, type in tags to change these settings, 0 to exit, S/show "
+		 << "to show current\nsettings, h/help for help\n";
 	// show
 	record.showSettingsWithTags();
-	cout << "\ncare to change one of them?\n";
+	cout << "\nCare to change one of them?\n";
 	while (true) {
 		printf("> ");
 		char input[8];
 		cin.getline(input, 8);
-		if (input[0] == '\0' || !strcmp(input, "0") || !strcmp(input, "exit") || !strcmp(input, "no")) {
+		if (input[0] == '\0' || !strcmp(input, "0") || !strcmp(input, "exit") ||
+			!strcmp(input, "no")) {
 			record.saveSettings();
 			cout << "Exit from settings mode\n";
 			return "debug";
@@ -397,8 +412,8 @@ string BoardInterface::settingsMode() {
 			if (!(tag1 < 26 && tag1 > -1 && tag2 < 26 && tag2 > -1 &&
 				record.changeSettingsUsingTags(tag1, tag2))) {
 				cout << "Invalid input, let's try again.\n";
-				cout << "And if you don't know what's going on, you can always "
-						"type help, happy to help as always.\n";
+				cout << "And if you don't know what's going on, you can always"
+						" type help, happy to help as always.\n";
 			}
 		} else {
 			cout << "Invalid input, let's try again.\n";
@@ -408,6 +423,51 @@ string BoardInterface::settingsMode() {
 	}
 	throw runtime_error("control flow into the end of settings mode\n");
 	return "quit";
+}
+
+string BoardInterface::otherSettings() {
+	cout << "Here you can change computer's max calculation time settings, the\n"
+		<< "current cal time is "
+		<< analyse->maxcaltime
+		<< "ms. You can reset it so the calculation time might be\ndifferent. "
+		<< "nothing or 0 to exit, q to quit\n";
+	char in[16];
+	int	 trans = 0;
+	do {
+		printf("(1~9999999)> ");
+		cin.getline(in, 16);
+		if (in[0] == '\0' || !strcmp(in, "0") || !strcmp(in, "exit"))
+			return "debug";
+		if (!strcmp(in, "q") || !strcmp(in, "quit"))
+			return "quit";
+		trans = atoi(in);
+		if (trans > 0 && trans < 9999999) {
+			analyse->maxcaltime = trans;
+			return "debug";
+		}
+		printf("let's try again\n");
+	} while (true);
+}
+
+string BoardInterface::settingsMode() {
+	printf("We are in settings mode now:\n");
+	// default settings, other settings
+	char input[8];
+	printf("1. default settings\n2. other settings\n");
+	do {
+		printf("(enter number)> ");
+		cin.getline(input, 8);
+		if (input[0] == '\0' || !strcmp(input, "0") || !strcmp(input, "exit"))
+			return "debug";
+		if (!strcmp(input, "q") || !strcmp(input, "quit"))
+			return "quit";
+		if (!strcmp(input, "1"))
+			return defaultSettings();
+		if (!strcmp(input, "2"))
+			return otherSettings();
+		else
+			printf("let's try again\n");
+	} while (true);
 }
 
 string BoardInterface::playMode() {
@@ -549,9 +609,9 @@ string BoardInterface::customMode() {
 	printf("In custom mode ...\n");
 	printf("Note that the more width you set, the clumsier the computer will be\n");
 	printf("It is recommended to set the width lesser than 16\n");
-	if (record.getSettings("inCustomMode", "askToSaveBoard"))
-		askToSaveBoard(record.getSettings("inCustomMode", "defaultSaveBoard"));
-	else if (record.getSettings("inCustomMode", "defaultSaveBoard"))
+	if (record.getDefaultSettings("inCustomMode", "askToSaveBoard"))
+		askToSaveBoard(record.getDefaultSettings("inCustomMode", "defaultSaveBoard"));
+	else if (record.getDefaultSettings("inCustomMode", "defaultSaveBoard"))
 		record.saveGame(analyse->state);
 	short column, row, winn;
 	column = getCustomInput("board width");
@@ -594,18 +654,18 @@ bool BoardInterface::controlMode() {
 		else if (advice == "custom")
 			advice = customMode();
 		else if (advice == "over") {
-			if (record.getSettings("gameIsOver", "askToDebug") &&
-				askToDebug(record.getSettings("gameIsOver", "defaultDebug"))) {
+			if (record.getDefaultSettings("gameIsOver", "askToDebug") &&
+				askToDebug(record.getDefaultSettings("gameIsOver", "defaultDebug"))) {
 				advice = debugMode(byPlayer);
 				continue;
 			}
-			else if (record.getSettings("gameIsOver", "defaultDebug")) {
+			else if (record.getDefaultSettings("gameIsOver", "defaultDebug")) {
 				advice = debugMode(byPlayer);
 				continue;
 			}
-			if (record.getSettings("gameIsOver", "askToSaveBoard"))
-				askToSaveBoard(record.getSettings("gameIsOver", "defaultSaveBoard"));
-			else if (record.getSettings("gameIsOver", "defaultSaveBoard"))
+			if (record.getDefaultSettings("gameIsOver", "askToSaveBoard"))
+				askToSaveBoard(record.getDefaultSettings("gameIsOver", "defaultSaveBoard"));
+			else if (record.getDefaultSettings("gameIsOver", "defaultSaveBoard"))
 				record.saveGame(analyse->state);
 			break;
 		}
@@ -831,35 +891,35 @@ string BoardInterface::getInfo(string input) {
 void BoardInterface::showComment(oneMove& move) {
 	// comment
 	if ((move.word == "good" && move.byComputer) || (move.word == "bad" && !move.byComputer))
-		cout << "\tNot a promising future I'm afraid.\n";
+		cout << "    not a promising future I'm afraid.\n";
 	else if ((move.word == "bad" && move.byComputer) || (move.word == "good" && !move.byComputer))
-		cout << "\tThis is going really well~\n";
+		cout << "    this is going really well~\n";
 	else {
 		shortv non;
 		analyse->state.nonFullColumn(non);
 		if (move.list.size() == 1 && move.byComputer)
-			cout << "One move left, where can I go then?\n";
+			cout << "    one move left, where can I go then?\n";
 		else if (move.list.size() == 1 && !move.byComputer)
-			cout << "One move left, where can you go then?\n";
+			cout << "    one move left, where can you go then?\n";
 		else if (non.size() > 5 && move.list.size() <= non.size() / 2)
-			cout << "Such broad space, yet so few of them is available.\n";
+			cout << "    such broad space, yet so few of them is available.\n";
 		else if (non.size() < 4)
-			cout << "Not much space to chose form.\n";
+			cout << "    not much space to chose form.\n";
 	}
 }
 
 bool BoardInterface::askToDebug(bool yes) {
 	char msg[8];
 	if (yes)
-		printf("care for a debug mode? (default yes) (Yes/no)> ");
+		printf("Care for a debug mode? (default yes) (Yes/no)> ");
 	else
-		printf("care for a debug mode? (default no) (yes/No)> ");
+		printf("Care for a debug mode? (default no) (yes/No)> ");
 	cin.getline(msg, 8);
 	if ((yes && !strlen(msg)) || !strcmp(msg, "Y") || !strcmp(msg, "yes") || !strcmp(msg, "y")) {
 		printf("As you wish\n");
 		return true;
 	} else
-		printf("no it is.\n");
+		printf("No it is.\n");
 	return false;
 }
 

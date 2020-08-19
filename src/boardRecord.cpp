@@ -2,39 +2,45 @@
 
 // hard core show
 string addon		   = "";
-string defaultSettings = addon +
+string inFileSettings = addon +
 	"{\n" +
-	"	\"changeBoard\" : \n" +
-	"	{\n" +
-	"		\"askToSaveBoard\" : false,\n" +
-	"		\"defaultSaveBoard\" : false\n" +
+	"	\"defaultSettings\": {\n" +
+	"		\"changeBoard\": {\n" +
+	"			\"askToSaveBoard\": false,\n" +
+	"			\"defaultSaveBoard\": false\n" +
+	"		},\n" +
+	"		\"gameIsOver\": {\n" +
+	"			\"askToDebug\": true,\n" +
+	"			\"askToSaveBoard\": true,\n" +
+	"			\"defaultDebug\": false,\n" +
+	"			\"defaultSaveBoard\": false\n" +
+	"		},\n" +
+	"		\"inCustomMode\": {\n" +
+	"			\"askToSaveBoard\": false,\n" +
+	"			\"defaultSaveBoard\": false\n" +
+	"		},\n" +
+	"		\"inDebugMode\": {\n" +
+	"			\"hintOn\": false,\n" +
+	"			\"showCalculate\": false,\n" +
+	"			\"showTime\": false,\n" +
+	"			\"starrySky\": false,\n" +
+	"			\"starsOn\": false\n" +
+	"		},\n" +
+	"		\"whenSaveGame\": {\n" +
+	"			\"askGiveName\": true,\n" +
+	"			\"defaultGiveName\": false\n" +
+	"		}\n" +
 	"	},\n" +
-	"	\"gameIsOver\" : \n" +
-	"	{\n" +
-	"		\"askToDebug\" : true,\n" +
-	"		\"askToSaveBoard\" : true,\n" +
-	"		\"defaultDebug\" : false,\n" +
-	"		\"defaultSaveBoard\" : false\n" +
-	"	},\n" +
-	"	\"inCustomMode\":\n" +
-	"	{\n" +
-	"		\"askToSaveBoard\" : false,\n" +
-	"		\"defaultSaveBoard\" : false\n" +
-	"	},\n" +
-	"	\"inDebugMode\" : \n" +
-	"	{\n" +
-	"		\"hintOn\" : false,\n" +
-	"		\"showCalculate\" : false,\n" +
-	"		\"showTime\" : false,\n" +
-	"		\"starrySky\" : false,\n" +
-	"		\"starsOn\" : false\n" +
-	"	},\n" +
-	"	\"whenSaveGame\" : \n" +
-	"	{\n" +
-	"		\"askGiveName\" : true,\n" +
-	"		\"defaultGiveName\" : false\n" +
+	"	\"otherSettings\": {\n" +
+	"		\"maxcaltime\":81\n" +
 	"	}\n" +
 	"}\n";
+
+BoardRecord::~BoardRecord() {
+	writeSettings();
+	if (!games.empty())
+		writeGames();
+}
 
 std::ostream& operator<<(std::ostream& os, oneMove& move) {
 	os << "mode = " << move.mode << "\n";
@@ -59,21 +65,24 @@ void BoardRecord::getFile() {
 	if (!inGames.is_open()) {
 		cout << "failed to open file \"" << gamesFileName << "\" to read\n";
 		cout << "will create one when necessary.\n";
-	} else
+	}
+	else
 		inGames >> games;
 	std::ifstream inSet(settingsFileName);
 	if (!inSet.is_open()) {
 		cout << "failed to open file \"" << settingsFileName << "\" to read\n";
 		cout << "creating a new file\n";
 		std::ofstream outSet(settingsFileName);
-		outSet << defaultSettings;
+		outSet << inFileSettings;
 		if (!outSet.is_open())
 			throw runtime_error("failed to create file, mission aborted\n ");
 		outSet.close();
 		std::ifstream in(settingsFileName);
 		in >> settings;
-	} else
+	}
+	else {
 		inSet >> settings;
+	}
 }
 
 void BoardRecord::writeGames() {
@@ -98,8 +107,8 @@ void BoardRecord::writeSettings() {
 
 void BoardRecord::saveGame(BoardState& state) {
 	string gameName = "no one";
-	if (getSettings("whenSaveGame", "askGiveName")) {
-		bool defaultGiveName = getSettings("whenSaveGame", "defaultGiveName");
+	if (getDefaultSettings("whenSaveGame", "askGiveName")) {
+		bool defaultGiveName = getDefaultSettings("whenSaveGame", "defaultGiveName");
 		if (defaultGiveName)
 			printf("Care to give the board a name? (yes as default) (no/Yes)> ");
 		else
@@ -129,15 +138,16 @@ void BoardRecord::saveGame(const string& gameName, BoardState& state) {
 	writeGames();
 }
 
-bool BoardRecord::getSettings(const string& situ, const string& item) {
+bool BoardRecord::getDefaultSettings(const string& situ, const string& item) {
 	int i = 0;
+	Json::Value &defaultSettings = settings["defaultSettings"];
 	while (i < 3) {
-		if (settings.isMember(situ)) {
-			if (settings[situ].isMember(item))
-				return settings[situ][item].asBool();
+		if (defaultSettings.isMember(situ)) {
+			if (defaultSettings[situ].isMember(item))
+				return defaultSettings[situ][item].asBool();
 			else if (i < 2) {
 				std::ofstream outSet(settingsFileName);
-				outSet << defaultSettings;
+				outSet << inFileSettings;
 				outSet.close();
 				std::ifstream in(settingsFileName);
 				in >> settings;
@@ -151,10 +161,11 @@ bool BoardRecord::getSettings(const string& situ, const string& item) {
 		}
 		else if (i < 2) {
 			std::ofstream outSet(settingsFileName);
-			outSet << defaultSettings;
+			outSet << inFileSettings;
 			outSet.close();
 			std::ifstream in(settingsFileName);
 			in >> settings;
+			defaultSettings = settings["defaultSettings"];
 			++i;
 			continue;
 		}
@@ -166,8 +177,31 @@ bool BoardRecord::getSettings(const string& situ, const string& item) {
 	throw runtime_error("getSettings flow to the end\n");
 }
 
+Json::Value& BoardRecord::getOtherSettings(const string &name) {
+	bool ret = true;
+	Json::Value &otherSettings = settings["otherSettings"];
+	while (true) {
+		if (otherSettings.isMember(name))
+			return otherSettings[name];
+		// if not, try writting first
+		if (ret) {
+			std::ofstream outSet(settingsFileName);
+			outSet << inFileSettings;
+			outSet.close();
+			std::ifstream in(settingsFileName);
+			in >> settings;
+			otherSettings = settings["otherSettings"];
+			ret = false;
+			continue;
+		}
+		// if tried and failed
+		throw runtime_error("no such other settings");
+	}
+}
+
 void BoardRecord::showSettingsWithTags() {
-	members member = settings.getMemberNames();
+	Json::Value &defaultSettings = settings["defaultSettings"];
+	members member = defaultSettings.getMemberNames();
 	cout << "situation\t"
 		<< "item\t\t\t"
 		<< "true/false\t"
@@ -175,32 +209,33 @@ void BoardRecord::showSettingsWithTags() {
 	char x = 'a';
 	for (members::iterator i = member.begin(); i != member.end(); ++i) {
 		char	y	  = 'a';
-		members inset = settings[*i].getMemberNames();
+		members inset = defaultSettings[*i].getMemberNames();
 		printf("\n");
 		for (members::iterator j = inset.begin(); j != inset.end(); ++j) {
 			if ((*j).size() > 15)
-				cout << *i << "\t" << *j << "\t" << settings[*i][*j] << "\t\t" << x << y++ << endl;
+				cout << *i << "\t" << *j << "\t" << defaultSettings[*i][*j] << "\t\t" << x << y++ << endl;
 			else if ((*j).size() < 8)
-				cout << *i << "\t" << *j << "\t\t\t" << settings[*i][*j] << "\t\t" << x << y++ << endl;
+				cout << *i << "\t" << *j << "\t\t\t" << defaultSettings[*i][*j] << "\t\t" << x << y++ << endl;
 			else
-				cout << *i << "\t" << *j << "\t\t" << settings[*i][*j] << "\t\t" << x << y++ << endl;
+				cout << *i << "\t" << *j << "\t\t" << defaultSettings[*i][*j] << "\t\t" << x << y++ << endl;
 		}
 		++x;
 	}
 }
 
 bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
-	members member = settings.getMemberNames();
+	Json::Value &defaultSettings = settings["defaultSettings"];
+	members member = defaultSettings.getMemberNames();
 	int		x	   = 0;
 	for (members::iterator i = member.begin(); i != member.end(); ++i) {
 		int		y	  = 0;
-		members inset = settings[*i].getMemberNames();
+		members inset = defaultSettings[*i].getMemberNames();
 		for (members::iterator j = inset.begin(); j != inset.end(); ++j) {
 			if (x == tag1 && y == tag2) {
-				settings[*i][*j] = !settings[*i][*j].asBool();
+				defaultSettings[*i][*j] = !defaultSettings[*i][*j].asBool();
 				cout << *i << ": " << *j << " is changed from "
-					<< std::boolalpha << !settings[*i][*j].asBool() << " to "
-					<< settings[*i][*j] << endl;
+					<< std::boolalpha << !defaultSettings[*i][*j].asBool()
+					<< " to " << defaultSettings[*i][*j] << endl;
 				return true;
 			}
 			++y;
@@ -215,7 +250,7 @@ string BoardRecord::showSavedGames(Json::Value& ret) {
 	unsigned int i = 0;
 	while (i < games.size()) {
 		// date, name, board, (index)
-		printf("\ndate: %s\nname: %s\nboard:\n", games[i]["date"].asCString(), games[i]["name"].asCString());
+		printf("\ndate: %sname: %s\nboard:\n", games[i]["date"].asCString(), games[i]["name"].asCString());
 		showSavedBoard(games[i]["state"]);
 		printf("index number: %d/%d\n> ", i + 1, games.size());
 
@@ -259,4 +294,15 @@ void BoardRecord::refreshHistoryMove(const Json::Value& hm) {
 	for (oneMove om : hm) {
 		historyMove.push_back(om);
 	}
+}
+
+BoardRecord& BoardRecord::operator=(const BoardRecord& br) {
+	if (this == &br)
+		return *this;
+	settings = br.settings;
+	gamesFileName = br.gamesFileName;
+	settingsFileName = br.settingsFileName;
+	historyMove		 = br.historyMove;
+	games			 = br.games;
+	return *this;
 }

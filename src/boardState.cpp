@@ -422,14 +422,14 @@ bool BoardState::specialPiece(const short col, const short ro) {
 		for (i = 1; i < winn; ++i)
 			if (board[col + i][ro] != present)
 				break;
-		if (i == winn && ((col + i <= cols && board[col + i][ro] == ' ') ||
+		if (i == winn && ((col + i < cols && board[col + i][ro] == ' ') ||
 			(col > 0 && board[col - 1][ro] == ' ')))
 			return true;
 		// up & right
 		for (i = 1; i < winn; ++i)
 			if (board[col + i][ro + i] != present)
 				break;
-		if (i == winn && ((col + i <= cols && ro + i <= rows &&
+		if (i == winn && ((col + i < cols && ro + i < rows &&
 			board[col + i][ro + i] == ' ') ||
 			(col > 0 && ro > 0 && board[col - 1][ro - 1] == ' ')))
 			return true;
@@ -438,7 +438,7 @@ bool BoardState::specialPiece(const short col, const short ro) {
 			for (i = 1; i < winn; ++i)
 				if (board[col + i][ro - i] != present)
 					break;
-			if (i == winn && ((col + i <= cols && ro - i >= 0 &&
+			if (i == winn && ((col + i < cols && ro - i >= 0 &&
 				board[col + i][ro - i] == ' ') ||
 				(col > 0 && ro + 1 <= rows && board[col - 1][ro + 1] == ' ')))
 				return true;
@@ -449,7 +449,7 @@ bool BoardState::specialPiece(const short col, const short ro) {
 		for (i = 1; i < winn; ++i)
 			if (board[col][ro + i] != present)
 				return false;
-		if ((ro > 0 && board[col][ro - 1] == ' ') || (ro + i <= rows && board[col][ro + i] == ' '))
+		if ((ro > 0 && board[col][ro - 1] == ' ') || (ro + i < rows && board[col][ro + i] == ' '))
 			return true;
 	}
 	return false;

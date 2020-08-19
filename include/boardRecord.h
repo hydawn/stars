@@ -13,10 +13,9 @@ typedef Json::Value::Members members;
 
 class BoardRecord {
 private:
-	Json::Value settings;
-	Json::Value strategy;
-	string		gamesFileName;
-	string		settingsFileName;
+	Json::Value	 settings;
+	string		 gamesFileName;
+	string		 settingsFileName;
 
 	// file control
 	void getFile();
@@ -26,8 +25,11 @@ private:
 public:
 	vector<oneMove> historyMove;
 	Json::Value		games;
-	BoardRecord() : historyMove(vector<oneMove>()), gamesFileName("Stars_games.json"),
-		settingsFileName("Stars_settings.json") { getFile(); }
+	BoardRecord() : historyMove(vector<oneMove>()),
+		gamesFileName("Stars_games.json"),
+		settingsFileName("Stars_settings.json")
+		{ getFile(); }
+	~BoardRecord();
 
 	// record
 	void push_back(const oneMove &om) { historyMove.push_back(om); }
@@ -41,8 +43,9 @@ public:
 	void clearHistoryMove() { historyMove.clear(); }
 
 	// settings
-	bool getSettings(const string &situ, const string &item);
-	int	 getSettingsItemNumber() { return settings.size(); }
+	bool getDefaultSettings(const string &situ, const string &item);
+	Json::Value& getOtherSettings(const string &name);
+	int	 getDefaultSettingsItemNum() { return settings["defaultSettings"].size(); }
 	void showSettingsWithTags();
 	bool changeSettingsUsingTags(int tag1, int tag2);
 
@@ -53,6 +56,9 @@ public:
 	void		 showSavedBoard(const Json::Value &state);
 	string		 showSavedGames(Json::Value& ret);
 	void		 refreshHistoryMove(const Json::Value &hm);
+
+	//oper
+	BoardRecord &operator=(const BoardRecord &br);
 };
 
 #endif
