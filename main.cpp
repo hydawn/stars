@@ -1,8 +1,7 @@
 #include "boardInterface.h"
 
 int main() {
-	BoardAnalyse   boardAnalyser;
-	BoardInterface boardInterface(boardAnalyser);
+	BoardInterface boardInterface;
 	cout << "Use numbers to place a piece, h for help, 0 to exit.\n";
 	cout << "The game is on ->\n";
 

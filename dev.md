@@ -22,6 +22,15 @@ well, this is clearly more organized than CharmedPython
 - route tree added to track the computer's analyse route
 - ways to reset the max calculation time added
 
+## 004
+- took single route analyse out in a new function - performance improved
+- fix problem: maxcaltime won't be write to json
+- fix generate function in boardInterface.h
+- which is never used until now
+- many copy constructors added
+- some renaming
+- other minor changes
+
 # TODO
 - add debug and release flag
 - change getStateFromInput to fit all size of board - there's no need to do that

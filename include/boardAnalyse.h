@@ -17,10 +17,12 @@ private:
 	string analyse(const char plr, shortv& list);
 
 public:
-	BoardState state;
 	int maxcaltime;
+	BoardState state;
 	RouteTree routes;
 	BoardAnalyse() : state(8, 8, 4), routes(RouteTree()) {maxcaltime = 81;}
+	BoardAnalyse(BoardAnalyse& ba) : maxcaltime(ba.maxcaltime), state(ba.state),
+		routes(ba.routes) {}
 	BoardAnalyse(BoardState board_) : state(board_),
 		routes(RouteTree()) {maxcaltime = 81;}
 	BoardAnalyse(const short r, const short c, const short w) : state(r, c, w),
@@ -31,6 +33,9 @@ public:
 	 * I should bear in mind that the whole concept of analyse function is to
 	 * narrow down the freeList, if not to gain "good" or "bad"
 	 */
+	string	  oneMoveAnalyseDebug(const char plr, const short col,
+		short goodNode, short badNode, const short depth,
+		const short maxDepth = 5);
 	string returnMove(const char plr, shortv& list, const short depth);
 	string returnMoveDebug(const char plr, shortv& list, const short depth);
 	long long returnTime(const char plr, shortv& list, const short depth, string& word, bool trackRoute);

@@ -5,7 +5,13 @@ BoardInterface::BoardInterface() {
 	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
 }
 
+BoardInterface::BoardInterface(BoardAnalyse& hb) {
+	analyse				= new BoardAnalyse(hb);
+	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
+}
+
 BoardInterface::~BoardInterface() {
+	delete analyse;
 	record.getOtherSettings("maxcaltime") = analyse->maxcaltime;
 }
 
@@ -80,7 +86,6 @@ string BoardInterface::getInput(const string mode) {
 		char input[INTER_MAX_INPUT];
 		cin.getline(input, INTER_MAX_INPUT);
 
-		// excute
 		if (input[0] == '\0' || !strcmp(input, "0") || !strcmp(input, "exit"))
 			return "exit";
 		else if (!strcmp(input, "quit") || !strcmp(input, "q"))
@@ -122,7 +127,6 @@ string BoardInterface::getInput(const string mode) {
 
 // mode = "debug"
 string BoardInterface::getInput(char plr, double& inputTime) {
-	// invalid valid debug help info
 	int						 counter = 0;
 	system_clock::time_point start;
 	system_clock::time_point end;
@@ -297,7 +301,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			std::swap(byPlayer.suggestion, byOpponent.suggestion);
 
 			// print hint
-			if (record.getDefaultSettings("inDebugMode", "hintOn")) {
+			if (byPlayer.mode == "debug" && record.getDefaultSettings("inDebugMode", "hintOn")) {
 				printf("Here was %c's word, list, and suggestion:\n", byPlayer.player);
 				cout << "word = " << byPlayer.word << "\nlist = [ ";
 				for (short move : byPlayer.list)
@@ -316,6 +320,10 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			continue;
 		}
 		else if (input == "H" || input == "hint") {
+			if (byPlayer.mode != "debug") {
+				printf("The last move is not in debug move, hint was lost.\n");
+				continue;
+			}
 			printf("this is the hint for the previous move:\n");
 			cout << "word = " << byPlayer.word << "\nlist = [ ";
 			for (short i : byPlayer.list)
@@ -910,10 +918,18 @@ string BoardInterface::getInfo(string input) {
 	}
 	if (input == "a song, please") {
 		string aSong = addon +
-		"\n    Oh my darling, oh my darling, oh my darling Clementine\n" +
-		"    You are lost and gone forever, dreadful sorry Clementine\n" +
-		"    How I missed her, how I missed her, how I missed my Clementine\n" +
-		"    Until I kissed her little sister and forgot my Clementine";
+		"\n    Oh my darling,\n" +
+		"    oh my darling,\n" +
+		"    oh my darling Clementine\n\n" +
+		"    You are lost and\n" +
+		"    gone forever,\n" +
+		"    dreadful sorry Clementine\n\n" +
+		"    How I missed her,\n" +
+		"    how I missed her,\n" +
+		"    how I missed my Clementine\n\n" +
+		"    Until I kissed her\n" +
+		"    little sister\n" +
+		"    and forgot my Clementine";
 		return aSong;
 	}
 	return info;
@@ -1003,4 +1019,3 @@ bool BoardInterface::isOver(const oneMove& move) {
 	}
 	return false;
 }
-

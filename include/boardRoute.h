@@ -18,6 +18,9 @@ public:
 	vector<RouteNode*> next;
 
 	RouteNode() : data(0), print(true), prev(nullptr), next(vector<RouteNode*>()) {}
+	RouteNode(const RouteNode& rn) { clone(rn); }
+
+	void clone(const RouteNode& rn);
 
 	bool	   listNextIs(vector<RouteNode*>& list, int data);
 	bool	   masked(vector<RouteNode*>& list);  // if all of list isn't printable
@@ -29,22 +32,25 @@ public:
 typedef vector<RouteNode*>::iterator vRi;
 
 class RouteTree {
-private:
 public:
 	RouteNode* head;
 	RouteNode* crnt;
+	int	badNode;
+	int	goodNode;
+	int	freeNode;
 	static long long branches;
-	RouteTree() { init(); }
+	RouteTree() : badNode(0), goodNode(-1), freeNode(-2) { generate(); }
+	RouteTree(const RouteTree& rt);
 	~RouteTree() { free(head); }
 
-    // check
+	// check
 	bool match() { return head == crnt; }
 
-	// init
+	// handle
+	void clear();
+	void generate();
 	void free(RouteNode* node);
 	void free(vector<RouteNode*> list);
-	void clear();
-	void init();
 
 	// move
 	void forward();

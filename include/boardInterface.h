@@ -14,10 +14,10 @@ private:
 
 public:
 	BoardInterface();
-	BoardInterface(BoardAnalyse& hb) { analyse = &hb; }
+	BoardInterface(BoardAnalyse& hb);
 	~BoardInterface();
 
-	void generate(short c, short r, short w) { analyse = new BoardAnalyse; }
+	void generate(short c, short r, short w) { analyse = new BoardAnalyse(c, r, w); }
 
 	// general
 	string getInput(const string mode);

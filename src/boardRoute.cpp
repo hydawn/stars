@@ -2,6 +2,19 @@
 
 long long RouteTree::branches = 0;
 
+void RouteNode::clone(const RouteNode& rn) {
+	data = rn.data;
+	print = rn.print;
+	if (rn.prev)
+		prev  = new RouteNode(*rn.prev);
+	else
+		prev = nullptr;
+	for (RouteNode* i : rn.next) {
+		RouteNode* temp = new RouteNode(*i);
+		next.push_back(temp);
+	}
+}
+
 bool RouteNode::listNextIs(vector<RouteNode*>& list, int data) {
 	for (RouteNode* iter : list) {
 		if (iter->next.size() != 1)
@@ -76,9 +89,16 @@ void RouteNode::resetMask() {
 		i->resetMask();
 }
 
+RouteTree::RouteTree(const RouteTree& rt) : crnt(rt.crnt), badNode(rt.badNode),
+	goodNode(rt.goodNode), freeNode(rt.freeNode) {
+	head = new RouteNode(*rt.head);
+}
+
 void RouteTree::free(RouteNode* node) {
-	free(node->next);
-	delete node;
+	if (node) {
+		free(node->next);
+		delete node;
+	}
 }
 
 void RouteTree::free(vector<RouteNode*> list) {
@@ -86,7 +106,7 @@ void RouteTree::free(vector<RouteNode*> list) {
 		free(*iter);
 }
 
-void RouteTree::init() {
+void RouteTree::generate() {
 	head		= new RouteNode;
 	head->data	= 0;
 	head->print = true;
@@ -96,7 +116,7 @@ void RouteTree::init() {
 
 void RouteTree::clear() {
 	free(head);
-	init();
+	generate();
 }
 
 void RouteTree::forward() {
@@ -118,6 +138,8 @@ void RouteTree::forward(short data) {
 }
 
 void RouteTree::nextNode() {
+	if (!crnt->prev)
+		throw runtime_error("trying nextNode on head node\n");
 	if (crnt->prev->next.empty())
 		throw runtime_error("reached the end of the tree!\n");
 	vRi iter = crnt->prev->next.begin();

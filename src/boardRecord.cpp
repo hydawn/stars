@@ -1,6 +1,6 @@
 #include "boardRecord.h"
 
-// hard core show
+// hard core code
 string addon		   = "";
 string inFileSettings = addon +
 	"{\n" +
@@ -81,9 +81,8 @@ void BoardRecord::getFile() {
 		std::ifstream in(settingsFileName);
 		in >> settings;
 	}
-	else {
+	else
 		inSet >> settings;
-	}
 }
 
 void BoardRecord::writeGames() {
@@ -246,11 +245,9 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 	return false;
 }
 
-// return "yes", "exit", "quit"
 string BoardRecord::showSavedGames(Json::Value& ret) {
 	unsigned int i = 0;
 	while (i < games.size()) {
-		// date, name, board, (index)
 		printf("\ndate: %sname: %s\nboard:\n", games[i]["date"].asCString(), games[i]["name"].asCString());
 		showSavedBoard(games[i]["state"]);
 		printf("index number: %d/%d\n> ", i + 1, games.size());
@@ -268,7 +265,8 @@ string BoardRecord::showSavedGames(Json::Value& ret) {
 				ret = games[i];
 				return "yes";
 			}
-			else if (!strcmp(input, "d") || !strcmp(input, "rm") || !strcmp(input, "delete")) {
+			else if (!strcmp(input, "d") || !strcmp(input, "rm") ||
+				!strcmp(input, "delete")) {
 				Json::Value removed;
 				games.removeIndex(i--, &removed);
 				writeGames();

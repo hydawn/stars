@@ -51,11 +51,13 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	if (list.size() > 1)
 		return "bad";
 	if (list.size() == 1) {
+		// no need for this actually
 		state.add(plr, list[0]);
 		temp1 = firstPoint(opp);
 		state.remove(list[0]);
 		if (!temp1.empty())
 			return "bad";
+		//
 		return "free";
 	}
 
@@ -114,6 +116,44 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	return "free";
 }
 
+string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
+	short goodNode, short badNode, const short depth, const short maxDepth) {
+	// only analyse one Move
+	char  opp = state.rPlayer(plr);
+	short freeNode = -2;
+	string word;
+	shortv list;
+
+	routes.add(col);
+	routes.forward(col);
+	state.add(plr, col);
+	word = analyse(opp, list);
+	if (word == "good") {
+		routes.add(badNode);
+		word = "bad";
+	}
+	else if (word == "bad") {
+		routes.add(goodNode);
+		word = "good";
+	}
+	else if (list.size() == 1 && depth < maxDepth) {
+		word = oneMoveAnalyseDebug(opp, list[0], badNode, goodNode, depth + 1);
+		if (word == "good")
+			word = "bad";
+		else if (word == "bad")
+			word = "good";
+		else
+			word = "free";
+	}
+	else {
+		word = "free";
+		routes.add(routes.freeNode);
+	}
+	state.remove(col);
+	routes.backward();
+	return word;
+}
+
 // check if game is over or board is full before call this
 // max depth = 9
 string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth) {
@@ -121,9 +161,9 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	if (word == "good" || word == "bad" || list.size() == 1)
 		return word;
 
-	/*********************************debug************************************/
+	/*********************************debug************************************
 	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
-	/*********************************debug************************************/
+	*********************************debug************************************/
 	char   opp = state.rPlayer(plr);
 	shortv list1, goodList;
 	vIter  col = list.begin();
@@ -428,13 +468,13 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 		++col;
 	}
 
-	/*******************************debug**********************************/
+	/*******************************debug**********************************
 	addNumber1	  = state.getAddNumber() - addNumber1;
 	removeNumber1 = state.getRemoveNumber() - removeNumber1;
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	if (addNumber1 != removeNumber1)
 		throw runtime_error("add and remove didn't match!\n");
-	/*******************************debug**********************************/
+	*******************************debug**********************************/
 	if (!goodList.empty()) {
 		list = goodList;
 		return "good";
@@ -474,7 +514,7 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 			routes.add(goodNode);
 			goodList.push_back(*col);
 		}
-		else if (!list1.empty()){
+		else if (!list1.empty()) {
 			shortv list2;
 			short  goodCount1 = 0;
 			bool   isBad1	  = false;
@@ -647,6 +687,16 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																					isBad9 = true;
 																					break;
 																				}
+																				else if (list10.size() == 1) {
+																					word = oneMoveAnalyseDebug(plr, list10[0], goodNode, badNode, 0);
+																					if (word == "good")
+																						++goodCount9;
+																					else if (word == "bad") {
+																						state.remove(*col9);
+																						isBad9 = true;
+																						break;
+																					}
+																				}
 																				else
 																					routes.add(freeNode);
 																				state.remove(*col9);
@@ -660,6 +710,16 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																				break;
 																			}
 																		}
+																		else if (list9.size() == 1) {
+																			word = oneMoveAnalyseDebug(opp, list9[0], badNode, goodNode, 0);
+																			if (word == "good")
+																				++badCount8;
+																			else if (word == "bad") {
+																				state.remove(*col8);
+																				isGood8 = true;
+																				break;
+																			}
+																		}
 																		else
 																			routes.add(freeNode);
 																		state.remove(*col8);
@@ -668,6 +728,16 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																	if (isGood8)
 																		++goodCount7;
 																	else if (badCount8 == list8.size()) {
+																		state.remove(*col7);
+																		isBad7 = true;
+																		break;
+																	}
+																}
+																else if (list8.size() == 1) {
+																	word = oneMoveAnalyseDebug(plr, list8[0], goodNode, badNode, 0);
+																	if (word == "good")
+																		++goodCount7;
+																	else if (word == "bad") {
 																		state.remove(*col7);
 																		isBad7 = true;
 																		break;
@@ -686,6 +756,16 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																break;
 															}
 														}
+														else if (list7.size() == 1) {
+															word = oneMoveAnalyseDebug(opp, list7[0], badNode, goodNode, 0);
+															if (word == "good")
+																++badCount6;
+															else if (word == "bad") {
+																state.remove(*col6);
+																isGood6 = true;
+																break;
+															}
+														}
 														else
 															routes.add(freeNode);
 														state.remove(*col6);
@@ -694,6 +774,16 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 													if (isGood6)
 														++goodCount5;
 													else if (badCount6 == list6.size()) {
+														state.remove(*col5);
+														isBad5 = true;
+														break;
+													}
+												}
+												else if (list6.size() == 1) {
+													word = oneMoveAnalyseDebug(plr, list6[0], goodNode, badNode, 0);
+													if (word == "good")
+														++goodCount5;
+													else if (word == "bad") {
 														state.remove(*col5);
 														isBad5 = true;
 														break;
@@ -713,27 +803,14 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 											}
 										}
 										else if (list5.size() == 1) {
-											shortv list6;
-											state.add(opp, list5[0]);
-											word = analyse(plr, list6);
-											routes.add(list5);
-											routes.forward(list5[0]);
-											if (word == "good") {
-												routes.add(goodNode);
-												routes.backward();
-												state.remove(list5[0]);
-												state.remove(*col4);
+											word = oneMoveAnalyseDebug(opp, list5[0], badNode, goodNode, 0);
+											if (word == "bad")
 												isGood4 = true;
+											else if (word == "good") {
+												state.remove(*col4);
+												++badCount4;
 												break;
 											}
-											else if (word == "bad"){
-												routes.add(badNode);
-												++badCount4;
-											}
-											else
-												routes.add(freeNode);
-											state.remove(list5[0]);
-											routes.backward();
 										}
 										else
 											routes.add(freeNode);
@@ -749,49 +826,14 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 									}
 								}
 								else if (list4.size() == 1) {
-									state.add(plr, list4[0]);
-									shortv list5;
-									word = analyse(opp, list5);
-									routes.add(list4);
-									routes.forward(list4[0]);
-									if (word == "good") {
-										routes.add(badNode);
-										routes.backward();
-										state.remove(list4[0]);
+									word = oneMoveAnalyseDebug(plr, list4[0], goodNode, badNode, 0);
+									if (word == "good")
+										++goodCount3;
+									else if (word == "bad") {
 										state.remove(*col3);
 										isBad3 = true;
 										break;
 									}
-									else if (word == "bad") {
-										routes.add(goodNode);
-										++goodCount3;
-									}
-									else if (list5.size() == 1) {
-										shortv list6;
-										state.add(opp, list5[0]);
-										word = analyse(plr, list6);
-										routes.add(list5);
-										routes.forward(list5[0]);
-										if (word == "bad") {
-											routes.backward(); // list5
-											routes.backward(); // list4
-											state.remove(list5[0], list4[0], *col3);
-											isBad3 = true;
-											break;
-										}
-										else if (word == "good") {
-											routes.add(goodNode);
-											++goodCount3;
-										}
-										else
-											routes.add(freeNode);
-										routes.backward(); // list5
-										state.remove(list5[0]);
-									}
-									else
-										routes.add(freeNode);
-									routes.backward();	// list4
-									state.remove(list4[0]);
 								}
 								else
 									routes.add(freeNode);
@@ -807,75 +849,14 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 							}
 						}
 						else if (list3.size() == 1) {
-							state.add(opp, list3[0]);
-							shortv list4;
-							word = analyse(plr, list4);
-							routes.add(list3);
-							routes.forward(list3[0]);
-							if (word == "bad") {
-								routes.add(badNode);
-								++badCount2;
-							}
+							word = oneMoveAnalyseDebug(opp, list3[0], badNode, goodNode, 0);
+							if (word == "bad")
+								isGood2 = true;
 							else if (word == "good") {
-								routes.add(goodNode);
-								routes.backward();
-								state.remove(list3[0]);
 								state.remove(*col2);
-								++goodCount1;
+								++badCount2;
 								break;
 							}
-							else if (list4.size() == 1) {
-								state.add(plr, list4[0]);
-								shortv list5;
-								word = analyse(opp, list5);
-								routes.add(list4);
-								routes.forward(list4[0]);
-								if (word == "good") {
-									routes.add(badNode);
-									++badCount2;
-								}
-								else if (word == "bad") {
-									routes.add(goodNode);
-									routes.backward();
-									routes.backward();
-									state.remove(list4[0], list3[0], *col2);
-									++goodCount1;
-									break;
-								}
-								else if (list5.size() == 1) {
-									state.add(opp, list5[0]);
-									shortv list6;
-									word = analyse(plr, list6);
-									routes.add(list5);
-									routes.forward(list5[0]);
-									if (word == "bad") {
-										routes.add(badNode);
-										++badCount2;
-									}
-									else if (word == "good") {
-										routes.add(goodNode);
-										routes.backward();
-										routes.backward();
-										routes.backward();
-										state.remove(list5[0]);
-										state.remove(list4[0], list3[0], *col2);
-										++goodCount1;
-										break;
-									}
-									else
-										routes.add(freeNode);
-									routes.backward();
-									state.remove(list5[0]);
-								}
-								else
-									routes.add(freeNode);
-								routes.backward();
-								state.remove(list4[0]);
-							}
-							else
-								routes.add(freeNode);
-							routes.backward();
-							state.remove(list3[0]);
 						}
 						else
 							routes.add(freeNode);
@@ -1062,9 +1043,9 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	// in case something unpleasent happens:
 	if (starsOn && returnMoveDepth > 8 && timeUsed < 81 && nonFullList.size() < 12) {
 		returnMoveDepth = 2;
-		while (timeUsed < maxcaltime && returnMoveDepth < 10) {
-			timeUsed = returnTime(plr, list, ++returnMoveDepth, word, trackRoute);
-		}
+		// while (timeUsed < maxcaltime && returnMoveDepth < 10) {
+		// 	timeUsed = returnTime(plr, list, ++returnMoveDepth, word, trackRoute);
+		// }
 		cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
 	}
 	else if (starsOn && list.size() > 4)
@@ -1117,14 +1098,3 @@ long long BoardAnalyse::returnTime(const char plr, shortv& list, const short ret
 	timeUsed	 = elapsed.count();
 	return timeUsed;
 }
-
-// long BoardAnalyse::recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word) { ;
-// 	long					 timeUsed;
-// 	system_clock::time_point start, end;
-// 	start		 = system_clock::now();
-// 	word		 = returnSituation(plr, list, returnMoveDepth, 0, countTop);
-// 	end			 = system_clock::now();
-// 	auto elapsed = duration_cast<milliseconds>(end - start);
-// 	timeUsed	 = elapsed.count();
-// 	return timeUsed;
-// }
