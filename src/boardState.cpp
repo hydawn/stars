@@ -39,11 +39,15 @@ void BoardState::generate(char** b, const short* t) {
 }
 
 void BoardState::free() {
-	for (short i = 0; i < cols; ++i)
-		delete[] board[i];
-	delete[] board;
+	freeBoard(board, cols);
 	delete[] top;
 	delete[] starArea;
+}
+
+void BoardState::freeBoard(char** b, int length) {
+	for (short i = 0; i < length; ++i)
+		delete[] b[i];
+	delete[] b;
 }
 
 BoardState& BoardState::operator=(const BoardState& bh) {
@@ -51,7 +55,7 @@ BoardState& BoardState::operator=(const BoardState& bh) {
 		return *this;
 	free();
 	cols	= bh.cols;
-	rows		= bh.rows;
+	rows	= bh.rows;
 	winn	= bh.winn;
 	starsOn = bh.starsOn;
 	generate(bh.board, bh.top);
@@ -79,16 +83,22 @@ Json::Value BoardState::arraryToJson(T a[], int n) {
 
 void BoardState::show() {
 	short i = 1;
-	for (; i <= cols && i <= 10; ++i)
-		printf(" %d", i);
-	for (; i <= cols; ++i)
-		printf("%d", i);
-	printf("\n");
+	printHead();
 	for (short i = rows - 1; i > -1; --i) {
 		for (short j = 0; j < cols; ++j)
 			printf("|%c", board[j][i]);
 		printf("|\n");
 	}
+}
+
+void BoardState::printHead() {
+	for (int i = 1; i <= cols; ++i) {
+		if (i <= 10)
+			printf(" %d", i);
+		else
+			printf("%d", i);
+	}
+	printf("\n");
 }
 
 bool BoardState::boardIsFull() {
@@ -194,7 +204,8 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	// but some times it block itself which is rather stupid
 	shortv plrTList = makeThreeCols(plr, list), oppTList = makeThreeCols(rPlayer(plr), oppList);
 	srand((unsigned)time(NULL));
-	if (rand() % 100 > 85) {
+	if (rand() % 100 < 85) {
+		printf("    Debug: Trying intercept strategy 1:\n");
 		MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
 		if (intersectionList.empty()) {
 			if (plrTList.empty()) {
@@ -212,6 +223,7 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	// else if everything is empty
 	// preference No.2: take the opponent's safe list
 	MyShortList::shortIntersection(intersectionList, list, oppList);
+	printf("    Debug: Trying intercept strategy 2:\n");
 	if (intersectionList.empty()) {
 		if (list.empty())
 			throw runtime_error("call randomSuggestion(4 args) with empty list");
@@ -252,6 +264,52 @@ bool BoardState::winPieceNearBy(const short col, const short ro) {
 		for (i = 1; i < winn; ++i)
 			if (board[col][ro + i] != present)
 				return false;
+		return true;
+	}
+	return false;
+}
+
+bool BoardState::winPieceButOne(const short col, const short ro, const short win) {
+	// grow up, right, upright, downright
+	short i			 = 1;
+	bool  butOneMet  = false;
+	char  present	 = board[col][ro];
+	bool  canUp = ro <= top[col] - win, canRight = col <= cols - win, canDown = ro >= win - 1;
+	if (canRight) {
+		// right
+		for (i = 1; i < win; ++i)
+			if (board[col + i][ro] != present && butOneMet)
+				break;
+			else
+				butOneMet = true;
+		if (i == win)
+			return true;
+		// up & right
+		for (butOneMet = false, i = 1; i < win; ++i)
+			if (board[col + i][ro + i] != present && butOneMet)
+				break;
+			else
+				butOneMet = true;
+		if (i == win)
+			return true;
+		if (canDown) {
+			// down & right
+			for (butOneMet = false, i = 1; i < win; ++i)
+				if (board[col + i][ro - i] != present && butOneMet)
+					break;
+				else
+					butOneMet = true;
+			if (i == win)
+				return true;
+		}
+	}
+	if (canUp) {
+		// up
+		for (butOneMet = false, i = 1; i < win; ++i)
+			if (board[col][ro + i] != present && butOneMet)
+				return false;
+			else
+				butOneMet = true;
 		return true;
 	}
 	return false;
@@ -370,15 +428,15 @@ int BoardState::starNumber() {
 	return sum;
 }
 
-// count how many three in a row is there in the board, just like winPieceNearBy
-// with the winn set to winn - 1
+// count how many three in a row or winn but one in a row is there in the board,
+// just like isOver with the winn set to winn - 1
 int BoardState::threeRowCount(const char plr, shortv& safeList) {
 	int rax = 0;
 	winn--;
 	// count how many "first point"
 	for (short i = 0; i < cols; ++i)
 		for (short j = 0; j < top[i]; ++j)
-			if (specialPiece(i, j))
+			if (specialPiece(i, j) || winPieceButOne(i, j, winn + 1))
 				++rax;
 	winn++;
 	return rax;

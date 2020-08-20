@@ -804,13 +804,13 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 										}
 										else if (list5.size() == 1) {
 											word = oneMoveAnalyseDebug(opp, list5[0], badNode, goodNode, 0);
-											if (word == "bad")
-												isGood4 = true;
-											else if (word == "good") {
+											if (word == "bad") {
 												state.remove(*col4);
-												++badCount4;
+												isGood4 = true;
 												break;
 											}
+											else if (word == "good")
+												++badCount4;
 										}
 										else
 											routes.add(freeNode);
@@ -850,13 +850,13 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 						}
 						else if (list3.size() == 1) {
 							word = oneMoveAnalyseDebug(opp, list3[0], badNode, goodNode, 0);
-							if (word == "bad")
-								isGood2 = true;
-							else if (word == "good") {
+							if (word == "bad") {
 								state.remove(*col2);
-								++badCount2;
+								isGood2 = true;
 								break;
 							}
+							else if (word == "good")
+								++badCount2;
 						}
 						else
 							routes.add(freeNode);

@@ -75,11 +75,11 @@ class BoardState {
 	// handles the memory allocate and ways to change the board
 public:
 	char** board;
-	short* top;	 // 0~column, 0 means no piece, column means full
+	short* top;
 	short* starArea;
 	short  rows;
 	short  cols;
-	short  winn;  // winning number?
+	short  winn;  // winning number
 	bool   starsOn;
 	/************************debug***************************/
 	static int removeNumber;
@@ -98,6 +98,7 @@ public:
 
 	// destruct
 	void free();
+	void freeBoard(char** b, int length);
 
 	// operator
 	operator Json::Value() {
@@ -117,6 +118,7 @@ public:
 
 	// show
 	void show();
+	void printHead();
 
 	// getter
 	short getWinn() { return winn; }
@@ -126,9 +128,10 @@ public:
 	bool colIsEmpty(const short col) { return top[col - 1] == 0; }
 	bool boardIsFull();
 	bool winPieceNearBy(const short col, const short ro);
+	bool winPieceButOne(const short col, const short ro, const short win);
 	char isOver();
 
-	// small tools
+	// tools
 	void nonFullColumn(shortv& nonFull);
 	char rPlayer(const char plr);
 
@@ -141,20 +144,20 @@ public:
 	// change function
 	void add(const char plr, const short col) {
 		/*****************************debug**********************************/
-		// debug, feel free to remove this for performance reasons
+		// debug, remove this for performance reasons
 		if (top[col - 1] == rows)
-			throw runtime_error("trying to add to a full column.\n");
+			throw std::logic_error("trying to add to a full column.\n");
 		if (plr != 'X' && plr != '0')
-			throw runtime_error("wrong player!\n");
+			throw std::logic_error("wrong player!\n");
 		++addNumber;
 		/*****************************debug**********************************/
 		board[col - 1][top[col - 1]++] = plr;
 	}
 	void remove(const short col) {
 		/*****************************debug**********************************/
-		// debug, feel free to remove this for performance reasons
+		// debug, remove this for performance reasons
 		if (top[col - 1] == 0)
-			throw runtime_error("trying to remove from an empty column.\n");
+			throw std::logic_error("trying to remove from an empty column.\n");
 		++removeNumber;
 		/*****************************debug**********************************/
 		board[col - 1][(top[col - 1]--) - 1] = ' ';

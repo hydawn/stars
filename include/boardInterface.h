@@ -5,6 +5,7 @@
 #define INTER_MAX_INPUT 256
 
 using std::cin;
+using std::getline;
 using std::string;
 
 class BoardInterface {
@@ -24,6 +25,7 @@ public:
 	string getInput(char plr, double& inputTime);
 	short  getCustomInput(const string item);
 	bool   getStateFromInput();
+	bool   transformInput(char** dest, vector<string>& src, const int cols, const int rows);
 
 	// mode
 	string addMode();

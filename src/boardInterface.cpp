@@ -16,64 +16,56 @@ BoardInterface::~BoardInterface() {
 }
 
 bool BoardInterface::getStateFromInput() {
-	short  row = analyse->getRows(), column = analyse->getCols();
-	short  minor = 0;
-	/*******************************temp code**********************************/
-	// don't really know why I need this eater
-	char* inputEater = new char[INTER_MAX_INPUT];
-	cin.getline(inputEater, INTER_MAX_INPUT);
-	if (!strcmp(inputEater, "0") || !strcmp(inputEater, "exit")) {
-		delete[] inputEater;
-		return false;
-	}
-	if (strlen(inputEater) != column * 2 + 1) {
-		cout << "Note that the imported board must fit in with the current "
-			<< "board size.\n";
-		delete[] inputEater;
-		return false;
-	}
-	char** input = new char*[INTER_MAX_INPUT];
-	if (inputEater[0] == '\0')
-		printf("inputEater=='\\0' and why?\n");
-	else {
-		input[0] = new char[INTER_MAX_INPUT];
-		strcpy(input[0], inputEater);
-		minor = 1;
-	}
-	delete[] inputEater;
+	short  rows = analyse->getRows(), cols = analyse->getCols();
+	vector<string> input;
+	string inputEater;
+	analyse->state.printHead();
 
-	for (short i = 0 + minor; i < row; ++i) {
-		input[i] = new char[INTER_MAX_INPUT];
-		cin.getline(input[i], INTER_MAX_INPUT);
+	for (int i = 0; i < rows; ++i) {
+		getline(cin, inputEater);
+		if (inputEater == "0" || inputEater == "exit")
+			return false;
+		if (inputEater.size() != cols * 2 + 1) {
+			cout << "Something wrong going on with the input board.\n";
+			return false;
+		}
+		input.push_back(inputEater);
 	}
 
-	char** temp = new char*[column];
-	for (short i = 0; i < column; ++i) {
-		temp[i] = new char[row];
-		for (short j = 0; j < row; ++j){
-			if (input[row - j - 1][i * 2 + 1] == '+')
-				input[row - j - 1][i * 2 + 1] = ' ';
-			temp[i][j] = input[row - j - 1][i * 2 + 1];
+	// transform
+	char** temp = new char*[cols];
+	if (transformInput(temp, input, cols, rows)) {
+		analyse->state.refreshBoard(temp);
+		analyse->state.refreshTop();
+		analyse->state.freeBoard(temp, rows);
+		return true;
+	}
+	analyse->state.freeBoard(temp, rows);
+	return false;
+}
+
+bool BoardInterface::transformInput(char** dest, vector<string>& src,
+	const int cols, const int rows) {
+	bool rax = true;
+	for (short i = 0; i < cols; ++i) {
+		dest[i] = new char[rows];
+		for (short j = 0; j < rows && rax; ++j) {
+			// check
+			if (src[rows - j - 1][i * 2 + 1] == '+')
+				src[rows - j - 1][i * 2 + 1] = ' ';
+			if (src[rows - j - 1][i * 2 + 1] != ' ' &&
+				src[rows - j - 1][i * 2 + 1] != 'X' &&
+				src[rows - j - 1][i * 2 + 1] != '0') {
+				cout << "Something wrong going on with the input board while "
+					<< "transforming.\n";
+				rax = false;
+				break;
+			}
+			// real transform
+			dest[i][j] = src[rows - j - 1][i * 2 + 1];
 		}
 	}
-
-	analyse->state.refreshBoard(temp);
-	analyse->state.refreshTop();
-	if (row == column)
-		for (short i = 0; i < row; ++i) {
-			delete[] input[i];
-			delete[] temp[i];
-		}
-	else {
-		for (short i = 0; i < row; ++i)
-			delete[] input[i];
-		for (short i = 0; i < column; ++i)
-			delete[] temp[i];
-	}
-
-	delete[] input;
-	delete[] temp;
-	return true;
+	return rax;
 }
 
 // mode = "reverse", "add"
@@ -104,8 +96,9 @@ string BoardInterface::getInput(const string mode) {
 			analyse->show();
 		else if (!strcmp(input, "h") || !strcmp(input, "help"))
 			cout << getHelp(mode) << endl;
-		else if (!strcmp(input, "i") || !strcmp(input, "info") || !strcmp(input, "story") ||
-				 !strcmp(input, "t") || !strcmp(input, "tips"))
+		else if (!strcmp(input, "i") || !strcmp(input, "info") ||
+			!strcmp(input, "story") || !strcmp(input, "t") ||
+			!strcmp(input, "tips"))
 			cout << getInfo(input) << endl;
 		else if (!strcmp(input, "m") || !strcmp(input, "move"))
 			printf("Why don't we try this in debug mode to see what it does?\n");
@@ -356,7 +349,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		// debug
 		if (!byOpponent.list.empty() &&
 			!MyShortList::inList(byOpponent.list, byOpponent.move))
-			throw runtime_error("suggestion not in safe list\n");
+			throw std::logic_error("suggestion not in safe list\n");
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
@@ -387,8 +380,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			analyse->show();
 		printf("\n");
 	}
-	throw runtime_error("control flow into the end of debug mode\n");
-	return "quit";
+	throw std::logic_error("control flow into the end of debug mode\n");
 }
 
 string BoardInterface::defaultSettings() {
@@ -695,7 +687,7 @@ bool BoardInterface::controlMode() {
 string BoardInterface::showRouteMode() {
 	long long routeBranches = analyse->routes.getBranches();
 	cout << "The computer examined " << routeBranches
-		 << " kinds of possibilities\n" << analyse->routes.getBranches(-2)
+		 << " possibilities\n" << analyse->routes.getBranches(-2)
 		 << " of them is free, " << analyse->routes.getBranches(-1)
 		 << " of them is good and " << analyse->routes.getBranches(0)
 		 << " of them is bad for the computer\n";
@@ -984,16 +976,10 @@ void BoardInterface::askToSaveBoard(bool yes) {
 }
 
 void BoardInterface::importNewBoard() {
-	printf("import a new board>\n");
+	printf("Paste a board down below>\n");
 	if (!getStateFromInput())
 		return;
 	record.clearHistoryMove();
-	printf("Here's the imported board we are gonna use:\n");
-	analyse->show();
-	printf("hit 'Enter' to continue> ");
-	cin.clear();
-	char disposal[8];
-	cin.getline(disposal, 8);
 }
 
 bool BoardInterface::isOver(const oneMove& move) {

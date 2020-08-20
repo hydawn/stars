@@ -31,6 +31,15 @@ well, this is clearly more organized than CharmedPython
 - some renaming
 - other minor changes
 
+## 005
+- using string for input handle
+- get board input function secured, get import interface improved
+- using string for input is good, but I don't want to change the old code - that's a waste of time
+- fix: returnModeDebug route related wrongly coded - thus performance improved
+- intercept strategy fixed
+- winPieceButOne added, intercept strategy improved
+- changed some runtime_error to logic error
+
 # TODO
 - add debug and release flag
 - change getStateFromInput to fit all size of board - there's no need to do that
