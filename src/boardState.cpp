@@ -270,48 +270,45 @@ bool BoardState::winPieceNearBy(const short col, const short ro) {
 }
 
 bool BoardState::winPieceButOne(const short col, const short ro, const short win) {
-	// grow up, right, upright, downright
+	// grow right, upright, downright
 	short i			 = 1;
 	bool  butOneMet  = false;
 	char  present	 = board[col][ro];
 	bool  canUp = ro <= top[col] - win, canRight = col <= cols - win, canDown = ro >= win - 1;
-	if (canRight) {
-		// right
-		for (i = 1; i < win; ++i)
-			if (board[col + i][ro] != present && butOneMet)
-				break;
-			else
-				butOneMet = true;
-		if (i == win)
-			return true;
-		// up & right
-		for (butOneMet = false, i = 1; i < win; ++i)
-			if (board[col + i][ro + i] != present && butOneMet)
-				break;
-			else
-				butOneMet = true;
-		if (i == win)
-			return true;
-		if (canDown) {
-			// down & right
-			for (butOneMet = false, i = 1; i < win; ++i)
-				if (board[col + i][ro - i] != present && butOneMet)
-					break;
-				else
-					butOneMet = true;
-			if (i == win)
-				return true;
-		}
-	}
-	if (canUp) {
-		// up
-		for (butOneMet = false, i = 1; i < win; ++i)
-			if (board[col][ro + i] != present && butOneMet)
-				return false;
-			else
-				butOneMet = true;
+	if (!canRight)
+		return false;
+	// right
+	for (i = 1; i < win; ++i)
+		if (board[col + i][ro] != present && butOneMet)
+			break;
+		else if (board[col + i][ro] == ' ')
+			butOneMet = true;
+		else
+			break;
+	if (i == win)
 		return true;
+	if (canDown) {
+		// down & right
+		for (butOneMet = false, i = 1; i < win; ++i)
+			if (board[col + i][ro - i] != present && butOneMet)
+				break;
+			else if (board[col + i][ro - i] == ' ')
+				butOneMet = true;
+			else
+				break;
+		if (i == win)
+			return true;
 	}
+	// up & right
+	for (butOneMet = false, i = 1; i < win; ++i)
+		if (board[col + i][ro + i] != present && butOneMet)
+			return false;
+		else if (board[col + i][ro + i] == ' ')
+			butOneMet = true;
+		else
+			return false;
+	if (i == win)
+		return true;
 	return false;
 }
 
@@ -433,7 +430,6 @@ int BoardState::starNumber() {
 int BoardState::threeRowCount(const char plr, shortv& safeList) {
 	int rax = 0;
 	winn--;
-	// count how many "first point"
 	for (short i = 0; i < cols; ++i)
 		for (short j = 0; j < top[i]; ++j)
 			if (specialPiece(i, j) || winPieceButOne(i, j, winn + 1))

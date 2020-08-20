@@ -11,8 +11,8 @@ BoardInterface::BoardInterface(BoardAnalyse& hb) {
 }
 
 BoardInterface::~BoardInterface() {
-	delete analyse;
 	record.getOtherSettings("maxcaltime") = analyse->maxcaltime;
+	delete analyse;
 }
 
 bool BoardInterface::getStateFromInput() {
@@ -196,7 +196,8 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 		else if (!strcmp(input, "sv") || !strcmp(input, "save"))
 			record.saveGame(analyse->state);
 		else if (!strcmp(input, "sr") || !strcmp(input, "show routes")) {
-			if (showRouteMode() == "quit")
+			analyse->routes.crnt = analyse->routes.head;
+			if (showRoutesMode() == "quit")
 				return "quit";
 		}
 		else if (!strcmp(input, "w") || !strcmp(input, "winn"))
@@ -429,6 +430,8 @@ string BoardInterface::defaultSettings() {
 }
 
 string BoardInterface::otherSettings() {
+	if (analyse->maxcaltime < 0)
+		printf("analyse->maxcaltime went nuts, better fix it\n");
 	cout << "Here you can change computer's max calculation time settings, the\n"
 		<< "current cal time is "
 		<< analyse->maxcaltime
@@ -437,14 +440,14 @@ string BoardInterface::otherSettings() {
 	char in[16];
 	int	 trans = 0;
 	do {
-		printf("(1~9999999)> ");
+		printf("(10ms ~ 9999999ms)> ");
 		cin.getline(in, 16);
 		if (in[0] == '\0' || !strcmp(in, "0") || !strcmp(in, "exit"))
 			return "debug";
 		if (!strcmp(in, "q") || !strcmp(in, "quit"))
 			return "quit";
 		trans = atoi(in);
-		if (trans > 0 && trans < 9999999) {
+		if (trans > 9 && trans < 9999999) {
 			analyse->maxcaltime = trans;
 			return "debug";
 		}
@@ -684,35 +687,96 @@ bool BoardInterface::controlMode() {
 	return true;
 }
 
-string BoardInterface::showRouteMode() {
-	long long routeBranches = analyse->routes.getBranches();
+string BoardInterface::showRoutesMode() {
+	RouteTree&			routes		  = analyse->routes;
+	vector<RouteNode*>& next		  = routes.crnt->next;
+	bool				nearFlag	  = false;
+	long long routeBranches = routes.getBranches();
 	cout << "The computer examined " << routeBranches
-		 << " possibilities\n" << analyse->routes.getBranches(-2)
-		 << " of them is free, " << analyse->routes.getBranches(-1)
-		 << " of them is good and " << analyse->routes.getBranches(0)
+		 << " possibilities in this node\n" << routes.getBranches(-2)
+		 << " of them is free, " << routes.getBranches(-1)
+		 << " of them is good and " << routes.getBranches(0)
 		 << " of them is bad for the computer\n";
-	cout << "We'll be showing:\n1. free routes\n2. good routes\n3. bad "
-		 << "routes\n4. all routes\n> ";
-	char in[8];
-	cin.getline(in, 8);
-	if (!strcmp(in, "q") || !strcmp(in, "quit"))
-		return "quit";
-	int num = atoi(in);
-	if (num < 1 || num > 4)
-		return "debug";
+	cout << "We'll be showing:\na. free routes\nb. good routes\nc. bad "
+		 << "routes\nd. all routes\n";
+	if (next.size() == 1 && next[0]->next.empty() &&
+		(next[0]->data == routes.goodNode || next[0]->data == routes.badNode ||
+		next[0]->data == routes.freeNode))
+		nearFlag = true; // next is a flag
+	else {
+		cout << "or see less in the next node choosing from:\n[ ";
+		vRi iter = next.begin();
+		for (; iter != next.end(); ++iter)
+			cout << (*iter)->data << " ";
+		cout << "]\n";
+	}
+	if (routes.crnt->prev)
+		cout << "Enter B or back to go back to the formal node\n";
+	string in;
+	int num = 0;
+	do {
+		cout << "> ";
+		getline(cin, in);
+		if (in == "q" || in == "quit")
+			return "quit";
+		if (in == "0" || in == "exit")
+			return "debug";
+		if (in == "a") {
+			num = 1;
+			break;
+		}
+		else if (in == "b") {
+			num = 2;
+			break;
+		}
+		else if (in == "c") {
+			num = 3;
+			break;
+		}
+		else if (in == "d") {
+			num = 4;
+			break;
+		}
+		else if (in == "B" || in == "back") {
+			if (routes.crnt->prev) {
+				routes.backward();
+				// 新时代的老递归怪
+				return showRoutesMode();
+			}
+			cout << "There's no going back, let's try again.\n";
+			continue;
+		}
+		else if (!nearFlag) {
+			num = atoi(in.c_str());
+			// find_if by me
+			vRi iter = next.begin();
+			for (; iter != next.end() &&
+				(*iter)->data != num;++iter);
+			if (iter == next.end()) {
+				cout << "No such move, let's try again.\n";
+				continue;
+			}
+			routes.forward(num);
+			// 老递归怪了
+			return showRoutesMode();
+		}
+		else
+			cout << "No such option, let's try again.\n";
+	} while (true);
+
 
 	// print
-	routeBranches = analyse->routes.getBranches(num - 3);
-	if (routeBranches > 64) {
+	routeBranches = routes.getBranches(num - 3);
+	if (routeBranches > 1024) {
 		cout << "There are " << routeBranches
 			<< " branches, sure you want to print them all?\n"
-			<< "(yes/No)> ";
-		cin.getline(in, 8);
-		if (!strcmp(in, "yes") || !strcmp(in, "y") || !strcmp(in, "Y"))
-			analyse->routes.showRoute(num - 3);
+			<< "(Yes/no)> ";
+		getline(cin, in);
+		if (in != "no" && in != "n")
+			routes.showRoute(num - 3);
 	}
 	else
-		analyse->routes.showRoute(num - 3);
+		routes.showRoute(num - 3);
 	return "debug";
 }
 

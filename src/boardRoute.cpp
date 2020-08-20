@@ -183,32 +183,32 @@ void RouteTree::add(ShortList& list) {
 		add(*iter);
 }
 
-void RouteTree::showRoute() {
-	for (RouteNode* i : head->next) {
-		if (showRoute(i, 0))
-			cout << endl;
-	}
-}
-
 void RouteTree::showRoute(int flag) {
-	if (flag == -1) { // good
-		head->maskFlag(-2);
-		head->maskFlag(0);
-		head->maskFlag(1);
+	if (flag == goodNode) { // good
+		crnt->maskFlag(freeNode);
+		crnt->maskFlag(badNode);
+		crnt->maskFlag(1);
 	}
-	else if (flag == 0) { // bad
-		head->maskFlag(-2);
-		head->maskFlag(-1);
-		head->maskFlag(1);
+	else if (flag == badNode) { // bad
+		crnt->maskFlag(freeNode);
+		crnt->maskFlag(goodNode);
+		crnt->maskFlag(1);
 	}
-	else if (flag == -2) { // free
-		head->maskFlag(-1);
-		head->maskFlag(0);
-		head->maskFlag(1);
+	else if (flag == freeNode) { // free
+		crnt->maskFlag(goodNode);
+		crnt->maskFlag(badNode);
+		crnt->maskFlag(1);
 	}
 	showRoute();
 	if (flag != 1)
-		head->resetMask();
+		crnt->resetMask();
+}
+
+void RouteTree::showRoute() {
+	for (RouteNode* i : crnt->next) {
+		if (showRoute(i, 0))
+			cout << endl;
+	}
 }
 
 bool RouteTree::showRoute(RouteNode* node, int level) {
@@ -300,21 +300,21 @@ void RouteTree::show(RouteNode* node, int level)  {
 
 int RouteTree::getBranches(int flag) {
 	if (flag == -1) {
-		head->maskFlag(-2);
-		head->maskFlag(0);
+		crnt->maskFlag(-2);
+		crnt->maskFlag(0);
 	}
 	else if (flag == 0) {
-		head->maskFlag(-2);
-		head->maskFlag(-1);
+		crnt->maskFlag(-2);
+		crnt->maskFlag(-1);
 	}
 	else if (flag == -2) {
-		head->maskFlag(-1);
-		head->maskFlag(0);
+		crnt->maskFlag(-1);
+		crnt->maskFlag(0);
 	}
 	branches = 0;
-	branchCounter(head);
+	branchCounter(crnt);
 	if (flag != 1)
-		head->resetMask();
+		crnt->resetMask();
 	return branches;
 }
 

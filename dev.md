@@ -40,8 +40,15 @@ well, this is clearly more organized than CharmedPython
 - winPieceButOne added, intercept strategy improved
 - changed some runtime_error to logic error
 
+## 006
+- BoardInterface destructor bugs fixed
+- intercept strategy fixed (another bug)
+- new features added in the show routes mode
+- maxcaltime protected
+
 # TODO
 - add debug and release flag
+- change runtime_error to logic error
 - change getStateFromInput to fit all size of board - there's no need to do that
 - add GUI - I don't think so
 - record calculate depth - but why?

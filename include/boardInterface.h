@@ -39,7 +39,7 @@ public:
 	string playBackMode();
 	string customMode();
 	bool controlMode();
-	string showRouteMode();
+	string showRoutesMode();
 
 	// ask & do
 	bool askToDebug(bool yes);	// if yes == true, then default yes
