@@ -28,10 +28,26 @@ public:
 	iterator begin() { return data; }
 	iterator end() { return data + top; }
 	iterator erase(iterator iter) {
-		for (short i = 0; i < (end() - iter) - 1; ++i)
-			iter[i] = iter[i + 1];
+		iterator saveIter = iter, lastIter = iter++;
+		// for (short i = 0; i < (end() - iter) - 1; ++i)
+		// 	iter[i] = iter[i + 1];
+		while (iter != end()) {
+			*lastIter = *iter;
+			++iter;
+			++lastIter;
+		}
 		top -= 1;
-		return iter;
+		return saveIter;
+	}
+	void del(short iter) {
+		for (short i = 0; i < top; ++i)
+			if (data[i] == iter) {
+				for (short j = i + 1; j < top; ++j)
+					data[j - 1] = data[j];
+				top -= 1;
+				return;
+			}
+		throw std::logic_error("trying to erase an item that does not exist\n");
 	}
 
 	// op
@@ -48,6 +64,7 @@ public:
 namespace MyShortList {
 	bool inList(ShortList& sl, short i);
 	void shortIntersection(ShortList& dest, ShortList& sour1, ShortList& sour2);
+	bool equal(ShortList& l1, ShortList& l2);
 };
 
 #endif

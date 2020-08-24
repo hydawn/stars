@@ -3,43 +3,42 @@
 void BoardAnalyse::go(const char plr, const short move) {
 	// debug - delete this for performance
 	if (state.colIsFull(move))
-		throw runtime_error("Error: trying to add to a full column.\n");
+		throw logic_error("Error: trying to add to a full column.\n");
 	state.add(plr, move);
 }
 
 void BoardAnalyse::reverse(const short column) {
 	if (state.colIsEmpty(column))
-		throw runtime_error("Error: tying to reverse an empty column\n");
+		throw logic_error("Error: tying to reverse an empty column\n");
 	state.remove(column);
 }
 
 shortv BoardAnalyse::firstPoint(const char plr) {
-	shortv fp, nfc;
-	state.nonFullColumn(nfc);
-	for (short col : nfc) {
+	shortv firstPointList, nonFullList;
+	state.nonFullColumn(nonFullList);
+	for (short col : nonFullList) {
 		state.add(plr, col);
 		if (plr == state.isOver())
-			fp.push_back(col);
+			firstPointList.push_back(col);
 		state.remove(col);
 	}
-	return fp;
+	return firstPointList;
 }
 
-shortv BoardAnalyse::firstPoint(const char plr, shortv& nfc) {
-	shortv fp;
-	for (short col : nfc) {
+shortv BoardAnalyse::firstPoint(const char plr, shortv& nonFullList) {
+	shortv firstPointList;
+	for (short col : nonFullList) {
 		state.add(plr, col);
 		if (plr == state.isOver())
-			fp.push_back(col);
+			firstPointList.push_back(col);
 		state.remove(col);
 	}
-	return fp;
+	return firstPointList;
 }
 
 // check if game is over or board is full before call this
 string BoardAnalyse::analyse(const char plr, shortv& list) {
-	shortv tempList, goodList, temp1, temp2, nonFull;
-	vIter  col;
+	shortv nonFull, temp1;
 
 	state.nonFullColumn(nonFull);
 	list = firstPoint(plr, nonFull);
@@ -51,62 +50,76 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	if (list.size() > 1)
 		return "bad";
 	if (list.size() == 1) {
-		// no need for this actually
 		state.add(plr, list[0]);
-		temp1 = firstPoint(opp);
+		state.sweepFullColumn(nonFull, list[0]);
+		temp1 = firstPoint(opp, nonFull);
 		state.remove(list[0]);
 		if (!temp1.empty())
 			return "bad";
-		//
 		return "free";
 	}
 
 	// I'll go
-	list = nonFull;
-	col	 = list.begin();
+	shortv tempList, goodList;
+	vIter  col = list.begin();
+	list	   = nonFull;
 	while (col != list.end()) {
 		state.add(plr, *col);
 		state.nonFullColumn(nonFull);
 		tempList = firstPoint(opp, nonFull);
-		if (!tempList.empty()) {
+		if (!tempList.empty()) { // bad
 			state.remove(*col);
 			col = list.erase(col);
 			continue;
 		}
 		tempList = firstPoint(plr, nonFull);
-		if (tempList.size() > 1) {
+		if (tempList.size() > 1) // good
 			goodList.push_back(*col);
-		} else if (tempList.size() == 1) {
+		else if (tempList.size() == 1) {
 			state.add(opp, tempList[0]);
-			state.nonFullColumn(nonFull);
-			temp1 = firstPoint(plr, nonFull);
-			if (!temp1.empty())
-				goodList.push_back(*col);
-			else {
-				temp1 = firstPoint(opp, nonFull);
-				if (temp1.size() > 1) {
+			// now it's my turn
+			state.sweepFullColumn(nonFull, tempList[0]);
+			temp1 = firstPoint(opp, nonFull);
+			if (temp1.size() > 1) {
+				state.remove(tempList[0]);
+				state.remove(*col);
+				col = list.erase(col);
+				continue;
+			}
+			if (temp1.size() == 1) {
+				shortv tempOpponent, tempPlayer;
+				state.add(plr, temp1[0]); // all the way size()==1 to here
+				state.sweepFullColumn(nonFull, temp1[0]);
+				tempOpponent = firstPoint(opp, nonFull);
+				tempPlayer	 = firstPoint(plr, nonFull);
+				state.remove(temp1[0]);
+				// opp's turn
+				if (!tempOpponent.empty()) {
 					state.remove(tempList[0]);
 					state.remove(*col);
 					col = list.erase(col);
 					continue;
 				}
-				if (temp1.size() == 1) {
-					state.add(plr, temp1[0]);
-					temp2 = firstPoint(opp);
-					state.remove(temp1[0]);
-					if (!temp2.empty()) {
-						state.remove(tempList[0]);
-						state.remove(*col);
-						col = list.erase(col);
-						continue;
-					}
-				}
+				// this is new
+				if (tempPlayer.size() > 1)
+					goodList.push_back(*col);
+				//
+			}
+			else {
+				temp1 = firstPoint(plr, nonFull);
+				if (!temp1.empty()) // good
+					goodList.push_back(*col);
 			}
 			state.remove(tempList[0]);
 		}
 		state.remove(*col);
 		++col;
 	}
+
+	// debug
+	if (!state.match())
+		throw logic_error("top and real top didn't match\n");
+
 	if (!goodList.empty()) {
 		list = goodList;
 		return "good";
@@ -172,6 +185,8 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	while (col != list.end()) {
 		state.add(plr, *col);
 		word = analyse(opp, list1);
+		if (!state.match())
+			throw logic_error("top and real top didn't match\n");
 		if (word == "good") {
 			state.remove(*col);
 			col = list.erase(col);
@@ -473,7 +488,7 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	removeNumber1 = state.getRemoveNumber() - removeNumber1;
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	if (addNumber1 != removeNumber1)
-		throw runtime_error("add and remove didn't match!\n");
+		throw logic_error("add and remove didn't match!\n");
 	*******************************debug**********************************/
 	if (!goodList.empty()) {
 		list = goodList;
@@ -503,6 +518,8 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 	// one big loop ahead of us
 	for (routes.forward(*col); col != list.end(); routes.nextNode()) {
 		state.add(plr, *col);
+		if (!state.match())
+			throw logic_error("top and real top didn't match\n");
 		word = analyse(opp, list1);
 		if (word == "good") {
 			routes.add(badNode);
@@ -896,9 +913,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 	removeNumber1 = state.getRemoveNumber() - removeNumber1;
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	if (addNumber1 != removeNumber1)
-		throw runtime_error("add and remove didn't match!\n");
+		throw logic_error("add and remove didn't match!\n");
 	if (!routes.match())
-		throw runtime_error("forward and backward didn't match!\n");
+		throw logic_error("forward and backward didn't match!\n");
+	if (!state.match())
+		throw logic_error("top and real top didn't match\n");
 	// routes.showRoute();
 	/*******************************debug**********************************/
 	if (!goodList.empty()) {
@@ -928,7 +947,7 @@ string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnM
 	newly defined recursiveSituationInline as recursiveSituation
 	****************************debug theory**********************************/
 	if (list.empty()) {
-		throw runtime_error("recursiveSituation: given list is empty!\n");
+		throw logic_error("recursiveSituation: given list is empty!\n");
 		return "end";
 	}
 
@@ -975,7 +994,7 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short retu
 	*****************************debug theory*********************************/
 	/*****************************debug action*********************************/
 	if (list.empty()) {
-		throw runtime_error("recursiveSituation: given list is empty!\n");
+		throw logic_error("recursiveSituation: given list is empty!\n");
 		return "end";
 	}
 	/*****************************debug action*********************************/
@@ -1023,9 +1042,9 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	// pre-test
 	state.nonFullColumn(nonFullList);
 	if (nonFullList.empty())
-		throw runtime_error("call respond with full board!\n");
+		throw logic_error("call respond with full board!\n");
 	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
-		throw runtime_error("call respond with ended game!\n");
+		throw logic_error("call respond with ended game!\n");
 
 	// analyse
 	if (starsOn && nonFullList.size() > 4)
@@ -1081,7 +1100,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 			return state.randomSuggestion(plr, list, oppList);
 	}
 	else
-		throw runtime_error("wrong word returned in respond\n");
+		throw logic_error("wrong word returned in respond\n");
 	return 0;
 }
 

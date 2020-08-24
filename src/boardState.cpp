@@ -5,7 +5,6 @@ int BoardState::addNumber;
 
 BoardState::BoardState(const Json::Value& root)
 	: rows(root["row"].asInt()), cols(root["column"].asInt()), winn(root["winn"].asInt()) {
-	starsOn = false;
 	generate();
 	for (short i = 0; i < cols; ++i) {
 		strcpy(board[i], root["board"][i].asCString());
@@ -27,12 +26,12 @@ void BoardState::generate() {
 }
 
 void BoardState::generate(char** b, const short* t) {
-	board	= new char*[cols];
-	top		= new short[cols];
+	board	 = new char*[cols];
+	top		 = new short[cols];
 	starArea = new short[cols];
 	for (short i = 0; i < cols; ++i) {
-		board[i]   = new char[rows + 1];
-		top[i]	   = t[i];
+		board[i]	= new char[rows + 1];
+		top[i]		= t[i];
 		starArea[i] = rows;
 	}
 	refreshBoard(b);
@@ -54,10 +53,9 @@ BoardState& BoardState::operator=(const BoardState& bh) {
 	if (this == &bh)
 		return *this;
 	free();
-	cols	= bh.cols;
-	rows	= bh.rows;
-	winn	= bh.winn;
-	starsOn = bh.starsOn;
+	cols = bh.cols;
+	rows = bh.rows;
+	winn = bh.winn;
 	generate(bh.board, bh.top);
 	return *this;
 }
@@ -123,6 +121,16 @@ void BoardState::nonFullColumn(shortv& nonFull) {
 			nonFull.push_back(i + 1);
 }
 
+void BoardState::sweepFullColumn(shortv& nonFull, short col) {
+	if (top[col - 1] == starArea[col - 1])
+		nonFull.del(col);
+	shortv realNonFull;
+	nonFullColumn(realNonFull);
+	// delete this when done enough test
+	if (!MyShortList::equal(nonFull, realNonFull))
+		throw logic_error("this non-full and the real non-full didn't match\n");
+}
+
 char BoardState::rPlayer(const char plr) {
 	if (plr == 'X')
 		return '0';
@@ -135,13 +143,13 @@ short BoardState::randomMove() {
 	shortv list;
 	nonFullColumn(list);
 	if (list.empty())
-		throw runtime_error("trying randomMove() in an empty list\n");
+		throw logic_error("trying randomMove() in an empty list\n");
 	return randomMove(list);
 }
 
 short BoardState::randomMove(shortv& list) {
 	if (list.empty())
-		throw runtime_error("trying randomMove(shortv& list) in an empty list\n");
+		throw logic_error("trying randomMove(shortv& list) in an empty list\n");
 	srand((unsigned)time(NULL));
 	return list[rand() % list.size()];
 }
@@ -191,9 +199,9 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 		if (!plr1.empty() && ran < 65)
 			return randomMove(plr1);
 	} else
-		throw runtime_error("no such mode.\n");
+		throw logic_error("no such mode.\n");
 	if (list.empty())
-		throw runtime_error("call randomSuggestion with empty list");
+		throw logic_error("call randomSuggestion with empty list");
 	return randomMove(list);
 }
 
@@ -226,10 +234,21 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	printf("    Debug: Trying intercept strategy 2:\n");
 	if (intersectionList.empty()) {
 		if (list.empty())
-			throw runtime_error("call randomSuggestion(4 args) with empty list");
+			throw logic_error("call randomSuggestion(4 args) with empty list");
 		return randomSuggestion(plr, list, mode);
 	}
 	return randomSuggestion(plr, intersectionList, mode);
+}
+
+bool BoardState::match() {
+	for (short i = 0; i < cols; ++i) {
+		short j = 0;
+		while (j < rows && (board[i][j] == 'X' || board[i][j] == '0'))
+			++j;
+		if (top[i] != j)
+			return false;
+	}
+	return true;
 }
 
 bool BoardState::winPieceNearBy(const short col, const short ro) {
@@ -321,8 +340,8 @@ void BoardState::refreshBoard(char** hb) {
 void BoardState::refreshTop() {
 	for (short i = 0; i < cols; ++i) {
 		short j = 0;
-		for (; j < rows && board[i][j] != ' '; ++j)
-			;
+		while (j < rows && board[i][j] != ' ')
+			++j;
 		top[i] = j;
 	}
 }
@@ -330,8 +349,8 @@ void BoardState::refreshTop() {
 void BoardState::customBoard(const short cl, const short ro, const short wi) {
 	free();
 	cols = cl;
-	rows	   = ro;
-	winn   = wi;
+	rows = ro;
+	winn = wi;
 	generate();
 }
 
@@ -497,12 +516,13 @@ bool BoardState::specialPiece(const short col, const short ro) {
 
 void BoardState::retInit(vector<oneMove>& his) {
 	// return the state to the 'initial state' accroding to the history move
-	for (vector<oneMove>::reverse_iterator riter = his.rbegin(); riter != his.rend();++riter) {
+	for (vector<oneMove>::reverse_iterator riter = his.rbegin();
+		riter != his.rend();++riter) {
 		if (riter->mode=="debug"||riter->mode=="add"||riter->mode=="normal")
 			remove(riter->move);
 		else if (riter->mode=="reverse")
 			add(riter->player, riter->move);
 		else
-			throw runtime_error("unexpected, unhandled mode in retInit in boardState.h\n");
+			throw logic_error("unexpected, unhandled mode in retInit in boardState.h\n");
 	}
 }

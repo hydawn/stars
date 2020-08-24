@@ -17,4 +17,13 @@ namespace MyShortList {
 				dest.push_back(i);
 		}
 	}
+
+	bool equal(ShortList& l1, ShortList& l2) {
+		if (l1.size()!=l2.size())
+			return false;
+		for (short i = 0; i < l1.size();++i)
+			if (l1[i]!=l2[i])
+				return false;
+		return true;
+	}
 };

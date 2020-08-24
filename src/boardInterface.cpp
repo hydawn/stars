@@ -425,7 +425,7 @@ string BoardInterface::defaultSettings() {
 					"type help, happy to help as always.\n";
 		}
 	}
-	throw runtime_error("control flow into the end of settings mode\n");
+	throw logic_error("control flow into the end of settings mode\n");
 	return "quit";
 }
 
@@ -681,8 +681,6 @@ bool BoardInterface::controlMode() {
 		throw runtime_error("too much unhandled advice\n");
 	if (advice == "quit")
 		return false;
-	// else if (advice == "exit")
-	// 	;
 	cout << "Exit from controller\n";
 	return true;
 }

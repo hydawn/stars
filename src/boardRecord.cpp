@@ -174,7 +174,6 @@ bool BoardRecord::getDefaultSettings(const string& situ, const string& item) {
 			throw runtime_error("no such situation in Stars_settings.json\n");
 		}
 	}
-	throw runtime_error("getSettings flow to the end\n");
 }
 
 Json::Value& BoardRecord::getOtherSettings(const string &name) {

@@ -1,5 +1,7 @@
 #include "boardRoute.h"
 
+using std::logic_error;
+
 long long RouteTree::branches = 0;
 
 void RouteNode::clone(const RouteNode& rn) {
@@ -41,7 +43,7 @@ bool RouteNode::hasNext() {
 	for (; iter != prev->next.end() && *iter != this; ++iter)
 		;
 	if (iter == prev->next.end())
-		throw runtime_error("error inside the code");
+		throw logic_error("error inside the code");
 	++iter;
 	if (iter == prev->next.end())
 		return false;
@@ -121,32 +123,32 @@ void RouteTree::clear() {
 
 void RouteTree::forward() {
 	if (crnt->next.size() != 1)
-		throw runtime_error("reached the end of the tree!\n");
+		throw logic_error("reached the end of the tree!\n");
 	crnt = crnt->next[0];
 }
 
 void RouteTree::forward(short data) {
 	if (crnt->next.empty())
-		throw runtime_error("reached the end of the tree!\n");
+		throw logic_error("reached the end of the tree!\n");
 	vector<RouteNode *>::iterator iter = crnt->next.begin();
 	for (; iter != crnt->next.end();++iter)
 		if ((*iter)->data == data) {
 			crnt = *iter;
 			return;
 		}
-	throw runtime_error("no such data in the next set of node\n");
+	throw logic_error("no such data in the next set of node\n");
 }
 
 void RouteTree::nextNode() {
 	if (!crnt->prev)
-		throw runtime_error("trying nextNode on head node\n");
+		throw logic_error("trying nextNode on head node\n");
 	if (crnt->prev->next.empty())
-		throw runtime_error("reached the end of the tree!\n");
+		throw logic_error("reached the end of the tree!\n");
 	vRi iter = crnt->prev->next.begin();
 	for (; iter != crnt->prev->next.end() && *iter != crnt;++iter)
 		;
 	if (iter == crnt->prev->next.end())
-		throw runtime_error("no such data, bugs occurred inside this class\n");
+		throw logic_error("no such data, bugs occurred inside this class\n");
 	++iter;
 	if (iter == crnt->prev->next.end())
 		return;
@@ -155,16 +157,16 @@ void RouteTree::nextNode() {
 
 void RouteTree::backward() {
 	if (!crnt->prev)
-		throw runtime_error("reached the top of the tree!\n");
+		throw logic_error("reached the top of the tree!\n");
 	crnt = crnt->prev;
 }
 
 RouteNode* RouteTree::fastBackward(RouteNode* node, int num) {
 	if (num < 0)
-		throw runtime_error("invalid argument");
+		throw logic_error("invalid argument");
 	for (int i = 0; i < num; ++i) {
 		if (!node->prev)
-			throw runtime_error("fastBackward \"overhead\"");
+			throw logic_error("fastBackward \"overhead\"");
 		node = node->prev;
 	}
 	return node;

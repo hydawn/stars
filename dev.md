@@ -46,6 +46,13 @@ well, this is clearly more organized than CharmedPython
 - new features added in the show routes mode
 - maxcaltime protected
 
+## 007
+- runtime_error changed into logic_error
+- erase in ShortList rewritten
+- del in ShortList added
+- new thought on analyse function - might improve performance
+- other minor fix
+
 # TODO
 - add debug and release flag
 - change runtime_error to logic error

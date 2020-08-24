@@ -12,7 +12,7 @@ int main() {
 		cout << endl << err.what() << "- a bug perhaps\n";
 	}
 
-	cout << "Over\nHit 'Enter' to close ...";
+	cout << "Over, hit 'Enter' to close ...";
 	cin.get();
 	return 0;
 }

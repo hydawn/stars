@@ -8,6 +8,7 @@
 #include <vector>
 #include "shortList.h"
 
+using std::logic_error;
 using std::runtime_error;
 using std::string;
 using std::vector;
@@ -80,16 +81,15 @@ public:
 	short  rows;
 	short  cols;
 	short  winn;  // winning number
-	bool   starsOn;
 	/************************debug***************************/
 	static int removeNumber;
 	static int addNumber;
 	/************************debug***************************/
 
-	BoardState() : rows(8), cols(8), winn(4), starsOn(false) { generate(); }
-	BoardState(const BoardState& input) : rows(input.rows), cols(input.cols), winn(input.winn), starsOn(false) { generate(input.board, input.top); }
+	BoardState() : rows(8), cols(8), winn(4) { generate(); }
+	BoardState(const BoardState& input) : rows(input.rows), cols(input.cols), winn(input.winn) { generate(input.board, input.top); }
 	BoardState(const Json::Value& root);
-	BoardState(const short r, const short c, const short w) : rows(r), cols(c), winn(w), starsOn(false) { generate(); }
+	BoardState(const short r, const short c, const short w) : rows(r), cols(c), winn(w) { generate(); }
 	~BoardState() { free(); }
 
 	// construct
@@ -133,6 +133,7 @@ public:
 
 	// tools
 	void nonFullColumn(shortv& nonFull);
+	void sweepFullColumn(shortv& nonFull, short col);
 	char rPlayer(const char plr);
 
 	// random
@@ -145,10 +146,12 @@ public:
 	void add(const char plr, const short col) {
 		/*****************************debug**********************************/
 		// debug, remove this for performance reasons
+		if (col < 0 || col > cols)
+			throw logic_error("trying to add in a wrong place");
 		if (top[col - 1] == rows)
-			throw std::logic_error("trying to add to a full column.\n");
+			throw logic_error("trying to add to a full column.\n");
 		if (plr != 'X' && plr != '0')
-			throw std::logic_error("wrong player!\n");
+			throw logic_error("wrong player!\n");
 		++addNumber;
 		/*****************************debug**********************************/
 		board[col - 1][top[col - 1]++] = plr;
@@ -156,8 +159,10 @@ public:
 	void remove(const short col) {
 		/*****************************debug**********************************/
 		// debug, remove this for performance reasons
+		if (col < 0 || col > cols)
+			throw logic_error("trying to remove in a wrong place");
 		if (top[col - 1] == 0)
-			throw std::logic_error("trying to remove from an empty column.\n");
+			throw logic_error("trying to remove from an empty column.\n");
 		++removeNumber;
 		/*****************************debug**********************************/
 		board[col - 1][(top[col - 1]--) - 1] = ' ';
@@ -170,6 +175,7 @@ public:
 	// debug
 	int getRemoveNumber() { return removeNumber; }
 	int getAddNumber() { return addNumber; }
+	bool match();
 
 	// refresh
 	void refreshBoard(char** b);
