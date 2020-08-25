@@ -62,8 +62,21 @@ well, this is clearly more organized than CharmedPython
 - in commit code 007, firstPoint is modified to improve performance
 - version updated
 
+## 009
+- add self play mode to help find bug and to make sure that the code is stable
+- no route version of oneMoveAnalyse added
+- returnMove changed accordingly
+- fix routesMode
+- logic_error tracked in main.cpp
+- add func to see if settings are match (of cause it match, why should I do this?)
+- some flags added
+
 # TODO
-- test if stable
+- test if stable - no, sometimes settings just crash, why?
+- use tester to test if stable, track if good and bad is correct
+- add a new strategy to avoid letting opp have more three in a row
+- change the last tag to 0.1.0 and add info: delete `#include "boardArea.h"`
+- refactor returnMove function
 - add GUI - I don't think so
 - Then I will stop
 

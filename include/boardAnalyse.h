@@ -35,6 +35,8 @@ public:
 	string oneMoveAnalyseDebug(const char plr, const short col,
 		short goodNode, short badNode, const short depth,
 		const short maxDepth = 5);
+	string oneMoveAnalyse(const char plr, const short col, const short depth,
+		const short maxDepth = 5);
 	string returnMove(const char plr, shortv& list, const short depth);
 	string returnMoveDebug(const char plr, shortv& list, const short depth);
 	long long returnTime(const char plr, shortv& list, const short depth, string& word, bool trackRoute);
@@ -42,11 +44,11 @@ public:
 
 	// recursive analyse
 	// simple and elegant, but too powerful for this game
-#ifdef STARS_ADVANCED_FUNCTIONS
+// #ifdef STARS_ADVANCED_FUNCTIONS
 	string returnSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 	string recursiveSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
 	long long recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
-#endif
+// #endif
 
 	// change board
 	void go(const char plr, const short move);

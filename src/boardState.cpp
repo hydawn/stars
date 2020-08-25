@@ -145,14 +145,18 @@ char BoardState::rPlayer(const char plr) {
 short BoardState::randomMove() {
 	shortv list;
 	nonFullColumn(list);
+#ifdef STARS_DEBUG_INFO
 	if (list.empty())
 		throw logic_error("trying randomMove() in an empty list\n");
+#endif	// STARS_DEBUG_INFO
 	return randomMove(list);
 }
 
 short BoardState::randomMove(shortv& list) {
+#ifdef STARS_DEBUG_INFO
 	if (list.empty())
 		throw logic_error("trying randomMove(shortv& list) in an empty list\n");
+#endif	// STARS_DEBUG_INFO
 	srand((unsigned)time(NULL));
 	return list[rand() % list.size()];
 }
@@ -203,10 +207,12 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 		if (!plr1.empty() && ran < 65)
 			return randomMove(plr1);
 	}
+#ifdef STARS_DEBUG_INFO
 	else
 		throw logic_error("no such mode.\n");
 	if (list.empty())
 		throw logic_error("call randomSuggestion with empty list");
+#endif // STARS_DEBUG_INFO
 	return randomMove(list);
 }
 
@@ -534,7 +540,9 @@ void BoardState::retInit(vector<oneMove>& his) {
 			remove(riter->move);
 		else if (riter->mode=="reverse")
 			add(riter->player, riter->move);
+#ifdef STARS_DEBUG_INFO
 		else
 			throw logic_error("unexpected, unhandled mode in retInit in boardState.h\n");
+#endif	// STARS_DEBUG_INFO
 	}
 }

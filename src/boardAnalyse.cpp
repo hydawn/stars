@@ -27,15 +27,18 @@ shortv BoardAnalyse::firstPoint(const char plr, shortv& nonFullList) {
 	return firstPointList;
 }
 
-// check if game is over or board is full before call this
+// check if game is over before call this
+// won't return free if list is empty, relax
 string BoardAnalyse::analyse(const char plr, shortv& list) {
 #ifdef STARS_DEBUG_INFO
-	if (state.isOver() != 'N' || state.boardIsFull())
-		throw logic_error("game is over or board is full, yet analyse is called!\n");
+	if (state.isOver() != 'N')
+		throw logic_error("game is over, yet analyse is called!\n");
 #endif
 	shortv nonFull, temp1;
 
 	state.nonFullColumn(nonFull);
+	if (nonFull.empty())
+		return "bad";
 	list = firstPoint(plr, nonFull);
 	if (!list.empty())
 		return "good";
@@ -120,6 +123,34 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	return "free";
 }
 
+string BoardAnalyse::oneMoveAnalyse(const char plr, const short col,
+	const short depth, const short maxDepth) {
+	// only analyse one Move
+	char  opp = state.rPlayer(plr);
+	string word;
+	shortv list;
+
+	state.add(plr, col);
+	word = analyse(opp, list);
+	if (word == "good") {
+		word = "bad";
+	}
+	else if (word == "bad") {
+		word = "good";
+	}
+	else if (list.size() == 1 && depth < maxDepth) {
+		word = oneMoveAnalyse(opp, list[0], depth + 1, maxDepth);
+		if (word == "good")
+			word = "bad";
+		else if (word == "bad")
+			word = "good";
+		else
+			word = "free";
+	}
+	state.remove(col);
+	return word;
+}
+
 string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
 	short goodNode, short badNode, const short depth, const short maxDepth) {
 	// only analyse one Move
@@ -141,7 +172,7 @@ string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
 		word = "good";
 	}
 	else if (list.size() == 1 && depth < maxDepth) {
-		word = oneMoveAnalyseDebug(opp, list[0], badNode, goodNode, depth + 1);
+		word = oneMoveAnalyseDebug(opp, list[0], badNode, goodNode, depth + 1, maxDepth);
 		if (word == "good")
 			word = "bad";
 		else if (word == "bad")
@@ -149,22 +180,21 @@ string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
 		else
 			word = "free";
 	}
-	else {
-		word = "free";
+	else
 		routes.add(routes.freeNode);
-	}
 	state.remove(col);
 	routes.backward();
 	return word;
 }
 
-// check if game is over or board is full before call this
+// check if game is over before call this
 // max depth = 9
+// without route
 string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth) {
 #ifdef STARS_DEBUG_INFO
-	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
 	if (state.isOver() != 'N' || state.boardIsFull())
 		throw logic_error("game is over or board is full, yet returnMove is called!\n");
+	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
 #endif
 	string word = analyse(plr, list);
 	if (word == "good" || word == "bad" || list.size() == 1)
@@ -173,148 +203,232 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	char   opp = state.rPlayer(plr);
 	shortv list1, goodList;
 	vIter  col = list.begin();
+	short goodNode = -1, badNode = 0, freeNode = -2;
 
 	// one big loop ahead of us
-	while (col != list.end()) {
+	for (; col != list.end();) {
 		state.add(plr, *col);
-		word = analyse(opp, list1);
 #ifdef STARS_DEBUG_INFO
 		if (!state.match())
 			throw logic_error("top and real top didn't match\n");
 #endif
+		word = analyse(opp, list1);
 		if (word == "good") {
 			state.remove(*col);
 			col = list.erase(col);
 			continue;
-		} else if (word == "bad")
+		}
+		else if (word == "bad") {
 			goodList.push_back(*col);
+		}
 		else {
+#ifdef STARS_DEBUG_INFO
+			if (list.empty())
+				throw logic_error("list is empty!");
+#endif // STARS_DEBUG_INFO
 			shortv list2;
 			short  goodCount1 = 0;
 			bool   isBad1	  = false;
-			for (vIter col1 = list1.begin(); col1 != list1.end(); ++col1) {
+
+			vIter col1 = list1.begin();
+			for (; col1 != list1.end(); ++col1) {
 				state.add(opp, *col1);
 				word = analyse(plr, list2);
-				if (word == "bad") { // bad
+				if (word == "bad") {
 					state.remove(*col1);
 					isBad1 = true;
-					break; // goes straight to line197 if (col1!=list1.end())
-				} else if (word == "good")
+					break;
+				}
+				else if (word == "good") {
 					++goodCount1;
+				}
 				else {
+#ifdef STARS_DEBUG_INFO
+				if (list2.empty())
+					throw logic_error("list2 is empty!");
+#endif // STARS_DEBUG_INFO
 					shortv list3;
 					short  badCount2 = 0;
 					short  isGood2	 = false;
-					for (vIter col2 = list2.begin(); col2 != list2.end(); ++col2) {
+					vIter  col2		 = list2.begin();
+					for (; col2 != list2.end(); ++col2) {
 						state.add(plr, *col2);
 						word = analyse(opp, list3);
-						if (word == "good") // bad for me
+						if (word == "good") {
 							++badCount2;
+						}
 						else if (word == "bad") { // good
 							state.remove(*col2);
 							isGood2 = true;
 							break;
-						} else if (depth > 2) {
+						}
+						else if (depth > 2) {
+#ifdef STARS_DEBUG_INFO
+						if (list3.empty())
+							throw logic_error("list3 is empty!");
+#endif // STARS_DEBUG_INFO
 							shortv list4;
 							short  goodCount3 = 0;
 							bool   isBad3	  = false;
-							for (vIter col3 = list3.begin(); col3 != list3.end(); ++col3) {
+							vIter col3 = list3.begin();
+							for (; col3 != list3.end(); ++col3) {
 								state.add(opp, *col3);
 								word = analyse(plr, list4);
 								if (word == "bad") {  // bad
 									state.remove(*col3);
 									isBad3 = true;
 									break;	// straight into 'if after while'
-								} else if (word == "good")
+								}
+								else if (word == "good") {
 									++goodCount3;
+								}
 								else if (depth > 3) {
+#ifdef STARS_DEBUG_INFO
+									if (list4.empty())
+										throw logic_error("list4 is empty!");
+#endif // STARS_DEBUG_INFO
 									shortv list5;
 									bool   isGood4	 = false;
 									short  badCount4 = 0;
-									for (vIter col4 = list4.begin(); col4 != list4.end(); ++col4) {
+									vIter col4 = list4.begin();
+									for (; col4 != list4.end(); ++col4) {
 										state.add(plr, *col4);
 										word = analyse(opp, list5);
 										if (word == "bad") {  // good
 											isGood4 = true;
 											state.remove(*col4);
 											break;
-										} else if (word == "good")
+										}
+										else if (word == "good") {
 											++badCount4;
+										}
 										else if (depth > 4) {
+#ifdef STARS_DEBUG_INFO
+											if (list5.empty())
+												throw logic_error("list5 is empty!");
+#endif // STARS_DEBUG_INFO
 											shortv list6;
 											bool   isBad5	  = false;
 											short  goodCount5 = 0;
-											for (vIter col5 = list5.begin(); col5 != list5.end(); ++col5) {
+											vIter col5 = list5.begin();
+											for (; col5 != list5.end(); ++col5) {
 												state.add(opp, *col5);
 												word = analyse(plr, list6);
-												if (word == "good")
+												if (word == "good") {
 													++goodCount5;
+												}
 												else if (word == "bad") {
 													state.remove(*col5);
 													isBad5 = true;
 													break;
-												} else if (depth > 5) {
+												}
+												else if (depth > 5) {
+#ifdef STARS_DEBUG_INFO
+													if (list6.empty())
+														throw logic_error("list6 is empty!");
+#endif // STARS_DEBUG_INFO
 													shortv list7;
 													bool   isGood6	 = false;
 													short  badCount6 = 0;
-													for (vIter col6 = list6.begin(); col6 != list6.end(); ++col6) {
+													vIter  col6		 = list6.begin();
+													for (; col6 != list6.end(); ++col6) {
 														state.add(plr, *col6);
 														word = analyse(opp, list7);
 														if (word == "bad") {  // good
 															state.remove(*col6);
 															isGood6 = true;
 															break;
-														} else if (word == "good") {
+														}
+														else if (word == "good") {
 															++badCount6;
-														} else if (depth > 6 && !list7.empty()) {
-															// this is gonna be a disaster, it's just too much for a function
+														}
+														else if (depth > 6 ) {
+#ifdef STARS_DEBUG_INFO
+															if (list7.empty())
+																throw logic_error("list7 is empty!");
+#endif // STARS_DEBUG_INFO
 															shortv list8;
 															bool   isBad7	  = false;
 															short  goodCount7 = 0;
-															for (vIter col7 = list7.begin(); col7 != list7.end(); ++col7) {
+															vIter col7 = list7.begin();
+															for (; col7 != list7.end(); ++col7) {
 																state.add(opp, *col7);
 																word = analyse(plr, list8);
-																if (word == "good")
+																if (word == "good") {
 																	++goodCount7;
+																}
 																else if (word == "bad") {
 																	state.remove(*col7);
 																	isBad7 = true;
 																	break;
-																} else if (depth > 7 && !list8.empty()) {
+																}
+																else if (depth > 7) {
+#ifdef STARS_DEBUG_INFO
+																	if (list8.empty())
+																		throw logic_error("list8 is empty!");
+#endif // STARS_DEBUG_INFO
 																	shortv list9;
 																	bool   isGood8	 = false;
 																	short  badCount8 = 0;
-																	for (vIter col8 = list8.begin(); col8 != list8.end(); ++col8) {
+																	vIter col8 = list8.begin();
+																	for (; col8 != list8.end(); ++col8) {
 																		state.add(plr, *col8);
 																		word = analyse(opp, list9);
-																		if (word == "good")
+																		if (word == "good") {
 																			++badCount8;  // bad for me
+																		}
 																		else if (word == "bad") {
 																			isGood8 = true;
 																			state.remove(*col8);
 																			break;
-																		} else if (depth > 8 && !list9.empty()) {
+																		}
+																		else if (depth > 8) {
+#ifdef STARS_DEBUG_INFO
+																			if (list9.empty())
+																				throw logic_error("list9 is empty!");
+#endif // STARS_DEBUG_INFO
 																			shortv list10;
 																			bool   isBad9	  = false;
 																			short  goodCount9 = 0;
-																			for (vIter col9 = list9.begin(); col9 != list9.end(); ++col9) {
+																			vIter col9 = list9.begin();
+																			for (; col9 != list9.end(); ++col9) {
 																				state.add(opp, *col9);
 																				word = analyse(plr, list10);
-																				if (word == "good")
+																				if (word == "good") {
 																					++goodCount9;
+																				}
 																				else if (word == "bad") {
 																					state.remove(*col9);
 																					isBad9 = true;
 																					break;
-																				} else
-																					;
+																				}
+																				else if (list10.size() == 1) {
+																					word = oneMoveAnalyse(plr, list10[0], 0);
+																					if (word == "good")
+																						++goodCount9;
+																					else if (word == "bad") {
+																						state.remove(*col9);
+																						isBad9 = true;
+																						break;
+																					}
+																				}
 																				state.remove(*col9);
 																			}
 																			if (isBad9)
 																				++badCount8;
-																			else if (goodCount9 == list9.size() && goodCount9 != 0) {
+																			else if (goodCount9 == list9.size()) {
 																				isGood8 = true;
 																				state.remove(*col8);
+																				break;
+																			}
+																		}
+																		else if (list9.size() == 1) {
+																			word = oneMoveAnalyse(opp, list9[0], 0);
+																			if (word == "good")
+																				++badCount8;
+																			else if (word == "bad") {
+																				state.remove(*col8);
+																				isGood8 = true;
 																				break;
 																			}
 																		}
@@ -323,6 +437,16 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 																	if (isGood8)
 																		++goodCount7;
 																	else if (badCount8 == list8.size()) {
+																		state.remove(*col7);
+																		isBad7 = true;
+																		break;
+																	}
+																}
+																else if (list8.size() == 1) {
+																	word = oneMoveAnalyse(plr, list8[0], 0);
+																	if (word == "good")
+																		++goodCount7;
+																	else if (word == "bad") {
 																		state.remove(*col7);
 																		isBad7 = true;
 																		break;
@@ -338,11 +462,31 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 																break;
 															}
 														}
+														else if (list7.size() == 1) {
+															word = oneMoveAnalyse(opp, list7[0], 0);
+															if (word == "good")
+																++badCount6;
+															else if (word == "bad") {
+																state.remove(*col6);
+																isGood6 = true;
+																break;
+															}
+														}
 														state.remove(*col6);
 													}
 													if (isGood6)
 														++goodCount5;
-													else if (badCount6 == list6.size() && !list6.empty()) {
+													else if (badCount6 == list6.size()) {
+														state.remove(*col5);
+														isBad5 = true;
+														break;
+													}
+												}
+												else if (list6.size() == 1) {
+													word = oneMoveAnalyse(plr, list6[0], 0);
+													if (word == "good")
+														++goodCount5;
+													else if (word == "bad") {
 														state.remove(*col5);
 														isBad5 = true;
 														break;
@@ -352,116 +496,70 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 											}
 											if (isBad5)
 												++badCount4;
-											else if (goodCount5 == list5.size() && !list5.empty()) {
+											else if (goodCount5 == list5.size()) {
 												isGood4 = true;
 												state.remove(*col4);
 												break;
 											}
-										} else if (list5.size() == 1) {
-											shortv list6;
-											state.add(opp, list5[0]);
-											word = analyse(plr, list6);
-											if (word == "good") {
-												state.remove(list5[0]);
+										}
+										else if (list5.size() == 1) {
+											word = oneMoveAnalyse(opp, list5[0], 0);
+											if (word == "bad") {
 												state.remove(*col4);
 												isGood4 = true;
 												break;
-											} else if (word == "bad")
+											}
+											else if (word == "good")
 												++badCount4;
-											// else if (list6.size() == 1)
-											// 	;
-											state.remove(list5[0]);
 										}
 										state.remove(*col4);
 									}
 									if (isGood4)
 										++goodCount3;
-									else if (badCount4 == list4.size() && !list4.empty()) {
+									else if (badCount4 == list4.size()) {
 										state.remove(*col3);
 										isBad3 = true;
 										break;	// straight into 'if after while'
 									}
-								} else if (list4.size() == 1) {
-									state.add(plr, list4[0]);
-									shortv list5;
-									word = analyse(opp, list5);
-									if (word == "good") {
-										state.remove(list4[0]);
-										state.remove(*col3);
-										isBad3 = true;
-										break;	// straight into 'if after while'
-									} else if (word == "bad")
+								}
+								else if (list4.size() == 1) {
+									word = oneMoveAnalyse(plr, list4[0], 0);
+									if (word == "good")
 										++goodCount3;
-									else if (list5.size() == 1) {
-										shortv list6;
-										state.add(opp, list5[0]);
-										word = analyse(plr, list6);
-										if (word == "bad") {
-											state.remove(list5[0], list4[0], *col3);
-											isBad3 = true;
-											break;	// straight into 'if after while'
-										} else if (word == "good")
-											++goodCount3;
-										state.remove(list5[0]);
+									else if (word == "bad") {
+										state.remove(*col3);
+										isBad3 = true;
+										break;
 									}
-									state.remove(list4[0]);
 								}
 								state.remove(*col3);
 							}
 							if (isBad3)
 								++badCount2;
-							if (goodCount3 == list3.size() && !list3.empty()) {
+							else if (goodCount3 == list3.size()) {
 								state.remove(*col2);
 								isGood2 = true;
 								break;
 							}
-						} else if (list3.size() == 1) {
-							state.add(opp, list3[0]);
-							shortv list4;
-							word = analyse(plr, list4);
+						}
+						else if (list3.size() == 1) {
+							word = oneMoveAnalyse(opp, list3[0], 0);
 							if (word == "bad") {
-								++badCount2;
-							} else if (word == "good") {
-								state.remove(list3[0]);
 								state.remove(*col2);
-								++goodCount1;
+								isGood2 = true;
 								break;
-							} else if (list4.size() == 1) {
-								state.add(plr, list4[0]);
-								shortv list5;
-								word = analyse(opp, list5);
-								if (word == "good") {
-									++badCount2;
-								} else if (word == "bad") {
-									state.remove(list4[0], list3[0], *col2);
-									++goodCount1;
-									break;
-								} else if (list5.size() == 1) {
-									state.add(opp, list5[0]);
-									shortv list6;
-									word = analyse(plr, list6);
-									if (word == "bad") {
-										++badCount2;
-									} else if (word == "good") {
-										state.remove(list5[0]);
-										state.remove(list4[0], list3[0], *col2);
-										++goodCount1;
-										break;
-									}
-									state.remove(list5[0]);
-								}
-								state.remove(list4[0]);
 							}
-							state.remove(list3[0]);
+							else if (word == "good")
+								++badCount2;
 						}
 						state.remove(*col2);
 					}
-					if (badCount2 == list2.size() && !list2.empty()) { // if all bad, then opp go col1 is bad
+					if (badCount2 == list2.size()) {
 						state.remove(*col1);
 						isBad1 = true;
 						break;
 					}
-					if (isGood2)
+					else if (isGood2)
 						++goodCount1;
 				}
 				state.remove(*col1);
@@ -471,18 +569,21 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 				col = list.erase(col);
 				continue;
 			}
-			if (goodCount1 == list1.size() && !list1.empty())
+			else if (goodCount1 == list1.size())
 				goodList.push_back(*col);
 		}
 		state.remove(*col);
 		++col;
 	}
+
 #ifdef STARS_DEBUG_INFO
 	addNumber1	  = state.getAddNumber() - addNumber1;
 	removeNumber1 = state.getRemoveNumber() - removeNumber1;
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	if (addNumber1 != removeNumber1)
 		throw logic_error("add and remove didn't match!\n");
+	if (!state.match())
+		throw logic_error("top and real top didn't match\n");
 #endif
 	if (!goodList.empty()) {
 		list = goodList;
@@ -495,21 +596,20 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 
 string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short depth) {
 #ifdef STARS_DEBUG_INFO
-	if (state.isOver() != 'N' || state.boardIsFull())
-		throw logic_error("game is over or board is full, yet returnMove is called!\n");
+	if (state.isOver() != 'N')
+		throw logic_error("game is over, yet returnMove is called!\n");
 	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
 #endif
-	routes.clear();
 	string word = analyse(plr, list);
-	if (word == "good" || word == "bad" || list.size() == 1) {
+	if (word == "good" || word == "bad" || list.size() == 1)
 		return word;
-	}
 
 	char   opp = state.rPlayer(plr);
 	shortv list1, goodList;
 	vIter  col = list.begin();
 	short goodNode = -1, badNode = 0, freeNode = -2;
 
+	routes.clear();
 	routes.add(list);
 	// one big loop ahead of us
 	for (routes.forward(*col); col != list.end(); routes.nextNode()) {
@@ -529,7 +629,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 			routes.add(goodNode);
 			goodList.push_back(*col);
 		}
-		else if (!list1.empty()) {
+		else {
+#ifdef STARS_DEBUG_INFO
+			if (list.empty())
+				throw logic_error("list is empty!");
+#endif // STARS_DEBUG_INFO
 			shortv list2;
 			short  goodCount1 = 0;
 			bool   isBad1	  = false;
@@ -549,7 +653,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 					routes.add(goodNode);
 					++goodCount1;
 				}
-				else if (!list2.empty()) {
+				else {
+#ifdef STARS_DEBUG_INFO
+				if (list2.empty())
+					throw logic_error("list2 is empty!");
+#endif // STARS_DEBUG_INFO
 					shortv list3;
 					short  badCount2 = 0;
 					short  isGood2	 = false;
@@ -568,7 +676,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 							isGood2 = true;
 							break;
 						}
-						else if (depth > 2 && !list3.empty()) {
+						else if (depth > 2) {
+#ifdef STARS_DEBUG_INFO
+						if (list3.empty())
+							throw logic_error("list3 is empty!");
+#endif // STARS_DEBUG_INFO
 							shortv list4;
 							short  goodCount3 = 0;
 							bool   isBad3	  = false;
@@ -587,7 +699,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 									routes.add(goodNode);
 									++goodCount3;
 								}
-								else if (depth > 3 && !list4.empty()) {
+								else if (depth > 3) {
+#ifdef STARS_DEBUG_INFO
+									if (list4.empty())
+										throw logic_error("list4 is empty!");
+#endif // STARS_DEBUG_INFO
 									shortv list5;
 									bool   isGood4	 = false;
 									short  badCount4 = 0;
@@ -606,7 +722,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 											routes.add(badNode);
 											++badCount4;
 										}
-										else if (depth > 4 && !list5.empty()) {
+										else if (depth > 4) {
+#ifdef STARS_DEBUG_INFO
+											if (list5.empty())
+												throw logic_error("list5 is empty!");
+#endif // STARS_DEBUG_INFO
 											shortv list6;
 											bool   isBad5	  = false;
 											short  goodCount5 = 0;
@@ -625,7 +745,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 													isBad5 = true;
 													break;
 												}
-												else if (depth > 5 && !list6.empty()) {
+												else if (depth > 5) {
+#ifdef STARS_DEBUG_INFO
+													if (list6.empty())
+														throw logic_error("list6 is empty!");
+#endif // STARS_DEBUG_INFO
 													shortv list7;
 													bool   isGood6	 = false;
 													short  badCount6 = 0;
@@ -644,7 +768,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 															routes.add(badNode);
 															++badCount6;
 														}
-														else if (depth > 6 && !list7.empty()) {
+														else if (depth > 6) {
+#ifdef STARS_DEBUG_INFO
+															if (list7.empty())
+																throw logic_error("list7 is empty!");
+#endif // STARS_DEBUG_INFO
 															// this is gonna be a disaster, it's just too much for a function
 															shortv list8;
 															bool   isBad7	  = false;
@@ -664,7 +792,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																	isBad7 = true;
 																	break;
 																}
-																else if (depth > 7 && !list8.empty()) {
+																else if (depth > 7) {
+#ifdef STARS_DEBUG_INFO
+																	if (list8.empty())
+																		throw logic_error("list8 is empty!");
+#endif // STARS_DEBUG_INFO
 																	shortv list9;
 																	bool   isGood8	 = false;
 																	short  badCount8 = 0;
@@ -683,7 +815,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																			state.remove(*col8);
 																			break;
 																		}
-																		else if (depth > 8 && !list9.empty()) {
+																		else if (depth > 8) {
+#ifdef STARS_DEBUG_INFO
+																			if (list9.empty())
+																				throw logic_error("list9 is empty!");
+#endif // STARS_DEBUG_INFO
 																			shortv list10;
 																			bool   isBad9	  = false;
 																			short  goodCount9 = 0;
@@ -719,7 +855,7 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 																			routes.backward();
 																			if (isBad9)
 																				++badCount8;
-																			else if (goodCount9 == list9.size() && goodCount9 != 0) {
+																			else if (goodCount9 == list9.size()) {
 																				isGood8 = true;
 																				state.remove(*col8);
 																				break;
@@ -834,7 +970,7 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 									routes.backward();
 									if (isGood4)
 										++goodCount3;
-									else if (badCount4 == list4.size() && !list4.empty()) {
+									else if (badCount4 == list4.size()) {
 										state.remove(*col3);
 										isBad3 = true;
 										break;	// straight into 'if after while'
@@ -886,8 +1022,6 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 					else if (isGood2)
 						++goodCount1;
 				}
-				else
-					routes.add(freeNode);
 				state.remove(*col1);
 			}
 			routes.backward();
@@ -899,8 +1033,6 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 			else if (goodCount1 == list1.size())
 				goodList.push_back(*col);
 		}
-		else
-			routes.add(freeNode);
 		state.remove(*col);
 		++col;
 	}
@@ -960,14 +1092,14 @@ string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnM
 		state.add(plr, *col);
 		word = returnMove(opp, list1, returnMoveDepth);
 		if (word == "free") {
-			if (!list1.empty())
-				word = recursiveSituation(opp, list1, returnMoveDepth, recursiveCount, countTop);
+			word = recursiveSituation(opp, list1, returnMoveDepth, recursiveCount, countTop);
 		}
 		if (word == "good") {
 			state.remove(*col);
 			col = list.erase(col);
 			continue;
-		} else if (word == "bad")
+		}
+		else if (word == "bad")
 			goodList.push_back(*col);
 		state.remove(*col);
 		++col;
@@ -975,13 +1107,15 @@ string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnM
 	if (!goodList.empty()) {
 		list = goodList;
 		return "good";
-	} else if (list.empty())
+	}
+	else if (list.empty())
 		return "bad";
 	return "free";
 }
 
 // shouldn't call this with an emptylist
-string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
+string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
+	short returnMoveDepth /*3*/, int recursiveCount /*0*/, int countTop /*3*/) {
 	/*****************************debug theory*********************************
 	Here is another version of recursiveSituation unfortunately, doesn't take
 	shortv isn't gonna work, so here we are. Now I can use for loop and
@@ -998,6 +1132,8 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short retu
 #endif
 
 	// main
+	char   opp	  = state.rPlayer(plr);
+	bool   isGood = false;
 	shortv list1;
 	string word;
 	short  badCount = 0;
@@ -1005,29 +1141,27 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list, short retu
 	vIter  col		= list.begin();
 	for (; col != list.end(); ++col) {
 		state.add(plr, *col);
-		word = returnMove(state.rPlayer(plr), list1, returnMoveDepth);
+		word = returnMove(opp, list1, returnMoveDepth);
 		if (word == "free")
-			if (!list1.empty())
-				word = recursiveSituation(state.rPlayer(plr), list1,
-					returnMoveDepth, recursiveCount, countTop);
+			word = recursiveSituation(opp, list1, returnMoveDepth,
+				recursiveCount, countTop);
 		if (word == "good")
 			++badCount;
 		else if (word == "bad") {
+			isGood = true;
 			state.remove(*col);
 			break;
 		}
 		state.remove(*col);
 	}
-	if (col != list.end())
-		// this is actually based on a fact that list.empty() == false, which is
-		// not always the case if the function isn't called properly
+	if (isGood)
 		return "good";
-	else if (badCount == list.size())
+	if (badCount == list.size())
 		return "bad";
 	return "free";
 }
 
-#endif
+#endif // STARS_ADVANCED_FUNCTIONS
 
 int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	bool showTime, bool starsOn, bool trackRoute) {

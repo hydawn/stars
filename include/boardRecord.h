@@ -59,6 +59,9 @@ public:
 
 	//oper
 	BoardRecord &operator=(const BoardRecord &br);
+
+	// check
+	bool match();
 };
 
 #endif

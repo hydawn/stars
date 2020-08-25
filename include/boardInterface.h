@@ -40,6 +40,7 @@ public:
 	string customMode();
 	bool controlMode();
 	string showRoutesMode();
+	string selfPlayMode();
 
 	// ask & do
 	bool askToReverse(bool yes);	// if yes == true, then default yes

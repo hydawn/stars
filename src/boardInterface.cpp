@@ -193,6 +193,11 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 		else if (!strcmp(input, "sa") || !strcmp(input, "st") ||
 			!strcmp(input, "show stars"))
 			analyse->starShow();
+		else if (!strcmp(input, "sp") || !strcmp(input, "self play")) {
+			if(selfPlayMode() == "quit")
+				return "quit";
+			continue;
+		}
 		else if (!strcmp(input, "sv") || !strcmp(input, "save"))
 			record.saveGame(analyse->state);
 		else if (!strcmp(input, "sr") || !strcmp(input, "show routes")) {
@@ -278,7 +283,6 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 
 	// main loop
 	while (true) {
-		// analyse->show();
 		input = getInput(byPlayer.player, byPlayer.time);
 		if (input == "exit" || input == "quit") {
 			printf("Exit from debug mode ...\n");
@@ -429,8 +433,10 @@ string BoardInterface::defaultSettings() {
 					"type help, happy to help as always.\n";
 		}
 	}
+#ifdef STARS_DEBUG_INFO
 	throw logic_error("control flow into the end of settings mode\n");
 	return "quit";
+#endif
 }
 
 string BoardInterface::otherSettings() {
@@ -681,6 +687,8 @@ bool BoardInterface::controlMode() {
 		}
 		++i;
 	}
+	if (!record.match())
+		throw runtime_error("current settings var in BoardRecord doesn't match with the default settings");
 	if (i == 100)
 		throw runtime_error("too much unhandled advice\n");
 	if (advice == "quit")
@@ -721,7 +729,7 @@ string BoardInterface::showRoutesMode() {
 		getline(cin, in);
 		if (in == "q" || in == "quit")
 			return "quit";
-		if (in == "0" || in == "exit")
+		if (in == "0" || in == "exit" || in.empty())
 			return "debug";
 		if (in == "a") {
 			num = 1;
@@ -779,6 +787,100 @@ string BoardInterface::showRoutesMode() {
 	}
 	else
 		routes.showRoute(num - 3);
+	return "debug";
+}
+
+string BoardInterface::selfPlayMode() {
+	cout << "With hit or without hit (w/Wo)>";
+	string input;
+	bool   with = false;
+	//getline(cin, input);
+	if (input == "w")
+		with = true;
+	else if (input == "q" || input == "quit")
+		return input;
+	else if (input == "0" || input == "exit")
+		return "debug";
+	
+	// show time
+	oneMove byOpponent, byPlayer;
+	// string	input;
+	// byPlayer.mode		  = "selfPlay";
+	byPlayer.player		  = 'X';
+	// byPlayer.byComputer	  = true;
+	byPlayer.move		  = 5;
+	// byOpponent.mode		  = "selfPlay";
+	// byOpponent.byComputer = true;
+	byOpponent.player	  = '0';
+	
+	printf("We are in self play mode now\n");
+	analyse->show();
+
+	// main loop
+	while (true) {
+		if (with)
+			break;
+		// player goes
+		analyse->go(byPlayer.player, byPlayer.move);
+		printf("    %c goes here %d\n", byPlayer.player, byPlayer.move);
+		// record.push_back(byPlayer);	 // byPlayer end here
+		if (isOver(byPlayer)) {
+			printf("Exit from self play mode ...\n");
+			return "quit";
+		}
+
+		// opp respond
+		// printf("Info for the computer:\n");
+		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
+			false, false,
+			// record.getDefaultSettings("inDebugMode", "showCalculate"),
+			// record.getDefaultSettings("inDebugMode", "showTime"),
+			record.getDefaultSettings("inDebugMode", "starsOn"),
+			false
+			// record.getDefaultSettings("inDebugMode", "trackRoutes")
+			);
+#ifdef STARS_DEBUG_INFO
+		if (!byOpponent.list.empty() &&
+			!MyShortList::inList(byOpponent.list, byOpponent.move))
+			throw logic_error("suggestion not in safe list\n");
+#endif
+		// analyse->go(byOpponent.player, byOpponent.move);
+		// record.push_back(byOpponent);
+		// cout << "    input time used: " << byPlayer.time << "ms\n";
+		// printf("    %c goes here %d\n", byOpponent.player, byOpponent.move);
+		// if (isOver(byOpponent)) {
+		// 	printf("Exit from self play mode ...\n");
+		// 	return "quit";
+		// }
+
+		// recommend
+		// byPlayer.hintOn	= record.getDefaultSettings("inDebugMode", "hintOn");
+		// if (byPlayer.hintOn)
+		// 	cout << "\nHere is hint provided for you\n";
+		// byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer,
+			// byPlayer.hintOn,
+			// record.getDefaultSettings("inDebugMode", "showTime"),
+			// record.getDefaultSettings("inDebugMode", "starsOn"),
+			// false);
+		// showComment(byPlayer);
+		// if (byPlayer.hintOn && byPlayer.word != "bad")
+		// 	printf("    %d is recommended\n", byPlayer.suggestion);
+
+		// show
+		printf("\n");
+		if (record.getDefaultSettings("inDebugMode", "starrySky"))
+			analyse->starShow();
+		else
+			analyse->show();
+		printf("\n");
+
+		// change the player
+		std::swap(byPlayer.player, byOpponent.player);
+		// std::swap(byPlayer.word, byOpponent.word);
+		// std::swap(byPlayer.list, byOpponent.list);
+		std::swap(byPlayer.move, byOpponent.move);
+	}
+
 	return "debug";
 }
 
