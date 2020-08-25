@@ -10,9 +10,9 @@ string inFileSettings = addon +
 	"			\"defaultSaveBoard\": false\n" +
 	"		},\n" +
 	"		\"gameIsOver\": {\n" +
-	"			\"askToDebug\": true,\n" +
+	"			\"askToReverse\": true,\n" +
 	"			\"askToSaveBoard\": true,\n" +
-	"			\"defaultDebug\": false,\n" +
+	"			\"defaultReverse\": false,\n" +
 	"			\"defaultSaveBoard\": false\n" +
 	"		},\n" +
 	"		\"inCustomMode\": {\n" +
@@ -44,20 +44,23 @@ BoardRecord::~BoardRecord() {
 }
 
 std::ostream& operator<<(std::ostream& os, oneMove& move) {
-	os << "mode = " << move.mode << "\n";
+	os << "    mode = " << move.mode << ";\n";
 	if (move.mode == "normal" || move.mode == "debug") {
-		os << "time used: " << move.time << "ms, hint on: " << std::boolalpha << move.hintOn << ", suggestion = " << move.suggestion << "\nword = " << move.word << ", list = [ ";
+		os << "    time used: " << move.time << "ms; hint on: "
+		   << std::boolalpha << move.hintOn << "; suggestion = "
+		   << move.suggestion << "\n    word = " << move.word << "; list = [ ";
 		for (short i : move.list)
 			os << i << " ";
-		os << "]\nmove = " << move.move;
+		os << "]\n    move = " << move.move;
 		if (move.byComputer)
 			os << " by computer '" << move.player << "':\n";
 		else
 			os << " by player '" << move.player << "':\n";
-	} else if (move.mode == "add")
-		os << "add '" << move.player << "' in column " << move.move << endl;
+	}
+	else if (move.mode == "add")
+		os << "    add '" << move.player << "' in column " << move.move << endl;
 	else if (move.mode == "reverse")
-		os << "remove column " << move.move << endl;
+		os << "    remove column " << move.move << endl;
 	return os;
 }
 
@@ -174,6 +177,7 @@ bool BoardRecord::getDefaultSettings(const string& situ, const string& item) {
 			throw runtime_error("no such situation in Stars_settings.json\n");
 		}
 	}
+	throw logic_error("control flow to the end of BoardRecord::getDefaultSettings\n");
 }
 
 Json::Value& BoardRecord::getOtherSettings(const string &name) {

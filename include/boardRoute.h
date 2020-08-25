@@ -43,8 +43,10 @@ public:
 	RouteTree(const RouteTree& rt);
 	~RouteTree() { free(head); }
 
+#ifdef STARS_DEBUG_INFO
 	// check
 	bool match() { return head == crnt; }
+#endif
 
 	// handle
 	void clear();

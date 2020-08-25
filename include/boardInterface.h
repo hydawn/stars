@@ -42,13 +42,13 @@ public:
 	string showRoutesMode();
 
 	// ask & do
-	bool askToDebug(bool yes);	// if yes == true, then default yes
+	bool askToReverse(bool yes);	// if yes == true, then default yes
 	void askToSaveBoard(bool yes);
 	void importNewBoard();
 
 	// info
-	string getHelp(string mode = "normal");
-	string getInfo(string input = "info");
+	string getHelp(string mode);
+	string getInfo(string input);
 
 	// refresh
 	void refreshRecord(const BoardRecord& record_) { record = record_; }

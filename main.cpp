@@ -2,6 +2,9 @@
 
 int main() {
 	BoardInterface boardInterface;
+#ifdef STARS_DEBUG_INFO
+	cout << "This is a debug version of main.cpp\n";
+#endif
 	cout << "Use numbers to place a piece, h for help, 0 to exit.\n";
 	cout << "The game is on ->\n";
 

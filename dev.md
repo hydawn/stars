@@ -53,12 +53,18 @@ well, this is clearly more organized than CharmedPython
 - new thought on analyse function - might improve performance
 - other minor fix
 
+## 008 prepare for version 0.1.1
+- flag STARS_DEBUG_INFO for debug added
+- flag STARS_ADVANCED_FUNCTIONS to hide the advanced functions
+- ask to reverse instead of ask to debug
+- unused or less-used function deleted or disabled
+- version control using add_definitions from cmake
+- in commit code 007, firstPoint is modified to improve performance
+- version updated
+
 # TODO
-- add debug and release flag
-- change runtime_error to logic error
-- change getStateFromInput to fit all size of board - there's no need to do that
+- test if stable
 - add GUI - I don't think so
-- record calculate depth - but why?
 - Then I will stop
 
 - actually, seen that starArea + while returnMove is doing quite well, there's no need to use recursive function anymore - I was actually proud of that, few thing here that needed brain work. Now that it's useless, I suddenly lost interest in all of this stuff. No then I will stop, I'll stop right now.

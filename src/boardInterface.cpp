@@ -347,10 +347,11 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			record.getDefaultSettings("inDebugMode", "showTime"),
 			record.getDefaultSettings("inDebugMode", "starsOn"),
 			record.getDefaultSettings("inDebugMode", "trackRoutes"));
-		// debug
+#ifdef STARS_DEBUG_INFO
 		if (!byOpponent.list.empty() &&
 			!MyShortList::inList(byOpponent.list, byOpponent.move))
-			throw std::logic_error("suggestion not in safe list\n");
+			throw logic_error("suggestion not in safe list\n");
+#endif
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
@@ -368,7 +369,8 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer,
 			byPlayer.hintOn,
 			record.getDefaultSettings("inDebugMode", "showTime"),
-			record.getDefaultSettings("inDebugMode", "starsOn"), false);
+			record.getDefaultSettings("inDebugMode", "starsOn"),
+			false);
 		showComment(byPlayer);
 		if (byPlayer.hintOn && byPlayer.word != "bad")
 			printf("    %d is recommended\n", byPlayer.suggestion);
@@ -381,7 +383,9 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			analyse->show();
 		printf("\n");
 	}
-	throw std::logic_error("control flow into the end of debug mode\n");
+#ifdef STARS_DEBUG_INFO
+	throw logic_error("control flow into the end of debug mode\n");
+#endif
 }
 
 string BoardInterface::defaultSettings() {
@@ -660,13 +664,13 @@ bool BoardInterface::controlMode() {
 		else if (advice == "custom")
 			advice = customMode();
 		else if (advice == "over") {
-			if (record.getDefaultSettings("gameIsOver", "askToDebug") &&
-				askToDebug(record.getDefaultSettings("gameIsOver", "defaultDebug"))) {
-				advice = debugMode(byPlayer);
+			if (record.getDefaultSettings("gameIsOver", "askToReverse") &&
+				askToReverse(record.getDefaultSettings("gameIsOver", "defaultReverse"))) {
+				advice = reverseMode();
 				continue;
 			}
-			else if (record.getDefaultSettings("gameIsOver", "defaultDebug")) {
-				advice = debugMode(byPlayer);
+			else if (record.getDefaultSettings("gameIsOver", "defaultReverse")) {
+				advice = reverseMode();
 				continue;
 			}
 			if (record.getDefaultSettings("gameIsOver", "askToSaveBoard"))
@@ -825,7 +829,7 @@ string BoardInterface::getHelp(string mode) {
 			"I/import   - import a new board from input, which must fit in the current board\n" +
 			"m/move     - force the computer to take a move now\n" +
 			"r/reverse  - into reverse mode: reverse some moves\n" +
-			"Knowing that one can reverse an action might discourage one from thinking\n" +
+			"\nKnowing that one can reverse an action might discourage one from thinking\n" +
 			"carefully before one take a move. It's easy to get bored playing games like\n"
 			"that.\n" + enjoy + end
 		};
@@ -866,7 +870,7 @@ string BoardInterface::getHelp(string mode) {
 			"Each situation represent a situation where questions might be asked, you can\n" +
 			"decide whether it will be asked, and dispite whether it IS asked, the default\n" +
 			"answer would be. Notice that, for example, in situation gameIsOver, if\n" +
-			"askToDebug is false but defaultDebug is true, then when game is over, we will\n" +
+			"askToReverse is false but defaultDebug is true, then when game is over, we will\n" +
 			"went into debug mode immediately.\n" +
 			"If starsOn is true, then stars will fall down from the sky then make the\n" +
 			"computer think fast and reckless.\n" +
@@ -878,6 +882,13 @@ string BoardInterface::getHelp(string mode) {
 
 string BoardInterface::getInfo(string input) {
 	string addon = "";
+#ifdef STARS_VERSION_DEBUG
+	string version = STARS_VERSION_DEBUG;
+#else
+#ifdef STARS_VERSION_RELEASE
+	string version = STARS_VERSION_RELEASE;
+#endif
+#endif
 	string enjoy = "Enjoy!\n";
 	string end	 = "----------------------------------- The End -----------------------------------\n";
 	string tips	 = addon + "Tips from CharmedPython:\n" +
@@ -896,10 +907,15 @@ string BoardInterface::getInfo(string input) {
 		"interrupt but build it anyway. Actually, trying to build any kind of three\n" +
 		"piece in a row is helpful.\nGood luck!\n" + end;
 	string info = addon +
-		"A 1v1 & 8x8 command line based board game\n" +
-		"\n-------------------------------- version 1.0.2 --------------------------------\n" +
-		"                                                                   by DuanHanyu\n" +
-		"                                                                      2020-8-19";
+		"\nA 1v1 & 8x8 command line based board game\n" +
+#ifndef STARS_DEBUG_INFO
+		"\n------------------------------- version " + version + " ---------------------------------\n" +
+#endif
+#ifdef STARS_DEBUG_INFO
+		"\n---------------------------- version " + version + " -------------------------------\n" +
+#endif
+		"                                                                  by Duan Hanyu\n" +
+		"                                                                      2020-8-25";
 	vector<string> story = {
 		addon +
 		"Out of a few random try, you finally get yourself an Easter Egg! But I'm afraid\n" +
@@ -1009,18 +1025,19 @@ void BoardInterface::showComment(oneMove& move) {
 	}
 }
 
-bool BoardInterface::askToDebug(bool yes) {
+bool BoardInterface::askToReverse(bool yes) {
 	char input[8];
 	if (yes)
-		printf("Care for new debug mode? (default yes) (Yes/no)> ");
+		printf("Care for reverse mode? (default yes) (Yes/no)> ");
 	else
-		printf("Care for new debug mode? (default no) (yes/No)> ");
+		printf("Care for reverse mode? (default no) (yes/No)> ");
 	cin.getline(input, 8);
 	if ((yes && !strlen(input)) || !strcmp(input, "Y") || !strcmp(input, "yes")
 		|| !strcmp(input, "y")) {
 		printf("As you wish\n");
 		return true;
-	} else
+	}
+	else
 		printf("No it is.\n");
 	return false;
 }

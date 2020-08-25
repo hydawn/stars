@@ -81,10 +81,10 @@ public:
 	short  rows;
 	short  cols;
 	short  winn;  // winning number
-	/************************debug***************************/
+#ifdef STARS_DEBUG_INFO
 	static int removeNumber;
 	static int addNumber;
-	/************************debug***************************/
+#endif
 
 	BoardState() : rows(8), cols(8), winn(4) { generate(); }
 	BoardState(const BoardState& input) : rows(input.rows), cols(input.cols), winn(input.winn) { generate(input.board, input.top); }
@@ -144,8 +144,7 @@ public:
 
 	// change function
 	void add(const char plr, const short col) {
-		/*****************************debug**********************************/
-		// debug, remove this for performance reasons
+#ifdef STARS_DEBUG_INFO
 		if (col < 0 || col > cols)
 			throw logic_error("trying to add in a wrong place");
 		if (top[col - 1] == rows)
@@ -153,18 +152,17 @@ public:
 		if (plr != 'X' && plr != '0')
 			throw logic_error("wrong player!\n");
 		++addNumber;
-		/*****************************debug**********************************/
+#endif
 		board[col - 1][top[col - 1]++] = plr;
 	}
 	void remove(const short col) {
-		/*****************************debug**********************************/
-		// debug, remove this for performance reasons
+#ifdef STARS_DEBUG_INFO
 		if (col < 0 || col > cols)
 			throw logic_error("trying to remove in a wrong place");
 		if (top[col - 1] == 0)
 			throw logic_error("trying to remove from an empty column.\n");
 		++removeNumber;
-		/*****************************debug**********************************/
+#endif
 		board[col - 1][(top[col - 1]--) - 1] = ' ';
 	}
 	void remove(const short first, const short second, const short third) {
@@ -173,9 +171,11 @@ public:
 		remove(third);
 	}
 	// debug
+#ifdef STARS_DEBUG_INFO
 	int getRemoveNumber() { return removeNumber; }
 	int getAddNumber() { return addNumber; }
 	bool match();
+#endif
 
 	// refresh
 	void refreshBoard(char** b);

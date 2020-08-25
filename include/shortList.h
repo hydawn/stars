@@ -1,7 +1,10 @@
 #ifndef _SHORTLIST_H_GUARD_
 #define _SHORTLIST_H_GUARD_ 1
+
 #include "json/json.h"
+
 #define SHORTV_LENGTH 32
+using std::logic_error;
 
 // some of this code can be improved - like short erase
 class ShortList {
@@ -19,7 +22,13 @@ public:
 
 	typedef short* iterator;
 
-	void  push_back(const short& ele) { data[top++] = ele; }
+	void push_back(const short& ele) {
+#ifdef STARS_DEBUG_INFO
+		if (top == SHORTV_LENGTH)
+			throw logic_error("ShortList can't be pushed back\n");
+#endif
+		data[top++] = ele;
+	}
 	bool  empty() const { return top == 0; }
 	short size() const { return top; }
 
@@ -29,8 +38,6 @@ public:
 	iterator end() { return data + top; }
 	iterator erase(iterator iter) {
 		iterator saveIter = iter, lastIter = iter++;
-		// for (short i = 0; i < (end() - iter) - 1; ++i)
-		// 	iter[i] = iter[i + 1];
 		while (iter != end()) {
 			*lastIter = *iter;
 			++iter;
@@ -47,7 +54,9 @@ public:
 				top -= 1;
 				return;
 			}
-		throw std::logic_error("trying to erase an item that does not exist\n");
+#ifdef STARS_DEBUG_INFO
+		throw logic_error("trying to erase an item that does not exist\n");
+#endif
 	}
 
 	// op

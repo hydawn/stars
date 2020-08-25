@@ -1,6 +1,8 @@
 #include "boardRoute.h"
 
+#ifdef STARS_DEBUG_INFO
 using std::logic_error;
+#endif
 
 long long RouteTree::branches = 0;
 
@@ -42,8 +44,10 @@ bool RouteNode::hasNext() {
 	vRi iter = prev->next.begin();
 	for (; iter != prev->next.end() && *iter != this; ++iter)
 		;
+#ifdef STARS_DEBUG_INFO
 	if (iter == prev->next.end())
-		throw logic_error("error inside the code");
+		throw logic_error("error RouteNode::hasNext");
+#endif
 	++iter;
 	if (iter == prev->next.end())
 		return false;
@@ -122,33 +126,43 @@ void RouteTree::clear() {
 }
 
 void RouteTree::forward() {
+#ifdef STARS_DEBUG_INFO
 	if (crnt->next.size() != 1)
 		throw logic_error("reached the end of the tree!\n");
+#endif
 	crnt = crnt->next[0];
 }
 
 void RouteTree::forward(short data) {
+#ifdef STARS_DEBUG_INFO
 	if (crnt->next.empty())
 		throw logic_error("reached the end of the tree!\n");
+#endif
 	vector<RouteNode *>::iterator iter = crnt->next.begin();
 	for (; iter != crnt->next.end();++iter)
 		if ((*iter)->data == data) {
 			crnt = *iter;
 			return;
 		}
+#ifdef STARS_DEBUG_INFO
 	throw logic_error("no such data in the next set of node\n");
+#endif
 }
 
 void RouteTree::nextNode() {
+#ifdef STARS_DEBUG_INFO
 	if (!crnt->prev)
 		throw logic_error("trying nextNode on head node\n");
 	if (crnt->prev->next.empty())
 		throw logic_error("reached the end of the tree!\n");
+#endif
 	vRi iter = crnt->prev->next.begin();
 	for (; iter != crnt->prev->next.end() && *iter != crnt;++iter)
 		;
+#ifdef STARS_DEBUG_INFO
 	if (iter == crnt->prev->next.end())
 		throw logic_error("no such data, bugs occurred inside this class\n");
+#endif
 	++iter;
 	if (iter == crnt->prev->next.end())
 		return;
@@ -156,17 +170,23 @@ void RouteTree::nextNode() {
 }
 
 void RouteTree::backward() {
+#ifdef STARS_DEBUG_INFO
 	if (!crnt->prev)
 		throw logic_error("reached the top of the tree!\n");
+#endif
 	crnt = crnt->prev;
 }
 
 RouteNode* RouteTree::fastBackward(RouteNode* node, int num) {
+#ifdef STARS_DEBUG_INFO
 	if (num < 0)
 		throw logic_error("invalid argument");
+#endif
 	for (int i = 0; i < num; ++i) {
+#ifdef STARS_DEBUG_INFO
 		if (!node->prev)
 			throw logic_error("fastBackward \"overhead\"");
+#endif
 		node = node->prev;
 	}
 	return node;

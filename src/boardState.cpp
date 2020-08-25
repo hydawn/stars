@@ -1,7 +1,9 @@
 #include "boardState.h"
 
+#ifdef STARS_DEBUG_INFO
 int BoardState::removeNumber;
 int BoardState::addNumber;
+#endif
 
 BoardState::BoardState(const Json::Value& root)
 	: rows(root["row"].asInt()), cols(root["column"].asInt()), winn(root["winn"].asInt()) {
@@ -126,9 +128,10 @@ void BoardState::sweepFullColumn(shortv& nonFull, short col) {
 		nonFull.del(col);
 	shortv realNonFull;
 	nonFullColumn(realNonFull);
-	// delete this when done enough test
+#ifdef STARS_DEBUG_INFO
 	if (!MyShortList::equal(nonFull, realNonFull))
 		throw logic_error("this non-full and the real non-full didn't match\n");
+#endif
 }
 
 char BoardState::rPlayer(const char plr) {
@@ -186,7 +189,8 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 		ran = rand() % 100;
 		if (!opp1.empty() && ran < 57)
 			return randomMove(opp1);
-	} else if (mode == "defensive") {
+	}
+	else if (mode == "defensive") {
 		if (!opp2.empty() && ran < 95)
 			return randomMove(opp2);
 		ran = rand() % 100;
@@ -198,7 +202,8 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 		ran = rand() % 100;
 		if (!plr1.empty() && ran < 65)
 			return randomMove(plr1);
-	} else
+	}
+	else
 		throw logic_error("no such mode.\n");
 	if (list.empty())
 		throw logic_error("call randomSuggestion with empty list");
@@ -206,6 +211,10 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 }
 
 short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList, const string& mode) {
+#ifdef STARS_DEBUG_INFO
+	if (list.empty())
+		throw logic_error("call randomSuggestion(4 args) with empty list");
+#endif
 	shortv intersectionList;
 	// preference No.1: take what can bring me winn-1 in a row, and what can
 	// interrupt opponent's three in a row
@@ -213,7 +222,9 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	shortv plrTList = makeThreeCols(plr, list), oppTList = makeThreeCols(rPlayer(plr), oppList);
 	srand((unsigned)time(NULL));
 	if (rand() % 100 < 85) {
+#ifdef STARS_DEBUG_INFO
 		printf("    Debug: Trying intercept strategy 1:\n");
+#endif
 		MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
 		if (intersectionList.empty()) {
 			if (plrTList.empty()) {
@@ -231,15 +242,15 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	// else if everything is empty
 	// preference No.2: take the opponent's safe list
 	MyShortList::shortIntersection(intersectionList, list, oppList);
+#ifdef STARS_DEBUG_INFO
 	printf("    Debug: Trying intercept strategy 2:\n");
-	if (intersectionList.empty()) {
-		if (list.empty())
-			throw logic_error("call randomSuggestion(4 args) with empty list");
+#endif
+	if (intersectionList.empty())
 		return randomSuggestion(plr, list, mode);
-	}
 	return randomSuggestion(plr, intersectionList, mode);
 }
 
+#ifdef STARS_DEBUG_INFO
 bool BoardState::match() {
 	for (short i = 0; i < cols; ++i) {
 		short j = 0;
@@ -250,6 +261,7 @@ bool BoardState::match() {
 	}
 	return true;
 }
+#endif
 
 bool BoardState::winPieceNearBy(const short col, const short ro) {
 	// grow up, right, upright, downright
