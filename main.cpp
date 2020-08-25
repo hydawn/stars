@@ -1,21 +1,21 @@
 #include "boardInterface.h"
-/*****
-int main() {
-	int i;
-	for (i = 0; i < 24; ++i) {
+
+// err = 7
+void autoTest(int n) {
+	int i, err = 0;
+	for (i = 10; i < n; ++i) {
 		BoardInterface boardInterface;
-		boardInterface.selfPlayMode();
+		err += boardInterface.autoTestMode(i % 8 + 1);
 	}
 	cout << "i = " << i << endl;
+	cout << "err = " << err << endl;
 	cout << "Over, hit 'Enter' to close ...";
 	cin.get();
-	return 0;
 }
-*****/
 
-
-/*****/
 int main() {
+	// autoTest(48);
+	// return 0;
 	BoardInterface boardInterface;
 #ifdef STARS_DEBUG_INFO
 	cout << "This is a debug version of main.cpp\n";
@@ -40,4 +40,3 @@ int main() {
 	cin.get();
 	return 0;
 }
-/*****/

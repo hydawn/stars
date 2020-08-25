@@ -59,6 +59,9 @@ public:
 
 	// check
 	bool isOver(const oneMove& move);
+	int autoTestMode(int startMove = 5);
 };
+
+int autoTest();
 
 #endif
