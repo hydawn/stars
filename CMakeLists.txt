@@ -10,7 +10,7 @@ add_library(json_lib STATIC
 	${DEPENDENCIES_SOURCE_DIR}/src/json/jsoncpp.cpp
 )
 target_include_directories(json_lib
-	PUBLIC 
+	PUBLIC
 		${DEPENDENCIES_SOURCE_DIR}/include
 )
 
@@ -68,7 +68,8 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	add_definitions(-DSTARS_VERSION_DEBUG="${STARS_VERSION_DEBUG}")
 	message(STATUS "Current version: ${STARS_VERSION_DEBUG}")
 	target_compile_definitions(stars_lib 
-		PUBLIC STARS_DEBUG_INFO
+		PUBLIC STARS_DEBUG_INFO # comment this to make a release version
+		# PUBLIC STARS_LANG_CHINESE # uncomment this to make a Chinese version
 	)
 	message (STATUS "Current platform: Windows")
 	message (STATUS "Current build type: (with debug info)")

@@ -1,3 +1,4 @@
+/*-- encoding: GBK --*/
 #include "boardTest.h"
 
 // bool inArgList(int argc, char *argv[], char str[]) {
@@ -130,10 +131,17 @@ int main(int argc, char *argv[]) {
 
 	// normal play mode
 	BoardInterface interface;
+#ifndef STARS_LANG_CHINESE
 #ifdef STARS_DEBUG_INFO
 	cout << "This is a debug version of Stars\n";
-#endif
+#endif // STARS_DEBUG_INFO
 	cout << "Use numbers to place a piece, h for help, 0 to exit.\n";
+#else
+#ifdef STARS_DEBUG_INFO
+	cout << "一个调试版本Stars\n";
+#endif // STARS_DEBUG_INFO
+	cout << "输入数字下棋，输入h获得帮助，输入0退出\n";
+#endif // STARS_LANG_CHINESE
 
 	// there was something normal going on here
 	try {
@@ -157,8 +165,12 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 #endif
-
+#ifndef STARS_LANG_CHINESE
 	cout << "Over, hit 'Enter' to close ...";
+#else
+	cout << "完毕，按回车键关闭 ...";
+#endif // STARS_LANG_CHINESE
+
 	cin.get();
 	return 0;
 }

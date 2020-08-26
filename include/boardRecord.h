@@ -64,4 +64,7 @@ public:
 	bool match();
 };
 
+string toChinese(const string& word);
+string toChinese(const bool word);
+
 #endif

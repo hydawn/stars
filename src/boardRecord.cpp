@@ -1,3 +1,4 @@
+/*-- encoding:GBK --*/
 #include "boardRecord.h"
 
 // hard core code
@@ -73,7 +74,7 @@ void BoardRecord::getFile() {
 		std::ofstream outSet(settingsFileName);
 		outSet << inFileSettings;
 		if (!outSet.is_open())
-			throw runtime_error("Failed to create file, mission aborted");
+			throw runtime_error("getFile: failed to create file, mission aborted");
 		outSet.close();
 		std::ifstream in(settingsFileName);
 		in >> settings;
@@ -85,9 +86,9 @@ void BoardRecord::getFile() {
 void BoardRecord::writeGames() {
 	std::ofstream outFile(gamesFileName);
 	if (!outFile.is_open()) {
-		cout << "failed to open file \"" << gamesFileName << "\" to write\n";
+		cout << "Failed to open file \"" << gamesFileName << "\" to write\n";
 		cout << "write action aborted\n ";
-		return;
+		throw runtime_error("writeGames: failed to open file to write");
 	}
 	outFile << games;
 }
@@ -97,7 +98,7 @@ void BoardRecord::writeSettings() {
 	if (!outFile.is_open()) {
 		cout << "Failed to open file \"" << settingsFileName << "\" to write\n";
 		cout << "write action aborted\n ";
-		throw runtime_error("can't open file to write settings");
+		throw runtime_error("writeSettings: can't open file to write settings");
 	}
 	outFile << settings;
 }
@@ -106,10 +107,18 @@ void BoardRecord::saveGame(BoardState& state) {
 	string gameName = "no one";
 	if (getDefaultSettings("whenSaveGame", "askGiveName")) {
 		bool defaultGiveName = getDefaultSettings("whenSaveGame", "defaultGiveName");
+#ifndef STARS_LANG_CHINESE
 		if (defaultGiveName)
 			printf("Care to give the board a name? (yes as default) (no/Yes)> ");
 		else
-			printf("Care to give the board a name? (none as default) (No/yes)> ");
+			printf("Care to give the board a name? (no as default) (No/yes)> ");
+#else
+		if (defaultGiveName)
+			printf("给存档命名? (默认 yes) (no/Yes)> ");
+		else
+			printf("给存档命名? (默认 no) (No/yes)> ");
+#endif // STARS_LANG_CHINESE
+
 		char name[256];
 		cin.getline(name, 256);
 		if ((defaultGiveName && !strlen(name)) || !strcmp(name, "yes")) {
@@ -119,7 +128,10 @@ void BoardRecord::saveGame(BoardState& state) {
 		}
 	}
 	saveGame(gameName, state);
+#ifndef STARS_LANG_CHINESE
 	cout << "game \"" << gameName << "\" is saved.\n";
+#endif // STARS_LANG_CHINESE
+	cout << "游戏 \"" << gameName << "\" 已存档\n";
 }
 
 void BoardRecord::saveGame(const string& gameName, BoardState& state) {
@@ -201,6 +213,7 @@ Json::Value& BoardRecord::getOtherSettings(const string &name) {
 void BoardRecord::showSettingsWithTags() {
 	Json::Value &defaultSettings = settings["defaultSettings"];
 	members member = defaultSettings.getMemberNames();
+#ifndef STARS_LANG_CHINESE
 	cout << "situation\t"
 		<< "item\t\t\t"
 		<< "true/false\t"
@@ -220,6 +233,22 @@ void BoardRecord::showSettingsWithTags() {
 		}
 		++x;
 	}
+#else
+	cout << "情况 -- "
+		<< "项目 -- "
+		<< "真假 -- "
+		<< "标签\n";
+	char x = 'a';
+	for (members::iterator i = member.begin(); i != member.end(); ++i) {
+		char	y	  = 'a';
+		members inset = defaultSettings[*i].getMemberNames();
+		printf("\n");
+		for (members::iterator j = inset.begin(); j != inset.end(); ++j) {
+			cout << toChinese(*i) << " -- " << toChinese(*j) << " -- " << toChinese(defaultSettings[*i][*j].asBool()) << " -- " << x << y++ << endl;
+		}
+		++x;
+	}
+#endif // STARS_LANG_CHINESE
 }
 
 bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
@@ -232,9 +261,15 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 		for (members::iterator j = inset.begin(); j != inset.end(); ++j) {
 			if (x == tag1 && y == tag2) {
 				defaultSettings[*i][*j] = !defaultSettings[*i][*j].asBool();
+#ifndef STARS_LANG_CHINESE
 				cout << *i << ": " << *j << " is changed from "
 					<< std::boolalpha << !defaultSettings[*i][*j].asBool()
 					<< " to " << defaultSettings[*i][*j] << endl;
+#else
+				cout << toChinese(*i) << ": " << toChinese(*j) << " 已从 "
+					<< std::boolalpha << toChinese(!defaultSettings[*i][*j].asBool())
+					<< " 更改到 " << toChinese(defaultSettings[*i][*j].asBool()) << endl;
+#endif // STARS_LANG_CHINESE
 				return true;
 			}
 			++y;
@@ -247,9 +282,15 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 string BoardRecord::showSavedGames(Json::Value& ret) {
 	unsigned int i = 0;
 	while (i < games.size()) {
+#ifndef STARS_LANG_CHINESE
 		printf("\ndate: %sname: %s\nboard:\n", games[i]["date"].asCString(), games[i]["name"].asCString());
 		showSavedBoard(games[i]["state"]);
 		printf("index number: %d/%d\n> ", i + 1, games.size());
+#else
+		printf("\n日期: %s名: %s\n棋盘:\n", games[i]["date"].asCString(), games[i]["name"].asCString());
+		showSavedBoard(games[i]["state"]);
+		printf("索引号: %d/%d\n> ", i + 1, games.size());
+#endif // STARS_LANG_CHINESE
 
 		while (true) {
 			char input[8];
@@ -276,7 +317,11 @@ string BoardRecord::showSavedGames(Json::Value& ret) {
 				ret = games[number - 1];
 				return "yes";
 			}
+#ifndef STARS_LANG_CHINESE
 			cout << "Pardon?\n> ";
+#else
+			cout << "啥？\n> ";
+#endif // STARS_LANG_CHINESE
 		}
 		++i;
 	}
@@ -362,3 +407,63 @@ bool BoardRecord::match() {
 	}
 	return true;
 }
+
+#ifdef STARS_LANG_CHINESE
+string toChinese(const string& word) {
+	if (word == "good")
+		return "好";
+	if (word == "bad")
+		return "坏";
+	if (word == "free")
+		return "自由"; // 我免费了！
+	if (word == "board width")
+		return "棋盘宽度";
+	if (word == "board height")
+		return "棋盘高度";
+	if (word == "win number")
+		return "获胜所需连排最小数";
+	if (word == "changeBoard")
+		return "更换棋盘";
+	if (word == "askToSaveBoard")
+		return "询问棋盘是否存档";
+	if (word == "defaultSaveBoard")
+		return "默认棋盘是否存档";
+	if (word == "gameIsOver")
+		return "游戏结束";
+	if (word == "askToReverse")
+		return "询问进入撤回模式";
+	if (word == "defaultReverse")
+		return "默认进入撤回模式";
+	if (word == "inCustomMode")
+		return "自定义模式";
+	if (word == "inDebugMode")
+		return "普通模式";
+	if (word == "hintOn")
+		return "打开提示";
+	if (word == "showCalculate")
+		return "显示程序计算过程";
+	if (word == "showTime")
+		return "显示用时";
+	if (word == "starrySky")
+		return "星空";
+	if (word == "starsOn")
+		return "晴天";
+	if (word == "trackRoutes")
+		return "追踪路径";
+	if (word == "whenSaveGame")
+		return "保存游戏";
+	if (word == "askGiveName")
+		return "询问命名存档";
+	if (word == "defaultGiveName")
+		return "默认命名存档";
+	if (word == "maxcaltime")
+		return "最大计算时间";
+	cout << "Word = " << word << endl;
+	throw logic_error("toChinese: wrong input");
+}
+string toChinese(const bool word) {
+	if (word)
+		return "真";
+	return "假";
+}
+#endif // STARS_LANG_CHINESE

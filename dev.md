@@ -81,6 +81,12 @@ well, this is clearly more organized than CharmedPython
 - remove \n in the end of error thrown
 - README.md build/download info added, import info updated, known bugs updated
 
+## 012 - Chinese added
+- most of the output now has a Chinese version, therefore the encoding of main.cpp, boardAnalyse.cpp, boardInterface.cpp and boardRecord.cpp is changed from UTF-8 to GBK
+- README updated
+- capital fixed
+- cut output
+
 # TODO
 - sometimes settings just crash, why?
 - add a new strategy to avoid letting opp have more three in a row

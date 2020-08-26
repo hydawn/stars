@@ -32,13 +32,13 @@ Download .exe file in [here](https://github.com/DuanHanyu/Stars/releases), run i
 git clone https://github.com/DuanHanyu/Stars.git
 mkdir build
 cd build
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Release
 make
 ```
-Use `./Stars` to start the game, use `make install` to install the game.  
+Use `./Stars play` to start the game, use `make install` to install the game.  
 
 # Import
-You can see there's a lot of board in [oldTestingBoard.md](./oldTestingBoard.md). In case you want to import and play a new board, just enter `import` and you'll see this:  
+You can see there's a lot of board in [oldTestingBoard.md](./oldTestingBoard.md). In case you want to import and play a new board, just enter `import` or `I` and you'll see this:  
 ```
 In debug mode
 Player 'X' move> I

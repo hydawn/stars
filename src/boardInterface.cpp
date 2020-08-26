@@ -1,4 +1,5 @@
-#include "BoardInterface.h"
+/*-- encoding: GBK --*/
+#include "boardInterface.h"
 
 BoardInterface::BoardInterface() {
 	generate(8, 8, 4);
@@ -26,7 +27,11 @@ bool BoardInterface::getStateFromInput() {
 		if (inputEater == "0" || inputEater == "exit")
 			return false;
 		if (inputEater.size() != cols * 2 + 1) {
-			cout << "Something wrong going on with the input board.\n";
+#ifndef STARS_LANG_CHINESE
+			cout << "Something wrong going on with the input board\n";
+#else
+			cout << "ÊäÈëµÄÆåÅÌ³öÁËµãÎÊÌâ\n";
+#endif
 			return false;
 		}
 		input.push_back(inputEater);
@@ -71,10 +76,17 @@ bool BoardInterface::transformInput(char** dest, vector<string>& src,
 // mode = "reverse", "add"
 string BoardInterface::getInput(const string mode) {
 	while (true) {
+#ifndef STARS_LANG_CHINESE
 		if (mode == "reverse")
 			printf("\nIn reverse mode\nEnter move> ");
 		else if (mode == "add")
 			printf("\nIn Add mode\nEnter player(blank space)move> ");
+#else
+		if (mode == "reverse")
+			printf("\n³·»ØÄ£Ê½\nÊäÈëĞĞÊı> ");
+		else if (mode == "add")
+			printf("\n°Ú×ÓÄ£Ê½\nÊäÈëÆå×Ó-Êı×Ö> ");
+#endif // STARS_LANG_CHINESE
 		char input[INTER_MAX_INPUT];
 		cin.getline(input, INTER_MAX_INPUT);
 
@@ -84,15 +96,25 @@ string BoardInterface::getInput(const string mode) {
 			return "quit";
 		else if (!strcmp(input, "r") || !strcmp(input, "reverse")) {
 			if (mode != "add")
+#ifndef STARS_LANG_CHINESE
 				printf("We are already in reverse mode\n");
+#else
+				printf("ÒÑ¾­½øÈë³·»ØÄ£Ê½\n");
+#endif	// STARS_LANG_CHINESE
 			else
 				return "reverse";
-		} else if (!strcmp(input, "a") || !strcmp(input, "add")) {
+		}
+		else if (!strcmp(input, "a") || !strcmp(input, "add")) {
 			if (mode != "reverse")
+#ifndef STARS_LANG_CHINESE
 				printf("We are already in add mode\n");
+#else
+				printf("ÒÑ¾­½øÈë°Ú×ÓÄ£Ê½\n");
+#endif	// STARS_LANG_CHINESE
 			else
 				return "add";
-		} else if (!strcmp(input, "S") || !strcmp(input, "show"))
+		}
+		else if (!strcmp(input, "S") || !strcmp(input, "show"))
 			analyse->show();
 		else if (!strcmp(input, "h") || !strcmp(input, "help"))
 			cout << getHelp(mode) << endl;
@@ -101,13 +123,22 @@ string BoardInterface::getInput(const string mode) {
 			!strcmp(input, "tips"))
 			cout << getInfo(input) << endl;
 		else if (!strcmp(input, "m") || !strcmp(input, "move"))
+#ifndef STARS_LANG_CHINESE
 			printf("Why don't we try this in debug mode to see what it does?\n");
+#else
+			printf("Äã¿ÉÒÔÔÚÆÕÍ¨Ä£Ê½ÀïÊäÈëÕâ¸öÖ¸Áî¿´¿´»á·¢ÉúÊ²Ã´\n");
+#endif	// STARS_LANG_CHINESE
 		else if (mode != "add") {
 			int num = atoi(input);
 			if (num > 0 && num <= analyse->getCols() && !analyse->colIsEmpty(num))
 				return input;
+#ifndef STARS_LANG_CHINESE
 			cout << "Invalid " << mode << " mode number input, let\'s try again\n";
-		} else if (mode != "reverse") {
+#else
+			cout << "Õâ¸öÊäÈëÓĞµãĞ¡ÎÊÌâ\n";
+#endif
+		}
+		else if (mode != "reverse") {
 			char temp[INTER_MAX_INPUT];
 			strcpy(temp, input + 2);
 			int num = atoi(temp);
@@ -127,7 +158,11 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 	while (true) {
 		if (counter > 32)
 			cin.clear();
+#ifndef STARS_LANG_CHINESE
 		cout << "\nIn debug mode\nPlayer '" << plr << "' move> ";
+#else
+		cout << "\nÆÕÍ¨Ä£Ê½\nÍæ¼Ò '" << plr << "' > ";
+#endif // STARS_LANG_CHINESE
 		char input[INTER_MAX_INPUT];
 		start = system_clock::now();
 		cin.getline(input, INTER_MAX_INPUT);
@@ -143,7 +178,11 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 			return "exit";
 		else if (input[0] == '\0') {
 			++counter;
+#ifndef STARS_LANG_CHINESE
 			cout << "Invalid empty input, let\'s try again\n";
+#else
+			cout << "ÊäÈëÎŞĞ§£¬ÇëÖØÊÔ\n";
+#endif // STARS_LANG_CHINESE
 		}
 		else if (!strcmp(input, "a") || !strcmp(input, "add"))
 			return "add";
@@ -208,7 +247,11 @@ string BoardInterface::getInput(char plr, double& inputTime) {
 		else if (!strcmp(input, "w") || !strcmp(input, "winn"))
 			cout << "winn = " << analyse->state.winn << endl;
 		else
+#ifndef STARS_LANG_CHINESE
 			cout << "No worries, Let\'s try again?\n";
+#else
+			cout << "À´ÔÛÔÙÊÔÒ»´Î\n";
+#endif
 	}
 }
 
@@ -216,14 +259,22 @@ short BoardInterface::getCustomInput(const string item) {
 	char  input[16];
 	short customNumber;
 	while (true) {
+#ifndef STARS_LANG_CHINESE
 		cout << item << " (2~" << SHORTV_LENGTH - 1 << ") = ";
+#else
+		cout << toChinese(item) << " (2~" << SHORTV_LENGTH - 1 << ") = ";
+#endif // STARS_LANG_CHINESE
 		cin.getline(input, 16);
 		if (!strcmp(input, "0") || !strcmp(input, "exit"))
 			return 0;
 		customNumber = atoi(input);
 		if (customNumber > 1 && customNumber < SHORTV_LENGTH - 1)
 			return customNumber;
+#ifndef STARS_LANG_CHINESE
 		cout << "Let's try again\n";
+#else
+		cout << "À´ÔÛÔÙÊÔÒ»´Î\n";
+#endif
 	}
 }
 
@@ -242,7 +293,11 @@ string BoardInterface::addMode() {
 		else
 			move.player = 'X';
 		move.move = atoi(input.c_str() + 2);
+#ifndef STARS_LANG_CHINESE
 		printf("Player '%c' is added to '%d' as you like it:\n", move.player, move.move);
+#else
+		printf("Æå×Ó '%c' ÒÑ±»ÈçÔ¸Ìí¼Óµ½ '%d' ÁĞ:\n", move.player, move.move);
+#endif // STARS_LANG_CHINESE
 		analyse->go(move.player, move.move);
 		analyse->show();
 		record.push_back(move);
@@ -263,7 +318,11 @@ string BoardInterface::reverseMode() {
 		// record which move is reversed
 		move.player = analyse->state.board[move.move - 1][analyse->state.top[move.move - 1] - 1];
 		analyse->reverse(move.move);
+#ifndef STARS_LANG_CHINESE
 		printf("Remove %d as you like it:\n", move.move);
+#else
+		printf("%d ÁĞ±»³·»Ø:\n", move.move);
+#endif // STARS_LANG_CHINESE
 		record.push_back(move);
 		analyse->show();
 	}
@@ -278,14 +337,17 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 	byOpponent.mode		  = "debug";
 	byOpponent.byComputer = true;
 	byOpponent.player	  = analyse->rPlayer(byPlayer.player);
-	printf("We are in debug mode now\n");
 	analyse->show();
 
 	// main loop
 	while (true) {
 		input = getInput(byPlayer.player, byPlayer.time);
 		if (input == "exit" || input == "quit") {
+#ifndef STARS_LANG_CHINESE
 			printf("Exit from debug mode ...\n");
+#else
+			printf("ÍË³öÆÕÍ¨Ä£Ê½ ...\n");
+#endif // STARS_LANG_CHINESE
 			return input;
 		}
 		if (input == "add" || input == "reverse" || input == "settings" ||
@@ -300,8 +362,13 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 
 			// print hint
 			if (byPlayer.mode == "debug" && record.getDefaultSettings("inDebugMode", "hintOn")) {
+#ifndef STARS_LANG_CHINESE
 				printf("Here was %c's word, list, and suggestion:\n", byPlayer.player);
 				cout << "word = " << byPlayer.word << "\nlist = [ ";
+#else
+				printf("ÁíÒ»¸öÍæ¼Ò %c µÄ×´Ì¬£¬½¨ÒéÁĞ±íºÍ½¨ÒéÈçÏÂ:\n", byPlayer.player);
+				cout << "Íæ¼Ò×´Ì¬ = " << toChinese(byPlayer.word) << "\n½¨ÒéÁĞ±í = [ ";
+#endif // STARS_LANG_CHINESE
 				for (short move : byPlayer.list)
 					printf("%d ", move);
 				printf("]\n");
@@ -318,12 +385,21 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			continue;
 		}
 		else if (input == "H" || input == "hint") {
+#ifndef STARS_LANG_CHINESE
 			if (byPlayer.mode != "debug") {
-				printf("The last move is not in debug move, hint was lost.\n");
+				printf("The last move is not in debug move, therefore has no hint.\n");
 				continue;
 			}
 			printf("this is the hint for the previous move:\n");
 			cout << "word = " << byPlayer.word << "\nlist = [ ";
+#else
+			if (byPlayer.mode != "debug") {
+				printf("ÉÏÒ»²½²»ÔÚÆÕÍ¨Ä£Ê½£¬ËùÒÔÃ»ÓĞÌáÊ¾\n");
+				continue;
+			}
+			printf("ÉÏÒ»²½µÄÌáÊ¾£º\n");
+			cout << "Íæ¼Ò×´Ì¬ = " << toChinese(byPlayer.word) << "\n½¨ÒéÁĞ±í = [ ";
+#endif // STARS_LANG_CHINESE
 			for (short i : byPlayer.list)
 				printf("%d ", i);
 			printf("]\n");
@@ -335,19 +411,31 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			analyse->go(byPlayer.player, byPlayer.move);
 			record.push_back(byPlayer);	 // byPlayer end here
 			if (isOver(byPlayer)) {
+#ifndef STARS_LANG_CHINESE
 				printf("Exit from debug mode ...\n");
+#else
+				printf("ÍË³öÆÕÍ¨Ä£Ê½ ...\n");
+#endif // STARS_LANG_CHINESE
 				return "over";
 			}
 		}
 		else if (isOver(byPlayer)) {
+#ifndef STARS_LANG_CHINESE
 			printf("Exit from debug mode ...\n");
+#else
+			printf("ÍË³öÆÕÍ¨Ä£Ê½ ...\n");
+#endif // STARS_LANG_CHINESE
 			return "over";
 		}
 
 		// opp respond
 		if (record.getDefaultSettings("inDebugMode", "showCalculate") &&
 			record.getDefaultSettings("inDebugMode", "showTime"))
+#ifndef STARS_LANG_CHINESE
 			printf("Info for the computer:\n");
+#else
+			printf("µçÄÔĞÅÏ¢£º\n");
+#endif // STARS_LANG_CHINESE
 		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
 			record.getDefaultSettings("inDebugMode", "showCalculate"),
 			record.getDefaultSettings("inDebugMode", "showTime"),
@@ -361,18 +449,33 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
+#ifndef STARS_LANG_CHINESE
 		if (record.getDefaultSettings("inDebugMode", "showTime"))
-			cout << "    input time used: " << byPlayer.time << "ms\n";
+			cout << "    input time used: " << byPlayer.time << " ms\n";
 		printf("    %c goes here %d\n", byOpponent.player, byOpponent.move);
 		if (isOver(byOpponent)) {
 			printf("Exit from debug mode ...\n");
 			return "over";
 		}
 
-		// recommend
 		byPlayer.hintOn	= record.getDefaultSettings("inDebugMode", "hintOn");
 		if (byPlayer.hintOn)
 			cout << "\nHere is hint provided for you\n";
+#else
+		if (record.getDefaultSettings("inDebugMode", "showTime"))
+			cout << "    ÊäÈëÓÃÊ±£º" << byPlayer.time << " ºÁÃë\n";
+		printf("    %c ×ßÁËÕâÒ»²½£º%d\n", byOpponent.player, byOpponent.move);
+		if (isOver(byOpponent)) {
+			printf("ÍË³öÆÕÍ¨Ä£Ê½ ...\n");
+			return "over";
+		}
+		
+		byPlayer.hintOn	= record.getDefaultSettings("inDebugMode", "hintOn");
+		if (byPlayer.hintOn)
+			cout << "\n¸øÍæ¼ÒµÄÌáÊ¾ĞÅÏ¢\n";
+#endif // STARS_LANG_CHINESE
+
+		// recommend
 		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer,
 			byPlayer.hintOn,
 			record.getDefaultSettings("inDebugMode", "showTime"),
@@ -380,7 +483,11 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 			false);
 		showComment(byPlayer);
 		if (byPlayer.hintOn && byPlayer.word != "bad")
-			printf("    %d is recommended\n", byPlayer.suggestion);
+#ifndef STARS_LANG_CHINESE
+			printf("    %d is recommended for player %c\n", byPlayer.suggestion, byPlayer.player);
+#else
+			printf("    ÍÆ¼ö %c ×ßÕâÒ»²½£º%d\n", byPlayer.player, byPlayer.suggestion);
+#endif // STARS_LANG_CHINESE
 
 		// show
 		printf("\n");
@@ -396,6 +503,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 }
 
 string BoardInterface::defaultSettings() {
+#ifndef STARS_LANG_CHINESE
 	cout << "We have " << record.getDefaultSettingsItemNum() << " situations and "
 		 << "within them we have multiple items each marked with tags\n"
 		 << "below, type in tags to change these settings, 0 to exit, S/show "
@@ -403,6 +511,13 @@ string BoardInterface::defaultSettings() {
 	// show
 	record.showSettingsWithTags();
 	cout << "\nCare to change one of them?\n";
+#else
+	cout << "Ò»¹²ÓĞ" << record.getDefaultSettingsItemNum() << "ÖÖÇé¿ö£¬ÆäÖĞ"
+		 << "Ã¿¸öÇé¿öÓĞ¶à¸öÏîÄ¿£¬¸÷¸öÏîÄ¿¾ùÓĞÁ½¸ö×ÖÄ¸Îª±ê¼Ç£¬ÊäÈë±ê¼Ç\n"
+		 << "À´¸Ä±äÏàÓ¦µÄÉè¶¨ÖµÊäÈë0ÍË³ö£¬ÊäÈëS»òshowÏÔÊ¾µ±Ç°ÉèÖÃ£¬ÊäÈëh»ñµÃ°ïÖú\n";
+	// show
+	record.showSettingsWithTags();
+#endif // STARS_LANG_CHINESE
 	while (true) {
 		printf("> ");
 		char input[8];
@@ -430,10 +545,11 @@ string BoardInterface::defaultSettings() {
 				cout << "And if you don't know what's going on, you can always"
 						" type help, happy to help as always.\n";
 			}
-		} else {
+		}
+		else {
 			cout << "Invalid input, let's try again.\n";
 			cout << "And if you don't know what's going on, you can always "
-					"type help, happy to help as always.\n";
+				"type help, happy to help as always.\n";
 		}
 	}
 #ifdef STARS_DEBUG_INFO
@@ -445,11 +561,17 @@ string BoardInterface::defaultSettings() {
 string BoardInterface::otherSettings() {
 	if (analyse->maxcaltime < 0)
 		printf("analyse->maxcaltime went nuts, better fix it\n");
+#ifndef STARS_LANG_CHINESE
 	cout << "Here you can change computer's max calculation time settings, the\n"
 		<< "current cal time is "
 		<< analyse->maxcaltime
-		<< "ms. You can reset it so the calculation time might be\ndifferent. "
-		<< "nothing or 0 to exit, q to quit\n";
+		<< "ms\n"
+		<< "Enter nothing or 0 to exit, q to quit\n";
+#else
+	cout << "Äã¿ÉÒÔÔÚ´Ë´¦¸Ä±ä³ÌĞòµÄ×î´ó¼ÆËãÊ±¼ä£¬µ±Ç°×î´ó¼ÆËãÊ±¼äÊÇ\n"
+		<< analyse->maxcaltime
+		<< "ºÁÃë\nÖ±½Ó»Ø³µ»òÊäÈë0·µ»Ø£¬qÍË³öÓÎÏ·\n";
+#endif // STARS_LANG_CHINESE
 	char in[16];
 	int	 trans = 0;
 	do {
@@ -469,12 +591,19 @@ string BoardInterface::otherSettings() {
 }
 
 string BoardInterface::settingsMode() {
+#ifndef STARS_LANG_CHINESE
 	printf("We are in settings mode now:\n");
-	// default settings, other settings
 	char input[8];
 	printf("1. default settings\n2. other settings\n");
 	do {
 		printf("(enter number)> ");
+#else
+	printf("ÉèÖÃÄ£Ê½\n");
+	char input[8];
+	printf("1. Ä¬ÈÏÉèÖÃ\n2. ÆäËûÉèÖÃ\n");
+	do {
+		printf("(ÊäÈëÊı×Ö)> ");
+#endif // STARS_LANG_CHINESE
 		cin.getline(input, 8);
 		if (input[0] == '\0' || !strcmp(input, "0") || !strcmp(input, "exit"))
 			return "debug";
@@ -485,8 +614,13 @@ string BoardInterface::settingsMode() {
 		if (!strcmp(input, "2"))
 			return otherSettings();
 		else
+#ifndef STARS_LANG_CHINESE
 			printf("let's try again\n");
 	} while (true);
+#else
+			printf("ÎÒÃÇÀ´ÔÙÊÔÒ»´Î\n");
+	} while (true);
+#endif // STARS_LANG_CHINESE
 }
 
 string BoardInterface::playMode() {
@@ -495,12 +629,20 @@ string BoardInterface::playMode() {
 				"save a game first\nTill next time.\nExit from play mode...\n";
 		return "debug";
 	}
+#ifndef STARS_LANG_CHINESE
 	printf("We are here in play mode.\n");
 	printf("You can choose from %d saved games.\n", record.getNumberOfSavedBoard());
 	printf("Hit 'Enter' to see more, type in index number to went into one of those games.\n");
 	printf("Or type c to continue to play the board that is currently displayed. ");
 	printf("Use d/rm/delete/remove to delete the current board, 0 to exit.\n");
 	printf("Explore!\n");
+#else
+	printf("ÕâÀïÊÇ¶ÁµµÄ£Ê½\n");
+	printf("¹² %d ·İ´æµµ\n", record.getNumberOfSavedBoard());
+	printf("»Ø³µä¯ÀÀÏÂÒ»¸ö£¬ÊäÈëË÷ÒıºÅÖ±½Ó¶ÁÈ¡¸Ã´æµµ£¬ÊäÈëc¶ÁÈ¡µ±Ç°ÏÔÊ¾µÄ´æµµ\n");
+	printf("Ê¹ÓÃ d/rm/delete/remove É¾³ıµ±Ç°´æµµ£¬0ÍË³ö\n");
+	printf("Ì½Ë÷Óä¿ì!\n");
+#endif // STARS_LANG_CHINESE
 	Json::Value game;
 	string result = record.showSavedGames(game);
 
@@ -519,21 +661,27 @@ string BoardInterface::playMode() {
 	BoardRecord	   newRecord;
 	newRecord.refreshHistoryMove(game["historyMove"]);
 	interface.refreshRecord(newRecord);
+#ifndef STARS_LANG_CHINESE
 	printf("Into a new control mode:\n");
-	printf("Use 1~8 to place a piece, h for help, 0 to exit.\n");
-	printf("Game is on->\n");
+#else
+	printf("½øÈëÒ»¸öĞÂÓÎÏ·£º\n");
+#endif // STARS_LANG_CHINESE
 
 	if(!interface.controlMode())
 		return "quit";
-	printf("Exit from play mode...\n");
+#ifndef STARS_LANG_CHINESE
+	printf("Exit from play mode ...\n");
+#else
+	printf("ÍË³ö¶ÁµµÄ£Ê½ ...\n");
+#endif // STARS_LANG_CHINESE
 	return "debug";
 }
 
 string BoardInterface::playBackMode() {
+#ifndef STARS_LANG_CHINESE
 	if (!record.getNumberOfSavedBoard()) {
-		printf(
-			"No games has been recorded yet. If you want to try this mode, save a game first\nTill next "
-			"time.\n");
+		printf("No games has been recorded yet. If you want to try this mode,");
+		cout << " save a game first\nTill next time.\n";
 		printf("Exit from play back mode...\n");
 		return "debug";
 	}
@@ -553,6 +701,28 @@ string BoardInterface::playBackMode() {
 		printf("Exit from play back mode...\n");
 		return "quit";
 	}
+#else
+	if (!record.getNumberOfSavedBoard()) {
+		printf("»¹Ã»ÓĞÈÎºÎ´æµµ£¬Èç¹ûÄãÏëÊ¹ÓÃ´ËÄ£Ê½£¬ÇëÏÈ±£´æÓÎÏ·");
+		printf("ÍË³ö¶Áµµ»Ø·ÅÄ£Ê½ ...\n");
+		return "debug";
+	}
+	printf("¶Áµµ»Ø·ÅÄ£Ê½\n");
+	printf("¹² %d ·İ´æµµ\n", record.getNumberOfSavedBoard());
+	printf("»Ø³µä¯ÀÀÏÂÒ»¸ö£¬ÊäÈëË÷ÒıºÅÖ±½Ó¶ÁÈ¡¸Ã´æµµ£¬ÊäÈëc¶ÁÈ¡µ±Ç°ÏÔÊ¾µÄ´æµµ\n");
+	printf("Ê¹ÓÃ d/rm/delete/remove É¾³ıµ±Ç°´æµµ£¬0ÍË³ö\n");
+	printf("Ì½Ë÷Óä¿ì!\n");
+	Json::Value game;
+	string result = record.showSavedGames(game);
+	if (result == "exit") {
+		printf("ÍË³ö¶Áµµ»Ø·ÅÄ£Ê½ ...\n");
+		return "debug";
+	}
+	if (result == "quit") {
+		printf("ÍË³ö¶Áµµ»Ø·ÅÄ£Ê½ ...\n");
+		return "quit";
+	}
+#endif // STARS_LANG_CHINESE
 
 	// set up a new game and play back the moves
 	BoardState	 state = game["state"];
@@ -561,16 +731,24 @@ string BoardInterface::playBackMode() {
 	// return to the initial state
 	state.retInit(newRecord.historyMove);
 	BoardAnalyse analyser(state);
-
+#ifndef STARS_LANG_CHINESE
 	printf("Here's the play back of an old game:\n");
 	printf("Use c to cut in and play, h for help, b to go back to the previous step, 0\nto exit.\n");
+#else
+	printf("ÕâÊÇ´æµµÓÎÏ·µÄ»Ø·Å£º\n");
+	printf("Ê¹ÓÃc´ò¶Ï»Ø·Å²¢½øÈëÓÎÏ·Ä£Ê½£¬b»Øµ½ÉÏÒ»²½£¬h°ïÖú£¬0ÍË³ö\n");
+#endif // STARS_LANG_CHINESE
 	char					  input[16];
 	bool					  wentBack		= false;
 	char					  reversePlayer = ' ';
 	vector<oneMove>::iterator iter			= newRecord.historyMove.begin();
 	while (iter != newRecord.historyMove.end()) {
 		// show
+#ifndef STARS_LANG_CHINESE
 		printf("This is step %zu/%zu\n", tempRecord.historyMove.size() + 1, newRecord.historyMove.size());
+#else
+		printf("´Ë²½/×Ü²½Êı %zu/%zu\n", tempRecord.historyMove.size() + 1, newRecord.historyMove.size());
+#endif // STARS_LANG_CHINESE
 		if (wentBack)
 			wentBack = false;
 		else {
@@ -596,14 +774,25 @@ string BoardInterface::playBackMode() {
 			BoardAnalyse   tempAnalyser = analyser;
 			BoardInterface interface(tempAnalyser);
 			interface.refreshRecord(tempRecord);
+#ifndef STARS_LANG_CHINESE
 			printf("Go into a new control mode:\n");
 			if(!interface.controlMode())
 				return "quit";
 			printf("We're back in play back mode again\n");
+#else
+			printf("½øÈëĞÂµÄÓÎÏ·Ä£Ê½\n");
+			if(!interface.controlMode())
+				return "quit";
+			printf("»Øµ½¶Áµµ»Ø·ÅÄ£Ê½\n");
+#endif // STARS_LANG_CHINESE
 		}
 		else if (!strcmp(input, "b") || !strcmp(input, "back") || !strcmp(input, "go back")) {
 			if (tempRecord.historyMove.empty())
+#ifndef STARS_LANG_CHINESE
 				printf("This is the beginning, there is no going back.\n");
+#else
+				printf("ÒÑ¾­»Øµ½¿ªÍ·£¬Ã»ÓĞÉÏÒ»²½ÁË\n");
+#endif // STARS_LANG_CHINESE
 			else {
 				tempRecord.pop_back();
 				if (iter->mode != "reverse")
@@ -616,18 +805,32 @@ string BoardInterface::playBackMode() {
 			}
 		}
 		else if (!strcmp(input, "h") || !strcmp(input, "help"))
+#ifndef STARS_LANG_CHINESE
 			printf("b to go back to the previous move, c to cut in and play, q to quit\n");
 			printf("the whole game, 0 to exit this mode\n");
+#else
+			printf("Ê¹ÓÃc´ò¶Ï»Ø·Å²¢½øÈëÓÎÏ·Ä£Ê½£¬b»Øµ½ÉÏÒ»²½£¬h°ïÖú£¬0ÍË³ö\n");
+#endif // STARS_LANG_CHINESE
 		++iter;
 	}
-	printf("Exit from play back mode...\n");
+#ifndef STARS_LANG_CHINESE
+	printf("Exit from play back mode ...\n");
+#else
+	printf("ÍË³ö¶Áµµ»Ø·ÅÄ£Ê½ ...\n");
+#endif // STARS_LANG_CHINESE
 	return "debug";
 }
 
 string BoardInterface::customMode() {
+#ifndef STARS_LANG_CHINESE
 	printf("In custom mode ...\n");
 	printf("Note that the more width you set, the clumsier the computer will be\n");
 	printf("It is recommended to set the width lesser than 16\n");
+#else
+	printf("×Ô¶¨ÒåÄ£Ê½ ...\n");
+	printf("×¢ÒâÉèÖÃµÄ¿í¶ÈÔ½´ó£¬³ÌĞòµÄ¼ÆËãÁ¿¾ÍÔ½´ó£¬¿ÉÄÜ»áµ¼ÖÂ³ÌĞò±äÂı£¬²»ÍÆ¼ö\n");
+	printf("½«¿í¶ÈÉèÖÃµ½16ÒÔÉÏ\n");
+#endif // STARS_LANG_CHINESE
 	if (record.getDefaultSettings("inCustomMode", "askToSaveBoard"))
 		askToSaveBoard(record.getDefaultSettings("inCustomMode", "defaultSaveBoard"));
 	else if (record.getDefaultSettings("inCustomMode", "defaultSaveBoard"))
@@ -644,9 +847,11 @@ string BoardInterface::customMode() {
 		return "debug";
 	analyse->customBoard(column, row, winn);
 	record.clearHistoryMove();
-	printf("Here's the board we're gonna use:\n");
-	analyse->show();
+#ifndef STARS_LANG_CHINESE
 	printf("Exit from custom mode ...\n");
+#else
+	printf("ÍË³ö×Ô¶¨ÒåÄ£Ê½ ...\n");
+#endif // STARS_LANG_CHINESE
 	return "debug";
 }
 
@@ -696,7 +901,11 @@ bool BoardInterface::controlMode() {
 		throw runtime_error("too much unhandled advice");
 	if (advice == "quit")
 		return false;
-	cout << "Exit from controller\n";
+#ifndef STARS_LANG_CHINESE
+	cout << "Exit from controller ...\n";
+#else
+	cout << "ÍË³ö¿ØÖÆÄ£Ê½ ...\n";
+#endif // STARS_LANG_CHINESE
 	return true;
 }
 
@@ -705,11 +914,12 @@ string BoardInterface::showRoutesMode() {
 	vector<RouteNode*>& next		  = routes.crnt->next;
 	bool				nearFlag	  = false;
 	long long routeBranches = routes.getBranches();
-	cout << "The computer examined " << routeBranches
+#ifndef STARS_LANG_CHINESE
+	cout << "The program examined " << routeBranches
 		 << " possibilities in this node\n" << routes.getBranches(-2)
 		 << " of them is free, " << routes.getBranches(-1)
 		 << " of them is good and " << routes.getBranches(0)
-		 << " of them is bad for the computer\n";
+		 << " of them is bad for the program\n";
 	cout << "We'll be showing:\na. free routes\nb. good routes\nc. bad "
 		 << "routes\nd. all routes\n";
 	if (next.size() == 1 && next[0]->next.empty() &&
@@ -726,6 +936,30 @@ string BoardInterface::showRoutesMode() {
 	if (routes.crnt->prev)
 		cout << "Enter B or back to go back to the formal node\n";
 	string in;
+	string tryAgain = "No such move, let's try again";
+#else
+	cout << "³ÌĞòÎª×Ô¼º¼ìÑéÁË " << routeBranches
+		 << "ÖÖÂ·¾¶£¬ÆäÖĞÓĞ " << routes.getBranches(-2)
+		 << " ¸ö×ÔÓÉ " << routes.getBranches(-1)
+		 << " ¸öºÃºÍ " << routes.getBranches(0)
+		 << " ¸ö»µ\n";
+	cout << "Í¨¹ıÊäÈëÏàÓ¦×ÖÄ¸£¬±¾³ÌĞò½«Õ¹Ê¾£º\na. ×ÔÓÉµÄÂ·¾¶\nb. ºÃµÄÂ·¾¶\nc. »µµÄÂ·¾¶\nd. ËùÓĞÂ·¾¶\n";
+	if (next.size() == 1 && next[0]->next.empty() &&
+		(next[0]->data == routes.goodNode || next[0]->data == routes.badNode ||
+		next[0]->data == routes.freeNode))
+		nearFlag = true; // next is a flag
+	else {
+		cout << "»òÕßÊäÈëÏàÓ¦Êı×ÖÑ¡Ôñ½øÈëÈçÏÂÂ·¾¶£¬²é¿´¸ÃÂ·¾¶ÏÂµÄÖÖÖÖ¿ÉÄÜ\n[ ";
+		vRi iter = next.begin();
+		for (; iter != next.end(); ++iter)
+			cout << (*iter)->data << " ";
+		cout << "]\n";
+	}
+	if (routes.crnt->prev)
+		cout << "ÊäÈëB»òback·µ»ØÉÏÒ»¸öÂ·¾¶\n";
+	string in;
+	string tryAgain = "Ã»ÓĞÕâ¸öÑ¡Ïî£¬ÎÒÃÇÔÙÊÔÒ»´Î";
+#endif // STARS_LANG_CHINESE
 	int num = 0;
 	do {
 		cout << "> ";
@@ -753,10 +987,14 @@ string BoardInterface::showRoutesMode() {
 		else if (in == "B" || in == "back") {
 			if (routes.crnt->prev) {
 				routes.backward();
-				// æ–°æ—¶ä»£çš„è€é€’å½’æ€ª
+				// ĞÂÊ±´úµÄÀÏµİ¹é¹Ö
 				return showRoutesMode();
 			}
+#ifndef STARS_LANG_CHINESE
 			cout << "There's no going back, let's try again.\n";
+#else
+			cout << "Ã»ÓĞ»ØÍ·Â·ÁË£¬ÎÒÃÇÔÙÊÔÒ»´Î\n";
+#endif // STARS_LANG_CHINESE
 			continue;
 		}
 		else if (!nearFlag) {
@@ -766,24 +1004,30 @@ string BoardInterface::showRoutesMode() {
 			for (; iter != next.end() &&
 				(*iter)->data != num;++iter);
 			if (iter == next.end()) {
-				cout << "No such move, let's try again.\n";
+				cout << tryAgain << endl;
 				continue;
 			}
 			routes.forward(num);
-			// è€é€’å½’æ€ªäº†
+			// ÀÏµİ¹é¹ÖÁË
 			return showRoutesMode();
 		}
 		else
-			cout << "No such option, let's try again.\n";
+			cout << tryAgain << endl;
 	} while (true);
 
 
 	// print
 	routeBranches = routes.getBranches(num - 3);
 	if (routeBranches > 1024) {
+#ifndef STARS_LANG_CHINESE
 		cout << "There are " << routeBranches
 			<< " branches, sure you want to print them all?\n"
 			<< "(Yes/no)> ";
+#else
+		cout << "Ò»¹²ÓĞ " << routeBranches
+			<< " ÖÖÂ·¾¶£¬È·¶¨ÒªÈ«²¿Êä³ö£¿\n"
+			<< "(Yes/no)> ";
+#endif // STARS_LANG_CHINESE
 		getline(cin, in);
 		if (in != "no" && in != "n")
 			routes.showRoute(num - 3);
@@ -888,6 +1132,7 @@ string BoardInterface::selfPlayMode() {
 }
 
 string BoardInterface::getHelp(string mode) {
+#ifndef STARS_LANG_CHINESE
 	string enjoy  = "Enjoy!\n";
 	string addon  = "";
 	string end	  = "------------------------------------ The End ----------------------------------\n";
@@ -903,20 +1148,20 @@ string BoardInterface::getHelp(string mode) {
 		"and see what the help information in debug mode have to say?\n" + enjoy + end;
 	string normal =
 		addon + "Type in number to play, one who place four piece in a row first wins\n\n" +
-		"0/exit ----------- exit from a certain mode\n" +
-		"q/quit ----------- quit the whole game\n" +
-		"C/custom --------- custom board height, width and win number (4 by default)\n" +
-		"h/help ----------- show help message of the current mode\n" +
-		"p/play ----------- into play mode\n" +
-		"P/play back ------ into play back mode\n" +
-		"S/show ----------- show the current board\n" +
-		"s/settings ------- view and change the settings\n" +
-		"st/show stars ---- show stars\n" +
-		"sv/save ---------- save the current game\n" +
-		"sr/show routes --- show routes that the computer has examined\n" +
-		"t/tips ----------- tips I wrote to help other player (you) to play the game\n" +
-		"w/winn ----------- show win number (4 by default) in case you forgot\n" +
-		"i/info ----------- information about the game\n\n" + enterForMore;
+		"0/exit             exit from a certain mode\n" +
+		"q/quit             quit the whole game\n" +
+		"C/custom           custom board height, width and win number (4 by default)\n" +
+		"h/help             show help message of the current mode\n" +
+		"p/play             into play mode\n" +
+		"P/play back        into play back mode\n" +
+		"S/show             show the current board\n" +
+		"s/settings         view and change the settings\n" +
+		"st/show stars      show stars\n" +
+		"sv/save            save the current game\n" +
+		"sr/show routes     show routes that the computer has examined\n" +
+		"t/tips             tips I wrote to help other player (you) to play the game\n" +
+		"w/winn             show win number (4 by default) in case you forgot\n" +
+		"i/info             information about the game\n\n" + enterForMore;
 	vector<string> moreDebug = {
 		addon +
 			"If hintOn is true, then when the computer says your word = good, then you'll\n" +
@@ -930,13 +1175,62 @@ string BoardInterface::getHelp(string mode) {
 			"Note that area that's covered by the stars cannot be accessed by the computer,\n" +
 			"therefore might contain surprise or danger.\n" + enterForMore,
 		addon +
-			"a/add      - into add mode: add some moves\n" +
-			"c/change   - change (swap) the player\n" +
-			"H/hint     - show hint for the previous step\n"
-			"I/import   - import a new board from input, which must fit in the current board\n" +
-			"m/move     - force the computer to take a move now\n" +
-			"r/reverse  - into reverse mode: reverse some moves\n" +
+			"a/add        into add mode: add some moves\n" +
+			"c/change     change (swap) the player\n" +
+			"H/hint       show hint for the previous step\n"
+			"I/import     import a new board from input, which must fit in the current board\n" +
+			"m/move       force the computer to take a move now\n" +
+			"r/reverse    into reverse mode: reverse some moves\n" +
 			enjoy + end};
+#else
+	string enjoy  = "ÍæµÄ¿ªĞÄ!\n";
+	string addon  = "";
+	string end	  = "------------------------------------ Ã»ÁË ----------------------------------\n";
+	string enterForMore =
+		"------------------------- '»Ø³µ'ÏÔÊ¾ÓàÏÂĞÅÏ¢£¬ 0·µ»Ø -------------------------\n";
+	string add = addon + "ÊäÈëÆå×Ó(X»ò0)ºÍÊı×ÖÀ´Ö¸¶¨·ÅÖÃÆå×ÓµÄÖÖÀàºÍÎ»ÖÃ¡£±ÈÈç£ºÊäÈë\n" +
+		"X 3\n¾ÍÊÇ°ÑÆå×ÓX·ÅÔÚµÚÈıÁĞ£¬Ò²¿ÉÒÔÊäÈë'x-7'£¬Ö»ĞèÒª±£Ö¤Æå×ÓºÍÊı×ÖÖ®¼äÓĞÇÒÖ»ÓĞÒ»¸ö×Ö·û¼´¿É\n" +
+		"²»×÷ÊäÈëÖ±½Ó»Ø³µ»Øµ¼ÖÂÍÆ³öÌí¼ÓÄ£Ê½\n";
+	string reverse = "ÊäÈëÁĞÊı³·»Ø¸ÃÁĞ×î¶¥¶ËÆå×Ó£¬°´»Ø³µÍË³ö\n";
+	string moreAddOrReverse =
+		addon + "Èç¹ûÄã²»ÖªµÀ·¢ÉúÁËÊ²Ã´£¬×îºÃ»Øµ½ÆÕÍ¨Ä£Ê½¿´ÄÇÀïµÄ°ïÖúÎÄµµ\n" + enjoy + end;
+	string normal =
+		addon + "ÊäÈë·Ç0Êı×ÖÏÂÆå£¬ËÄ×ÓÁ¬³ÉÒ»ÌõÏßÔò»ñÊ¤£¬×¢ÒâÆå×ÓÖ»ÄÜ´ÓÏÂÍùÉÏµşÆğÀ´\n\n" +
+		"Ñ¡Ïî               Ğ§¹û\n" +
+		"0/exit             ÍË³öËùÔÚÄ£Ê½\n" +
+		"q/quit             ÍË³öÓÎÏ·\n" +
+		"C/custom           ×Ô¶¨ÒåÆåÅÌ³¤¿íºÍ»ñÊ¤ËùĞè×îĞ¡³ÉÅÅÆå×ÓÊı£¨Ä¬ÈÏ4£©\n" +
+		"h/help             ÏÔÊ¾µ±Ç°Ä£Ê½°ïÖúÎÄµµ\n" +
+		"p/play             ½øÈë¶ÁµµÄ£Ê½\n" +
+		"P/play back        ½øÈë¶Áµµ»Ø·ÅÄ£Ê½\n" +
+		"S/show             ÏÔÊ¾µ±Ç°ÆåÅÌ\n" +
+		"s/settings         ½øÈëÉèÖÃÄ£Ê½\n" +
+		"st/show stars      ÏÔÊ¾ĞÇĞÇ\n" +
+		"sv/save            ´æµµ\n" +
+		"sr/show routes     ÏÔÊ¾µçÄÔ¼ÆËã¹ıµÄÂ·¾¶\n" +
+		"t/tips             ÏÔÊ¾ÓÎÏ·Íæ·¨ÌáÊ¾\n" +
+		"w/winn             ÏÔÊ¾»ñÊ¤ËùĞè×îĞ¡³ÉÅÅÆå×ÓÊı\n" +
+		"i/info             ÏÔÊ¾ÓÎÏ·ĞÅÏ¢\n\n" + enterForMore;
+	vector<string> moreDebug = {
+		addon +
+			"    Èç¹û´ò¿ªÌáÊ¾£¨hintOn£©ÎªÕæ£¬ÄÇÃ´µ±µçÄÔÏÔÊ¾Íæ¼Ò×´Ì¬ÎªºÃÊ±£¬Èç¹ûÍæ¼ÒÑ¡Ôñ×ñ\n" +
+			"Ñ­ÍÆ¼öÁĞ±íÖĞµÄÏÂ·¨£¬ÄÇÃ´Íæ¼Ò½«ÔÚ¼¸²½Ö®ÄÚ»ñÊ¤£¬·´Ö®Èç¹ûÏÔÊ¾Íæ¼Ò×´Ì¬Îª»µ\n" +
+			"ÔòµçÄÔ½«ÔÚ¼¸²½Ö®ÄÚ»ñÊ¤\n" +
+			"    ²»¹ıÈç¹ûÉèÖÃÖĞµÄÇçÌì£¨starsOn£©ÎªÕæ£¬ÄÇÃ´µçÄÔÓĞ´ó¸Å15%¸ÅÂÊ¼ÆËã´íÎó ;-)\n" + enterForMore,
+		addon + "    µ±Íæ¼Ò×´Ì¬ÏÔÊ¾Îª×ÔÓÉÊ±£¬ÍÆ¼öÁĞ±íÖĞµÄÏÂ·¨Ò»°ã¿ÉÒÔËæ±ãÏÂ£¬ÍÆ¼öÁĞ±íÖ®Íâ\n" +
+			"¾Í²»ºÃËµÁË£¬×îºÃ²»ÒªÏÂ¡£\n" +
+			"    ×¢ÒâÓĞĞÇĞÇµÄµØ·½µçÄÔÊÇ¿´²»µ½µÄ£¬ËùÒÔ²»»áÍÆ¼ö£¬µ«Õâ²¢²»ËµÃ÷ÄÇ¶ùÊÇºÃ»òÕß»µ\n" +
+			"Ö»ÄÜËµÃ÷ÄÇ¶ùÔ¶\n" + enterForMore,
+		addon +
+			"a/add        ½øÈë°Ú×ÓÄ£Ê½\n" +
+			"c/change     ÈË»úÍæ¼ÒÉí·İ»¥»»\n" +
+			"H/hint       ÏÔÊ¾ÉÏÒ»²½µÄÌáÊ¾\n"
+			"I/import     µ¼ÈëĞÂÆåÅÌ£¬×¢ÒâĞÂ¾ÉÆåÅÌµÄ´óĞ¡±ØĞëÏàÍ¬\n" +
+			"m/move       Ê¹µçÄÔÁ¢¿Ì×ß×Ó£¨¾Í²»µÈÄãÏÂÁË£©\n" +
+			"r/reverse    ½øÈë³·»ØÄ£Ê½\n" +
+			enjoy + end
+		};
+#endif // STARS_LANG_CHINESE
 	if (mode == "debug") {
 		cout << normal;
 		char dis[16];
@@ -952,8 +1246,13 @@ string BoardInterface::getHelp(string mode) {
 			else if (i < 3 && (!strlen(dis) || !strcmp(dis, "m") || !strcmp(dis, "more"))) {
 				cout << moreDebug[i];
 				++i;
-			} else {
+			}
+			else {
+#ifndef STARS_LANG_CHINESE
 				cout << "Pardon?\n";
+#else
+				cout << "É¶?\n";
+#endif // STARS_LANG_CHINESE
 				++wrongInput;
 			}
 			if (wrongInput > 8) {
@@ -969,18 +1268,32 @@ string BoardInterface::getHelp(string mode) {
 		return add + moreAddOrReverse;
 	if (mode == "reverse")
 		return reverse + moreAddOrReverse;
+#ifndef STARS_LANG_CHINESE
 	if (mode == "settings") {
-		string settings = addon + 
+		string settings = addon +
+			"default settings:\n" +
+			"other settings:\n" +
+			"Customize the program's behaviour in certain situations\n" +
 			"Each situation represent a situation where questions might be asked, you can\n" +
 			"decide whether it will be asked, and dispite whether it IS asked, the default\n" +
 			"answer would be. Notice that, for example, in situation gameIsOver, if\n" +
-			"askToReverse is false but defaultDebug is true, then when game is over, we will\n" +
-			"went into debug mode immediately.\n" +
-			"If starsOn is true, then stars will fall down from the sky then make the\n" +
-			"computer think fast and reckless.\n" +
-			"Most of them is turned down by default to keep it simple.\n";
+			"askToReverse is false but defaultReverse is true, then when game is over, we will\n" +
+			"went into reverse mode immediately.\n" +
+			"If starsOn is true, then stars will fall down from the sky then make sure the\n" +
+			"computer think fast and reckless.\n";
 		return settings;
 	}
+#else
+	if (mode == "settings") {
+		string settings = addon +
+			"Ä¬ÈÏÉè¶¨£º\n" +
+			"    Éè¶¨³ÌĞòÔÚÌØ¶¨Çé¿öÏÂµÄĞĞÎª£¬±ÈÈçÇé¿ö£ºÓÎÏ·½áÊø ÏÂµÄÏîÄ¿£ºÑ¯ÎÊ³·»ØÈç¹ûÎª\n" +
+			"Õæ£¬³ÌĞò¾Í»áÔÚÓÎÏ·½áÊøÊ±Ñ¯ÎÊÊÇ·ñ½øÈë³·»ØÄ£Ê½£¬×¢ÒâÈç¹ûÑ¯ÎÊ³·»ØÎª¼Ù¶øÏîÄ¿£ºÄ¬ÈÏ\n" +
+			"³·»ØÎªÕæ£¬Ôò³ÌĞò»áÌø¹ıÑ¯ÎÊÖ±½Ó½øÈë³·»ØÄ£Ê½\n" +
+			"    Èç¹ûÇçÌìÎªÕæ£¬ĞÇĞÇ¾Í»á´ÓÌìÉÏÂäÏÂÀ´£¬½ø¶øµ¼ÖÂ³ÌĞòµÄ¼ÆËãÑ¸ËÙ¶øÂ³Ã§\n";
+		return settings;
+	}
+#endif // STARS_LANG_CHINESE
 	return reverse;
 }
 
@@ -993,6 +1306,7 @@ string BoardInterface::getInfo(string input) {
 	string version = STARS_VERSION_RELEASE;
 #endif // STARS_VERSION_RELEASE
 #endif // STARS_VERSION_DEBUG
+#ifndef STARS_LANG_CHINESE
 	string enjoy = "Enjoy!\n";
 	string end	 = "----------------------------------- The End -----------------------------------\n";
 	string tips	 = addon + "Tips from CharmedPython:\n" +
@@ -1004,7 +1318,7 @@ string BoardInterface::getInfo(string input) {
 		"1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" + "| |0| | | | | | |\n" +
 		"| |0| | | | | | |\n" + "| |X| | |0| | | |\n" + "| |X| |0|X| | | |\n" +
 		"| |X| |X|X| | | |\n" + "| |0| |X|X| | | |\n" + "|0|0| |X|0|X|0|0|\n" +
-		"------------------------- 'Enter' for more, q to quit -------------------------\n";
+		"------------------------- 'Enter' for more, 0 to exit -------------------------\n";
 	string moreTips = addon +
 		"This type of layout will give you a lot of advantage. Trying to build any kind\n" +
 		"of three piece in a row is helpful.\nGood luck!\n" + end;
@@ -1018,6 +1332,33 @@ string BoardInterface::getInfo(string input) {
 #endif
 		"                                                                  by Duan Hanyu\n" +
 		"                                                                      2020-8-25";
+#else
+	string enjoy = "ÍæµÄ¿ªĞÄ£¡\n";
+	string end	 = "----------------------------------- Ã»ÁË -----------------------------------\n";
+	string tips	 = addon + "´ÓÉÏÒ»¸öpython°æÓÎÏ·¸´ÖÆÀ´µÄÓÎÏ·:\n" +
+		"Õâ¸öÒª¾÷¾ÍÊÇ¾¡Á¿Ôì³öÁ¬ĞøµÄ£¬¶Ô·½²»ÄÜÏÂµÄµã£¬¿ÉÒÔ´Ó¸ÇÁ¬Ğø¸ßÂ¥¿ªÊ¼\n" +
+		"µ«ÖĞ¼äÁôµã¿Õ£¬±ğÅª³ÉÒ»´ó¶Ñ\n" +
+		"1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" + "| | | | | | | | |\n" +
+		"| | | | | |0| | |\n" + "|0| | | | |X| | |\n" + "|X| |X|0| |X| | |\n" +
+		"|0| |X|X| |X| | |\n" + "|0| |X|X| |0|X| |\n" + "|0|0|0|X|0|X|0| |\n" + "\nor\n" +
+		"1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" + "| |0| | | | | | |\n" +
+		"| |0| | | | | | |\n" + "| |X| | |0| | | |\n" + "| |X| |0|X| | | |\n" +
+		"| |X| |X|X| | | |\n" + "| |0| |X|X| | | |\n" + "|0|0| |X|0|X|0|0|\n" +
+		"------------------------- '»Ø³µ'ÏÔÊ¾ÓàÏÂĞÅÏ¢£¬ 0·µ»Ø -------------------------\n";
+	string moreTips = addon +
+		"ÕâÑù¾ÍÄÜÌáÉıÓ®µÄ¸ÅÂÊ¡£Êµ¼ÊÉÏ£¬ËùÓĞĞÎÊ½µÄÈı¸öÒ»ĞĞ¶¼ÄÜ´ïµ½Ìá¸ß»ñÊ¤¸ÅÂÊµÄĞ§¹û" +
+		"\n×£ºÃÔË!\n" + end;
+	string info = addon +
+		"\nÒ»¸öÒ»¶ÔÒ»£¬8x8 »ùÓÚÃüÁîĞĞµÄËÄ×ÓÆåÓÎÏ·\n" +
+#ifndef STARS_DEBUG_INFO
+		"\n------------------------------- version " + version + " ---------------------------------\n" +
+#endif
+#ifdef STARS_DEBUG_INFO
+		"\n---------------------------- version " + version + " -------------------------------\n" +
+#endif
+		"                                                                      by ¶ÎêÏÓî\n" +
+		"                                                                      2020-8-25";
+#endif // STARS_LANG_CHINESE
 	vector<string> story = {
 		addon +
 		"Out of a few random try, you finally get yourself an Easter Egg! But I'm afraid\n" +
@@ -1108,6 +1449,7 @@ string BoardInterface::getInfo(string input) {
 }
 
 void BoardInterface::showComment(oneMove& move) {
+#ifndef STARS_LANG_CHINESE
 	// comment
 	if ((move.word == "good" && move.byComputer) || (move.word == "bad" && !move.byComputer))
 		cout << "    not a promising future I'm afraid.\n";
@@ -1125,10 +1467,27 @@ void BoardInterface::showComment(oneMove& move) {
 		else if (non.size() < 4)
 			cout << "    not much space to chose form.\n";
 	}
+#else
+	if ((move.word == "good" && move.byComputer) || (move.word == "bad" && !move.byComputer))
+		cout << "    ËÆºõ²»Ãî\n";
+	else if ((move.word == "bad" && move.byComputer) || (move.word == "good" && !move.byComputer))
+		cout << "    ÃîÑ½~\n";
+	else {
+		shortv non;
+		analyse->state.nonFullColumn(non);
+		if (move.list.size() == 1 && move.byComputer)
+			cout << "    Ö»ÓĞÒ»²½¿É×ß£¬ÎÒÄÜ×ßÄÄ¶ùÄØ£¿\n";
+		else if (move.list.size() == 1 && !move.byComputer)
+			cout << "    Ö»ÓĞÒ»²½¿É×ß£¬ÄãÄÜ×ßÄÄ¶ùÄØ£¿\n";
+		else if (non.size() < 4)
+			cout << "    Ê£ÏÂµÄ¿Õ¼ä²»¶àÁË\n";
+	}
+#endif // STARS_LANG_CHINESE
 }
 
 bool BoardInterface::askToReverse(bool yes) {
 	char input[8];
+#ifndef STARS_LANG_CHINESE
 	if (yes)
 		printf("Care for reverse mode? (default yes) (Yes/no)> ");
 	else
@@ -1141,15 +1500,36 @@ bool BoardInterface::askToReverse(bool yes) {
 	}
 	else
 		printf("No it is.\n");
+#else
+	if (yes)
+		printf("½øÈë³·»ØÄ£Ê½? (Ä¬ÈÏ yes) (Yes/no)> ");
+	else
+		printf("½øÈë³·»ØÄ£Ê½? (Ä¬ÈÏ no) (yes/No)> ");
+	cin.getline(input, 8);
+	if ((yes && !strlen(input)) || !strcmp(input, "Y") || !strcmp(input, "yes")
+		|| !strcmp(input, "y")) {
+		printf("ÈçÄãËùÔ¸\n");
+		return true;
+	}
+	else
+		printf("°ÕÁË\n");
+#endif // STARS_LANG_CHINESE
 	return false;
 }
 
 void BoardInterface::askToSaveBoard(bool yes) {
 	char input[8];
+#ifndef STARS_LANG_CHINESE
 	if (yes)
 		printf("Save the old game? (yes as default) (Yes/no)> ");
 	else
 		printf("Save the old game? (no as default) (yes/No)> ");
+#else
+	if (yes)
+		printf("½«ÓÎÏ·´æµµ? (Ä¬ÈÏ yes) (Yes/no)> ");
+	else
+		printf("½«ÓÎÏ·´æµµ? (Ä¬ÈÏ no) (yes/No)> ");
+#endif // STARS_LANG_CHINESE
 	cin.getline(input, 8);
 	if ((yes && !strlen(input)) || !strcmp(input, "Y") || !strcmp(input, "yes")
 		|| !strcmp(input, "y"))
@@ -1157,31 +1537,44 @@ void BoardInterface::askToSaveBoard(bool yes) {
 }
 
 void BoardInterface::importNewBoard() {
+#ifndef STARS_LANG_CHINESE
 	printf("Paste a board down below>\n");
+#else
+	printf("Õ³ÌùÒ»¸öÆåÅÌ>\n");
+#endif // STARS_LANG_CHINESE
 	if (!getStateFromInput())
 		return;
 	record.clearHistoryMove();
 }
 
 bool BoardInterface::isOver(const oneMove& move) {
+#ifndef STARS_LANG_CHINESE
+	string gameOver		   = "Game is over, stars are gone.\n";
+	string congratulations = "Congratulations, you win!\n";
+	string boardFull	   = "board is full, game is over, lura is gone.\n";
+#else
+	string gameOver		   = "ÓÎÏ·½áÊø\n";
+	string congratulations = "Íæ¼Ò»ñÊ¤£¡\n";
+	string boardFull	   = "ÆåÅÌÂúÁË\n";
+#endif // STARS_LANG_CHINESE
 	if (analyse->gameIsOver() == move.player) {
 		analyse->show();
 		if (move.byComputer)
-			printf("Game is over, stars are gone.\n");
+			cout << gameOver;
 		else
-			printf("Congratulations, you win!\n");
+			cout << congratulations;
 		return true;
 	}
 	if (analyse->gameIsOver() == analyse->rPlayer(move.player)) {
 		analyse->show();
 		if (move.byComputer)
-			printf("Congratulations, you win!\n");
+			cout << congratulations;
 		else
-			printf("Game is over, stars are gone.\n");
+			cout << gameOver;
 		return true;
 	}
 	if (analyse->boardIsFull()) {
-		printf("board is full, game is over, lura is gone.\n");
+		cout << boardFull;
 		return true;
 	}
 	return false;

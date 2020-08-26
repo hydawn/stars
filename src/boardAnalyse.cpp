@@ -1,3 +1,4 @@
+/*-- encoding: GBK --*/
 #include "boardAnalyse.h"
 
 void BoardAnalyse::go(const char plr, const short move) {
@@ -1196,6 +1197,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 		do {
 			timeUsed = returnTime(plr, plrList, ++returnMoveDepth, word, trackRoute);
 		} while (word == "free" && timeUsed < maxcaltime && returnMoveDepth < 10);
+#ifndef STARS_LANG_CHINESE
 		if (showCal)
 			cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
 	}
@@ -1215,6 +1217,27 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	}
 	if (showTime)
 		cout << "    calculate time used: " << timeUsed << " ms\n";
+#else
+		if (showCal)
+			cout << "    没有星星的计算深度 = " << returnMoveDepth - 1 << endl;
+	}
+	else if (showCal) {
+		if (starsOn)
+			cout << "    有星星的计算深度 = " << returnMoveDepth - 1 << endl;
+		else 
+			cout << "    没有星星的计算深度 = " << returnMoveDepth - 1 << endl;
+	}
+
+	// show info if needed
+	if (showCal) {
+		cout << "    玩家状态 = " << toChinese(word) << ", 推荐列表 = [ ";
+		for (short c : plrList)
+			cout << c << " ";
+		printf("]\n");
+	}
+	if (showTime)
+		cout << "    程序计算用时 " << timeUsed << " 毫秒\n";
+#endif // STARS_LANG_CHINESE
 
 	// record, suggest and return
 	thisMove.word = word;
