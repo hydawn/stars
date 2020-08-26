@@ -42,6 +42,9 @@ target_link_libraries(${PROJECT_NAME}
 # set macros
 ## if windows, set or unset debug info by hand
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+	target_compile_definitions(${PROJECT_NAME}
+		PUBLIC STARS_PLATFORM_LINUX
+	)
 	message (STATUS "Current platform: Linux")
 	if (NOT CMAKE_BUILD_TYPE)
 		set(CMAKE_BUILD_TYPE "Debug")
@@ -59,6 +62,9 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 		message (STATUS "Current build type: (without debug info)")
 	endif()
 elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
+	target_compile_definitions(${PROJECT_NAME}
+		PUBLIC STARS_PLATFORM_WINDOWS
+	)
 	add_definitions(-DSTARS_VERSION_DEBUG="${STARS_VERSION_DEBUG}")
 	message(STATUS "Current version: ${STARS_VERSION_DEBUG}")
 	target_compile_definitions(stars_lib 

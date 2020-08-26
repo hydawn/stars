@@ -37,7 +37,7 @@ public:
 	string playMode();
 	string playBackMode();
 	string customMode();
-	bool controlMode();
+	virtual bool controlMode();
 	string showRoutesMode();
 	string selfPlayMode();
 
