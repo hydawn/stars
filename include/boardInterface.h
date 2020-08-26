@@ -9,14 +9,13 @@ using std::getline;
 using std::string;
 
 class BoardInterface {
-private:
+public:
 	BoardAnalyse* analyse;	// this might be more important?
 	BoardRecord	  record;
 
-public:
 	BoardInterface();
 	BoardInterface(BoardAnalyse& hb);
-	~BoardInterface();
+	virtual ~BoardInterface();
 
 	void generate(short c, short r, short w) { analyse = new BoardAnalyse(c, r, w); }
 
@@ -30,7 +29,7 @@ public:
 	// mode
 	string addMode();
 	string reverseMode();
-	string debugMode(oneMove& byPlayer);
+	virtual string debugMode(oneMove& byPlayer);
 	// string normalMode();
 	string settingsMode();
 	string defaultSettings();
@@ -43,8 +42,8 @@ public:
 	string selfPlayMode();
 
 	// ask & do
-	bool askToReverse(bool yes);	// if yes == true, then default yes
-	void askToSaveBoard(bool yes);
+	virtual bool askToReverse(bool yes);	// if yes == true, then default yes
+	virtual void askToSaveBoard(bool yes);
 	void importNewBoard();
 
 	// info
@@ -58,10 +57,8 @@ public:
 	void showComment(oneMove& move);
 
 	// check
-	bool isOver(const oneMove& move);
-	int autoTestMode(int startMove = 5);
+	virtual bool isOver(const oneMove& move);
+	int autoTestMode(int startMove);
 };
-
-int autoTest();
 
 #endif

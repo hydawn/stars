@@ -8,7 +8,10 @@
 #include <vector>
 #include "shortList.h"
 
+#ifdef STARS_DEBUG_INFO
 using std::logic_error;
+#endif	// STARS_DEBUG_INFO
+
 using std::runtime_error;
 using std::string;
 using std::vector;

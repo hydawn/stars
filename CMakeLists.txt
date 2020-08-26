@@ -20,6 +20,7 @@ add_library(stars_lib STATIC
 	src/boardRecord.cpp
 	src/boardRoute.cpp
 	src/boardState.cpp
+	src/boardTest.cpp
 	src/shortList.cpp
 )
 target_include_directories(stars_lib

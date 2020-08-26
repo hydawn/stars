@@ -144,8 +144,6 @@ string BoardAnalyse::oneMoveAnalyse(const char plr, const short col,
 			word = "bad";
 		else if (word == "bad")
 			word = "good";
-		else
-			word = "free";
 	}
 	state.remove(col);
 	return word;
@@ -203,7 +201,6 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	char   opp = state.rPlayer(plr);
 	shortv list1, goodList;
 	vIter  col = list.begin();
-	short goodNode = -1, badNode = 0, freeNode = -2;
 
 	// one big loop ahead of us
 	for (; col != list.end();) {
@@ -1184,7 +1181,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	if (starsOn && nonFullList.size() > 4)
 		state.areaTopTransform();
 	do {
-		timeUsed = returnTime(plr, plrList, returnMoveDepth++, word, trackRoute);
+		timeUsed = returnTime(plr, plrList, ++returnMoveDepth, word, trackRoute);
 	} while (word == "free" && timeUsed < maxcaltime && returnMoveDepth < 10);
 	// this opp list is for the random suggestion functions
 	if (returnMoveDepth > 2)
@@ -1194,16 +1191,20 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	state.areaTopRestore();
 
 	// in case something unpleasent happens:
-	if (starsOn && returnMoveDepth > 8 && timeUsed < 81 && nonFullList.size() < 12) {
+	if (starsOn && word != "free" && returnMoveDepth > 5 && timeUsed < maxcaltime && nonFullList.size() < 12) {
 		returnMoveDepth = 2;
 		do {
 			timeUsed = returnTime(plr, plrList, ++returnMoveDepth, word, trackRoute);
 		} while (word == "free" && timeUsed < maxcaltime && returnMoveDepth < 10);
-		cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
-	} else if (starsOn && plrList.size() > 4)
-		cout << "    calculation depth with stars = " << returnMoveDepth - 1 << endl;
-	else
-		cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
+		if (showCal)
+			cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
+	}
+	else if (showCal) {
+		if (starsOn)
+			cout << "    calculation depth with stars = " << returnMoveDepth - 1 << endl;
+		else 
+			cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
+	}
 
 	// show info if needed
 	if (showCal) {

@@ -1,21 +1,41 @@
-#include "boardInterface.h"
+#include "boardTest.h"
 
-// err = 7
 void autoTest(int n) {
-	int i, err = 0;
-	for (i = 10; i < n; ++i) {
-		BoardInterface boardInterface;
-		err += boardInterface.autoTestMode(i % 8 + 1);
+	BoardInterface boardInterface;
+	boardInterface.settingsMode();
+	int i, err = 0, XWinn = 0, ZeroWinn = 0;
+	for (i = 0; i < n; ++i) {
+		try {
+			BoardTest test;
+			try {
+				test.controlMode();
+				if (test.toWinn == 'X')
+					++XWinn;
+				else if (test.toWinn == '0')
+					++ZeroWinn;
+			}
+			catch(const std::exception& e) {
+				std::cerr << e.what() << '\n';
+				test.askToSaveBoard(true);
+				++err;
+			}
+		}
+		catch(const std::exception& e) {
+			std::cerr << e.what() << '\n';
+			cout << "Error occurred when creating or destroying BoardTest\n";
+		}
 	}
 	cout << "i = " << i << endl;
 	cout << "err = " << err << endl;
+	cout << "XWinn = " << XWinn << endl;
+	cout << "ZeroWinn = " << ZeroWinn << endl;
 	cout << "Over, hit 'Enter' to close ...";
 	cin.get();
 }
 
 int main() {
-	// autoTest(48);
-	// return 0;
+	//autoTest(55);
+	//return 0;
 	BoardInterface boardInterface;
 #ifdef STARS_DEBUG_INFO
 	cout << "This is a debug version of main.cpp\n";

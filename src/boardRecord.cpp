@@ -66,16 +66,10 @@ std::ostream& operator<<(std::ostream& os, oneMove& move) {
 
 void BoardRecord::getFile() {
 	std::ifstream inGames(gamesFileName);
-	if (!inGames.is_open()) {
-		cout << "Failed to open file \"" << gamesFileName << "\" to read\n";
-		cout << "Will create one when necessary.\n";
-	}
-	else
+	if (inGames.is_open())
 		inGames >> games;
 	std::ifstream inSet(settingsFileName);
 	if (!inSet.is_open()) {
-		cout << "Failed to open file \"" << settingsFileName << "\" to read\n";
-		cout << "Creating a new file\n";
 		std::ofstream outSet(settingsFileName);
 		outSet << inFileSettings;
 		if (!outSet.is_open())
@@ -271,7 +265,7 @@ string BoardRecord::showSavedGames(Json::Value& ret) {
 				return "yes";
 			}
 			else if (!strcmp(input, "d") || !strcmp(input, "rm") ||
-				!strcmp(input, "delete")) {
+				!strcmp(input, "delete") || !strcmp(input, "rm")) {
 				Json::Value removed;
 				games.removeIndex(i--, &removed);
 				writeGames();

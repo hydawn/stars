@@ -345,7 +345,9 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		}
 
 		// opp respond
-		printf("Info for the computer:\n");
+		if (record.getDefaultSettings("inDebugMode", "showCalculate") &&
+			record.getDefaultSettings("inDebugMode", "showTime"))
+			printf("Info for the computer:\n");
 		byOpponent.move = analyse->respond(byOpponent.player, byOpponent,
 			record.getDefaultSettings("inDebugMode", "showCalculate"),
 			record.getDefaultSettings("inDebugMode", "showTime"),
@@ -359,7 +361,8 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
 		record.push_back(byOpponent);
-		cout << "    input time used: " << byPlayer.time << "ms\n";
+		if (record.getDefaultSettings("inDebugMode", "showTime"))
+			cout << "    input time used: " << byPlayer.time << "ms\n";
 		printf("    %c goes here %d\n", byOpponent.player, byOpponent.move);
 		if (isOver(byOpponent)) {
 			printf("Exit from debug mode ...\n");
@@ -494,9 +497,9 @@ string BoardInterface::playMode() {
 	}
 	printf("We are here in play mode.\n");
 	printf("You can choose from %d saved games.\n", record.getNumberOfSavedBoard());
-	printf("Hit 'Enter' to see more, type in index number to went into\n");
-	printf("one of those games. Or type c to continue to play the board that is currently\ndisplayed. ");
-	printf("Use 0 to exit.\n");
+	printf("Hit 'Enter' to see more, type in index number to went into one of those games.\n");
+	printf("Or type c to continue to play the board that is currently displayed. ");
+	printf("Use d/rm/delete/remove to delete the current board, 0 to exit.\n");
 	printf("Explore!\n");
 	Json::Value game;
 	string result = record.showSavedGames(game);
@@ -536,9 +539,9 @@ string BoardInterface::playBackMode() {
 	}
 	printf("We are here in play back mode.\n");
 	printf("You can choose from %d saved games.\n", record.getNumberOfSavedBoard());
-	printf("Hit 'Enter' to see more, type in index number to see one of the games.\n");
-	printf("or type c to see the play back of the board that is currently displayed.\n");
-	printf("Use 0 to exit.\n");
+	printf("Hit 'Enter' to see more, type in index number to went into one of those games.\n");
+	printf("Or type c to continue to play the board that is currently displayed. ");
+	printf("Use d/rm/delete/remove to delete the current board, 0 to exit.\n");
 	printf("Explore!\n");
 	Json::Value game;
 	string result = record.showSavedGames(game);
@@ -1207,7 +1210,7 @@ int BoardInterface::autoTestMode(int startMove) {
 		if (isOver(byPlayer)) {
 			if (analyse->gameIsOver() != expectedWinner)
 				cout << "What? why?\n";
-			printf("Exit from self play mode ...\n");
+			printf("Exit from auto test mode ...\n");
 			return errCount;
 		}
 
@@ -1230,8 +1233,6 @@ int BoardInterface::autoTestMode(int startMove) {
 					analyse->starShow();
 					printf("\n\n\n\n");
 					expectedWinner = byOpponent.player;
-					//cout << "Hit anything to continue ...";
-					//cin.get();
 				}
 				else
 					expectedWinner = byOpponent.player;
@@ -1280,9 +1281,5 @@ int BoardInterface::autoTestMode(int startMove) {
 		++stepCount;
 	}
 	return errCount;
-}
-
-int autoTest() {
-	return 0;
 }
 #endif // STARS_DEBUG_INFO

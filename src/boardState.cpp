@@ -228,9 +228,9 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	shortv plrTList = makeThreeCols(plr, list), oppTList = makeThreeCols(rPlayer(plr), oppList);
 	srand((unsigned)time(NULL));
 	if (rand() % 100 < 85) {
-#ifdef STARS_DEBUG_INFO
-		printf("    Debug: Trying intercept strategy 1:\n");
-#endif
+// #ifdef STARS_DEBUG_INFO
+// 		printf("    Debug: Trying intercept strategy 1:\n");
+// #endif
 		MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
 		if (intersectionList.empty()) {
 			if (plrTList.empty()) {
@@ -248,9 +248,9 @@ short BoardState::randomSuggestion(const char plr, shortv& list, shortv oppList,
 	// else if everything is empty
 	// preference No.2: take the opponent's safe list
 	MyShortList::shortIntersection(intersectionList, list, oppList);
-#ifdef STARS_DEBUG_INFO
-	printf("    Debug: Trying intercept strategy 2:\n");
-#endif
+// #ifdef STARS_DEBUG_INFO
+// 	printf("    Debug: Trying intercept strategy 2:\n");
+// #endif
 	if (intersectionList.empty())
 		return randomSuggestion(plr, list, mode);
 	return randomSuggestion(plr, intersectionList, mode);
@@ -439,11 +439,11 @@ void BoardState::setATopWithTop(short i, short t) {
 	// important numbers here!
 	if (t == 0)
 		return;
-	setATopWithNumber(i - 2, t / 2);
-	setATopWithNumber(i - 1, t + 1);
+	setATopWithNumber(i - 2, t / 2 + 1);
+	setATopWithNumber(i - 1, t + 1 > 4 ? t + 1 : 4);
 	setATopWithNumber(i, t + 2);
-	setATopWithNumber(i + 1, t + 1);
-	setATopWithNumber(i + 2, t / 2);
+	setATopWithNumber(i + 1, t + 1 > 4 ? t + 1 : 4);
+	setATopWithNumber(i + 2, t / 2 + 1);
 }
 
 shortv BoardState::aTopFullColumn() {

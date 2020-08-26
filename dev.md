@@ -71,9 +71,13 @@ well, this is clearly more organized than CharmedPython
 - add func to see if settings are match (of cause it match, why should I do this?)
 - some flags added
 
+## 010
+- class BoardTest added & tested
+- in-function help info updated
+- other minor fix concerning program output, performance improvement and analyse strategy updated
+
 # TODO
-- test if stable - no, sometimes settings just crash, why?
-- use tester to test if stable, track if good and bad is correct
+- sometimes settings just crash, why?
 - add a new strategy to avoid letting opp have more three in a row
 - change the last tag to 0.1.0 and add info: delete `#include "boardArea.h"`
 - refactor returnMove function
@@ -86,6 +90,9 @@ wait, I got a new idea
 the last time I got a new idea (starArea) was yesterday when taking a walk. Just a few minutes ago, when I was taking a shower, thinking about giving up the project and start writing my essay, it occurred to me that I can record every "route" that in the end produce something (like good or bad), and record that route, after hundreds of times of "letting-computer-play-with-itself", I should gathered enough data to produce a conclusion about how to decide which area should be the star area.  
 That sounds ... interesting?   
 I can use a tree, never used a tree (explicitly?) before.   
+
+# test
+in 55 tests, 0 goes first, 32 0 win, 22 X win, one board is full
 
 # pre-release note - version 1.0 - Beta
 preRelease - total failure, no pause in bash, clock() is not working as expected, core dumped, returnSituation is never used, depth > 3 is never used.
