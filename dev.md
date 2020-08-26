@@ -53,7 +53,7 @@ well, this is clearly more organized than CharmedPython
 - new thought on analyse function - might improve performance
 - other minor fix
 
-## 008 prepare for version 0.1.1
+## 008 - prepare for version 0.1.1
 - flag STARS_DEBUG_INFO for debug added
 - flag STARS_ADVANCED_FUNCTIONS to hide the advanced functions
 - ask to reverse instead of ask to debug
@@ -75,6 +75,11 @@ well, this is clearly more organized than CharmedPython
 - class BoardTest added & tested
 - in-function help info updated
 - other minor fix concerning program output, performance improvement and analyse strategy updated
+
+## 011 - minor fix
+- help and info updated
+- remove \n in the end of error thrown
+- README.md build/download info added, import info updated, known bugs updated
 
 # TODO
 - sometimes settings just crash, why?

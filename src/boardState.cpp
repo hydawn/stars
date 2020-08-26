@@ -130,7 +130,7 @@ void BoardState::sweepFullColumn(shortv& nonFull, short col) {
 	nonFullColumn(realNonFull);
 #ifdef STARS_DEBUG_INFO
 	if (!MyShortList::equal(nonFull, realNonFull))
-		throw logic_error("this non-full and the real non-full didn't match\n");
+		throw logic_error("this non-full and the real non-full didn't match");
 #endif
 }
 
@@ -139,7 +139,7 @@ char BoardState::rPlayer(const char plr) {
 		return '0';
 	if (plr == '0')
 		return 'X';
-	throw runtime_error("No such player exist!\n");
+	throw runtime_error("No such player exist");
 }
 
 short BoardState::randomMove() {
@@ -147,7 +147,7 @@ short BoardState::randomMove() {
 	nonFullColumn(list);
 #ifdef STARS_DEBUG_INFO
 	if (list.empty())
-		throw logic_error("trying randomMove() in an empty list\n");
+		throw logic_error("trying randomMove() in an empty list");
 #endif	// STARS_DEBUG_INFO
 	return randomMove(list);
 }
@@ -155,7 +155,7 @@ short BoardState::randomMove() {
 short BoardState::randomMove(shortv& list) {
 #ifdef STARS_DEBUG_INFO
 	if (list.empty())
-		throw logic_error("trying randomMove(shortv& list) in an empty list\n");
+		throw logic_error("trying randomMove(shortv& list) in an empty list");
 #endif	// STARS_DEBUG_INFO
 	srand((unsigned)time(NULL));
 	return list[rand() % list.size()];
@@ -209,7 +209,7 @@ short BoardState::randomSuggestion(const char plr, shortv& list, const string& m
 	}
 #ifdef STARS_DEBUG_INFO
 	else
-		throw logic_error("no such mode.\n");
+		throw logic_error("no such mode");
 	if (list.empty())
 		throw logic_error("call randomSuggestion with empty list");
 #endif // STARS_DEBUG_INFO
@@ -542,7 +542,7 @@ void BoardState::retInit(vector<oneMove>& his) {
 			add(riter->player, riter->move);
 #ifdef STARS_DEBUG_INFO
 		else
-			throw logic_error("unexpected, unhandled mode in retInit in boardState.h\n");
+			throw logic_error("unexpected, unhandled mode in retInit in boardState.h");
 #endif	// STARS_DEBUG_INFO
 	}
 }

@@ -56,7 +56,7 @@ string BoardTest::debugMode(oneMove& byPlayer) {
 #ifdef STARS_DEBUG_INFO
 		if (!byOpponent.list.empty() &&
 			!MyShortList::inList(byOpponent.list, byOpponent.move))
-			throw logic_error("suggestion not in safe list\n");
+			throw logic_error("suggestion not in safe list");
 #endif
 		analyse->go(byOpponent.player, byOpponent.move);
 		printf("%d:'%c' goes '%d'\t", ++stepCount, byOpponent.player, byOpponent.move);
@@ -109,7 +109,7 @@ string BoardTest::debugMode(oneMove& byPlayer) {
 			printf("    %d is recommended\n", byPlayer.suggestion);
 	}
 #ifdef STARS_DEBUG_INFO
-	throw logic_error("control flow into the end of debug mode\n");
+	throw logic_error("control flow into the end of debug mode");
 #endif
 }
 

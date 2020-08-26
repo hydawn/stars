@@ -25,7 +25,7 @@ public:
 	void push_back(const short& ele) {
 #ifdef STARS_DEBUG_INFO
 		if (top == SHORTV_LENGTH)
-			throw logic_error("ShortList can't be pushed back\n");
+			throw logic_error("the end of ShortList, can't be pushed back further more");
 #endif
 		data[top++] = ele;
 	}
@@ -55,7 +55,7 @@ public:
 				return;
 			}
 #ifdef STARS_DEBUG_INFO
-		throw logic_error("trying to erase an item that does not exist\n");
+		throw logic_error("trying to erase an item that does not exist");
 #endif
 	}
 

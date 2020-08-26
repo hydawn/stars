@@ -128,7 +128,7 @@ void RouteTree::clear() {
 void RouteTree::forward() {
 #ifdef STARS_DEBUG_INFO
 	if (crnt->next.size() != 1)
-		throw logic_error("reached the end of the tree!\n");
+		throw logic_error("reached the end of the tree");
 #endif
 	crnt = crnt->next[0];
 }
@@ -136,7 +136,7 @@ void RouteTree::forward() {
 void RouteTree::forward(short data) {
 #ifdef STARS_DEBUG_INFO
 	if (crnt->next.empty())
-		throw logic_error("reached the end of the tree!\n");
+		throw logic_error("reached the end of the tree");
 #endif
 	vector<RouteNode *>::iterator iter = crnt->next.begin();
 	for (; iter != crnt->next.end();++iter)
@@ -145,23 +145,23 @@ void RouteTree::forward(short data) {
 			return;
 		}
 #ifdef STARS_DEBUG_INFO
-	throw logic_error("no such data in the next set of node\n");
+	throw logic_error("no such data in the next set of node");
 #endif
 }
 
 void RouteTree::nextNode() {
 #ifdef STARS_DEBUG_INFO
 	if (!crnt->prev)
-		throw logic_error("trying nextNode on head node\n");
+		throw logic_error("trying nextNode on head node");
 	if (crnt->prev->next.empty())
-		throw logic_error("reached the end of the tree!\n");
+		throw logic_error("reached the end of the tree");
 #endif
 	vRi iter = crnt->prev->next.begin();
 	for (; iter != crnt->prev->next.end() && *iter != crnt;++iter)
 		;
 #ifdef STARS_DEBUG_INFO
 	if (iter == crnt->prev->next.end())
-		throw logic_error("no such data, bugs occurred inside this class\n");
+		throw logic_error("no such data, bugs occurred inside this class");
 #endif
 	++iter;
 	if (iter == crnt->prev->next.end())
@@ -172,7 +172,7 @@ void RouteTree::nextNode() {
 void RouteTree::backward() {
 #ifdef STARS_DEBUG_INFO
 	if (!crnt->prev)
-		throw logic_error("reached the top of the tree!\n");
+		throw logic_error("reached the top of the tree");
 #endif
 	crnt = crnt->prev;
 }

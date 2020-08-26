@@ -151,9 +151,9 @@ public:
 		if (col < 0 || col > cols)
 			throw logic_error("trying to add in a wrong place");
 		if (top[col - 1] == rows)
-			throw logic_error("trying to add to a full column.\n");
+			throw logic_error("trying to add to a full column");
 		if (plr != 'X' && plr != '0')
-			throw logic_error("wrong player!\n");
+			throw logic_error("wrong player!");
 		++addNumber;
 #endif
 		board[col - 1][top[col - 1]++] = plr;
@@ -163,7 +163,7 @@ public:
 		if (col < 0 || col > cols)
 			throw logic_error("trying to remove in a wrong place");
 		if (top[col - 1] == 0)
-			throw logic_error("trying to remove from an empty column.\n");
+			throw logic_error("trying to remove from an empty column");
 		++removeNumber;
 #endif
 		board[col - 1][(top[col - 1]--) - 1] = ' ';

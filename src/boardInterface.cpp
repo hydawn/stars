@@ -356,7 +356,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 #ifdef STARS_DEBUG_INFO
 		if (!byOpponent.list.empty() &&
 			!MyShortList::inList(byOpponent.list, byOpponent.move))
-			throw logic_error("suggestion not in safe list\n");
+			throw logic_error("suggestion not in safe list");
 #endif
 		analyse->go(byOpponent.player, byOpponent.move);
 		byOpponent.suggestion = byOpponent.move;
@@ -391,7 +391,7 @@ string BoardInterface::debugMode(oneMove& byPlayer) {
 		printf("\n");
 	}
 #ifdef STARS_DEBUG_INFO
-	throw logic_error("control flow into the end of debug mode\n");
+	throw logic_error("control flow into the end of debug mode");
 #endif
 }
 
@@ -437,7 +437,7 @@ string BoardInterface::defaultSettings() {
 		}
 	}
 #ifdef STARS_DEBUG_INFO
-	throw logic_error("control flow into the end of settings mode\n");
+	throw logic_error("control flow into the end of settings mode");
 	return "quit";
 #endif
 }
@@ -693,7 +693,7 @@ bool BoardInterface::controlMode() {
 	if (!record.match())
 		throw runtime_error("current settings var in BoardRecord doesn't match with the default settings");
 	if (i == 100)
-		throw runtime_error("too much unhandled advice\n");
+		throw runtime_error("too much unhandled advice");
 	if (advice == "quit")
 		return false;
 	cout << "Exit from controller\n";
@@ -845,7 +845,7 @@ string BoardInterface::selfPlayMode() {
 #ifdef STARS_DEBUG_INFO
 		if (!byOpponent.list.empty() &&
 			!MyShortList::inList(byOpponent.list, byOpponent.move))
-			throw logic_error("suggestion not in safe list\n");
+			throw logic_error("suggestion not in safe list");
 #endif
 		// analyse->go(byOpponent.player, byOpponent.move);
 		// record.push_back(byOpponent);
@@ -893,40 +893,42 @@ string BoardInterface::getHelp(string mode) {
 	string end	  = "------------------------------------ The End ----------------------------------\n";
 	string enterForMore =
 		"------------------------- 'Enter' for more, 0 to quit -------------------------\n";
-	string add = addon + "Type in player (X or 0) and move (1~8) to place a piece, for example, type in\n" +
+	string add = addon + "Enter player (X or 0) and number to place a piece, for example, enter\n" +
 		"X 3\nwill place a pice X in column 3, you can also type x-7 if you want. Just make\n" +
 		"sure there's one and only one character between player and its move.\n" +
-		"Hit 'Enter' to exit add mode.\n";
+		"Hit 'Enter' only to exit add mode.\n";
 	string reverse = "Type in column number to reverse that action. Hit 'Enter' to exit\n";
 	string moreAddOrReverse =
 		addon + "If you don't know what's going on, why are you here. Why don't you exit from here\n" +
 		"and see what the help information in debug mode have to say?\n" + enjoy + end;
 	string normal =
-		addon + "Type in numbers (1~8) to play, one who place four piece in a row first wins\n\n" +
-		"0/exit ---------- exit from a certain mode\n" +
-		"q/quit ---------- quit the whole game\n" +
-		"C/custom -------- custom board height, width and win number (4 by default)\n" +
-		"h/help ---------- show help message of the current mode\n" +
-		"p/play ---------- into play mode\n" +
-		"P/play back ----- into play back mode\n" +
-		"S/show ---------- show the current board\n" +
-		"s/settings ------ view and change the settings\n" +
-		"st/show stars --- show debug analyse stars\n" +
-		"sv/save --------- save the current game\n" +
-		"sr/show routes -- show routes that the computer has examined\n" +
-		"t/tips ---------- tips I wrote to help other player (you) to play the game\n" +
-		"w/winn ---------- show win number (4 by default) in case you forgot\n" +
-		"i/info ---------- information about the game\n\n" + enterForMore;
+		addon + "Type in number to play, one who place four piece in a row first wins\n\n" +
+		"0/exit ----------- exit from a certain mode\n" +
+		"q/quit ----------- quit the whole game\n" +
+		"C/custom --------- custom board height, width and win number (4 by default)\n" +
+		"h/help ----------- show help message of the current mode\n" +
+		"p/play ----------- into play mode\n" +
+		"P/play back ------ into play back mode\n" +
+		"S/show ----------- show the current board\n" +
+		"s/settings ------- view and change the settings\n" +
+		"st/show stars ---- show stars\n" +
+		"sv/save ---------- save the current game\n" +
+		"sr/show routes --- show routes that the computer has examined\n" +
+		"t/tips ----------- tips I wrote to help other player (you) to play the game\n" +
+		"w/winn ----------- show win number (4 by default) in case you forgot\n" +
+		"i/info ----------- information about the game\n\n" + enterForMore;
 	vector<string> moreDebug = {
 		addon +
-			"If hintOn is true, then when the computer says word = good, then you'll win (if\n" +
-			"starsOn is false) in a few steps if you chose to take the step within the list\n" +
-			"that follows, and if there's no bugs :-)\n" + enterForMore,
+			"If hintOn is true, then when the computer says your word = good, then you'll\n" +
+			"win in a few steps if you chose to take the step within the list that follows.\n" +
+			"Note that if starsOn is true however, then there is a 15% chance that the\n" +
+			"computer will make one mistake in every 30 rounds, which means that the rules\n" +
+			"above won\'t apply ;-)\n" + enterForMore,
 		addon + "If word=free, list=[1, 5] but you can see that there are plenty of column that\n" +
 			"is not full but out side of that [1, 5] list, it is recommended that you take\n" +
-			"the step within the list for every Move outside the safe list is risky.\n"
-			"Note that area that's covered by the stars cannot be accessed by the computer\n" +
-			"easily, therefore might contain surprise or danger.\n"+ enterForMore,
+			"the step within the list for every Move outside the safe list is risky.\n" +
+			"Note that area that's covered by the stars cannot be accessed by the computer,\n" +
+			"therefore might contain surprise or danger.\n" + enterForMore,
 		addon +
 			"a/add      - into add mode: add some moves\n" +
 			"c/change   - change (swap) the player\n" +
@@ -934,10 +936,7 @@ string BoardInterface::getHelp(string mode) {
 			"I/import   - import a new board from input, which must fit in the current board\n" +
 			"m/move     - force the computer to take a move now\n" +
 			"r/reverse  - into reverse mode: reverse some moves\n" +
-			"\nKnowing that one can reverse an action might discourage one from thinking\n" +
-			"carefully before one take a move. It's easy to get bored playing games like\n"
-			"that.\n" + enjoy + end
-		};
+			enjoy + end};
 	if (mode == "debug") {
 		cout << normal;
 		char dis[16];
@@ -992,8 +991,8 @@ string BoardInterface::getInfo(string input) {
 #else
 #ifdef STARS_VERSION_RELEASE
 	string version = STARS_VERSION_RELEASE;
-#endif
-#endif
+#endif // STARS_VERSION_RELEASE
+#endif // STARS_VERSION_DEBUG
 	string enjoy = "Enjoy!\n";
 	string end	 = "----------------------------------- The End -----------------------------------\n";
 	string tips	 = addon + "Tips from CharmedPython:\n" +
@@ -1007,10 +1006,8 @@ string BoardInterface::getInfo(string input) {
 		"| |X| |X|X| | | |\n" + "| |0| |X|X| | | |\n" + "|0|0| |X|0|X|0|0|\n" +
 		"------------------------- 'Enter' for more, q to quit -------------------------\n";
 	string moreTips = addon +
-		"This type of layout will give you a lot of advantage. However, this program is\n" +
-		"designed to prevent you from building yourself too high - it's always trying to\n" +
-		"interrupt but build it anyway. Actually, trying to build any kind of three\n" +
-		"piece in a row is helpful.\nGood luck!\n" + end;
+		"This type of layout will give you a lot of advantage. Trying to build any kind\n" +
+		"of three piece in a row is helpful.\nGood luck!\n" + end;
 	string info = addon +
 		"\nA 1v1 & 8x8 command line based board game\n" +
 #ifndef STARS_DEBUG_INFO

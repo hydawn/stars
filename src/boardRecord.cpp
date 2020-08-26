@@ -73,7 +73,7 @@ void BoardRecord::getFile() {
 		std::ofstream outSet(settingsFileName);
 		outSet << inFileSettings;
 		if (!outSet.is_open())
-			throw runtime_error("Failed to create file, mission aborted\n ");
+			throw runtime_error("Failed to create file, mission aborted");
 		outSet.close();
 		std::ifstream in(settingsFileName);
 		in >> settings;
@@ -153,7 +153,7 @@ bool BoardRecord::getDefaultSettings(const string& situ, const string& item) {
 			}
 			else {
 				cout << "situ = " << situ << " item = " << item << endl;
-				throw runtime_error("no such item in Stars_settings.json\n");
+				throw runtime_error("no such item in Stars_settings.json");
 			}
 		}
 		else if (i < 2) {
@@ -168,11 +168,11 @@ bool BoardRecord::getDefaultSettings(const string& situ, const string& item) {
 		}
 		else {
 			cout << "situ = " << situ << endl;
-			throw runtime_error("no such situation in Stars_settings.json\n");
+			throw runtime_error("no such situation in Stars_settings.json");
 		}
 	}
 #ifdef STARS_DEBUG_INFO
-	throw logic_error("control flow to the end of BoardRecord::getDefaultSettings\n");
+	throw logic_error("control flow to the end of BoardRecord::getDefaultSettings");
 #endif
 }
 
@@ -338,11 +338,11 @@ bool BoardRecord::match() {
 	// get the "right default settings"
 	std::ifstream in(settingsFileName);
 	if (!in.is_open())
-		throw runtime_error("can't open settings file, match check aborted\n");
+		throw runtime_error("can't open settings file, match check aborted");
 	Json::Value rightDs;
 	Json::Reader reader;
 	if(!reader.parse(inFileSettings, os))
-		throw logic_error("can't parse in file settings file, match check aborted\n");
+		throw logic_error("can't parse in file settings file, match check aborted");
 	rightDs = os["defaultSettings"];
 
 	// check if default settings match

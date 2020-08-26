@@ -3,7 +3,7 @@
 void BoardAnalyse::go(const char plr, const short move) {
 #ifdef STARS_DEBUG_INFO
 	if (state.colIsFull(move))
-		throw logic_error("Error: trying to add to a full column.\n");
+		throw logic_error("Error: trying to add to a full column");
 #endif
 	state.add(plr, move);
 }
@@ -11,7 +11,7 @@ void BoardAnalyse::go(const char plr, const short move) {
 void BoardAnalyse::reverse(const short column) {
 #ifdef STARS_DEBUG_INFO
 	if (state.colIsEmpty(column))
-		throw logic_error("Error: tying to reverse an empty column\n");
+		throw logic_error("Error: tying to reverse an empty column");
 #endif
 	state.remove(column);
 }
@@ -32,7 +32,7 @@ shortv BoardAnalyse::firstPoint(const char plr, shortv& nonFullList) {
 string BoardAnalyse::analyse(const char plr, shortv& list) {
 #ifdef STARS_DEBUG_INFO
 	if (state.isOver() != 'N')
-		throw logic_error("game is over, yet analyse is called!\n");
+		throw logic_error("game is over, yet analyse is called");
 #endif
 	shortv nonFull, temp1;
 
@@ -191,7 +191,7 @@ string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
 string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth) {
 #ifdef STARS_DEBUG_INFO
 	if (state.isOver() != 'N' || state.boardIsFull())
-		throw logic_error("game is over or board is full, yet returnMove is called!\n");
+		throw logic_error("game is over or board is full, yet returnMove is called");
 	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
 #endif
 	string word = analyse(plr, list);
@@ -207,7 +207,7 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 		state.add(plr, *col);
 #ifdef STARS_DEBUG_INFO
 		if (!state.match())
-			throw logic_error("top and real top didn't match\n");
+			throw logic_error("top and real top didn't match");
 #endif
 		word = analyse(opp, list1);
 		if (word == "good") {
@@ -578,9 +578,9 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 	removeNumber1 = state.getRemoveNumber() - removeNumber1;
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	if (addNumber1 != removeNumber1)
-		throw logic_error("add and remove didn't match!\n");
+		throw logic_error("add and remove didn't match");
 	if (!state.match())
-		throw logic_error("top and real top didn't match\n");
+		throw logic_error("top and real top didn't match");
 #endif
 	if (!goodList.empty()) {
 		list = goodList;
@@ -594,7 +594,7 @@ string BoardAnalyse::returnMove(const char plr, shortv& list, const short depth)
 string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short depth) {
 #ifdef STARS_DEBUG_INFO
 	if (state.isOver() != 'N')
-		throw logic_error("game is over, yet returnMove is called!\n");
+		throw logic_error("game is over, yet returnMove is called");
 	int addNumber1 = state.getAddNumber(), removeNumber1 = state.getRemoveNumber();
 #endif
 	string word = analyse(plr, list);
@@ -613,7 +613,7 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 		state.add(plr, *col);
 #ifdef STARS_DEBUG_INFO
 		if (!state.match())
-			throw logic_error("top and real top didn't match\n");
+			throw logic_error("top and real top didn't match");
 #endif
 		word = analyse(opp, list1);
 		if (word == "good") {
@@ -1040,11 +1040,11 @@ string BoardAnalyse::returnMoveDebug(const char plr, shortv& list, const short d
 	removeNumber1 = state.getRemoveNumber() - removeNumber1;
 	// printf("addNumber=%d, removeNumber=%d\n", addNumber1, removeNumber1);
 	if (addNumber1 != removeNumber1)
-		throw logic_error("add and remove didn't match!\n");
+		throw logic_error("add and remove didn't match");
 	if (!routes.match())
-		throw logic_error("forward and backward didn't match!\n");
+		throw logic_error("forward and backward didn't match");
 	if (!state.match())
-		throw logic_error("top and real top didn't match\n");
+		throw logic_error("top and real top didn't match");
 #endif
 	if (!goodList.empty()) {
 		list = goodList;
@@ -1075,7 +1075,7 @@ string BoardAnalyse::returnSituation(const char plr, shortv& list, short returnM
 	****************************debug theory**********************************/
 #ifdef STARS_DEBUG_INFO
 	if (list.empty()) {
-		throw logic_error("recursiveSituation: given list is empty!\n");
+		throw logic_error("recursiveSituation: given list is empty");
 		return "end";
 	}
 #endif
@@ -1123,7 +1123,7 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
 	*****************************debug theory*********************************/
 #ifdef STARS_DEBUG_INFO
 	if (list.empty()) {
-		throw logic_error("recursiveSituation: given list is empty!\n");
+		throw logic_error("recursiveSituation: given list is empty");
 		return "end";
 	}
 #endif
@@ -1172,9 +1172,9 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	state.nonFullColumn(nonFullList);
 #ifdef STARS_DEBUG_INFO
 	if (nonFullList.empty())
-		throw logic_error("call respond with full board!\n");
+		throw logic_error("call respond with full board");
 	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
-		throw logic_error("call respond with ended game!\n");
+		throw logic_error("call respond with ended game");
 #endif
 
 	// analyse
@@ -1235,7 +1235,7 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	}
 #ifdef STARS_DEBUG_INFO
 	else
-		throw logic_error("wrong word returned in respond\n");
+		throw logic_error("wrong word returned in respond");
 #endif
 	return 0;
 }
