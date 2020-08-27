@@ -35,7 +35,7 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make
 ```
-Use `./Stars play` to start the game, use `make install` to install the game.  
+Use `./Stars start` to start the game, use `make install` to install the game.  
 
 # Import
 You can see there's a lot of board in [oldTestingBoard.md](./oldTestingBoard.md). In case you want to import and play a new board, just enter `import` or `I` and you'll see this:  

@@ -46,7 +46,7 @@ BoardRecord::~BoardRecord() {
 
 std::ostream& operator<<(std::ostream& os, oneMove& move) {
 	os << "    mode = " << move.mode << ";\n";
-	if (move.mode == "normal" || move.mode == "debug") {
+	if (move.mode == "normal" || move.mode == "debug" || move.mode == "test") {
 		os << "    time used: " << move.time << "ms; hint on: "
 		   << std::boolalpha << move.hintOn << "; suggestion = "
 		   << move.suggestion << "\n    word = " << move.word << "; list = [ ";
@@ -416,6 +416,10 @@ string toChinese(const string& word) {
 		return "坏";
 	if (word == "free")
 		return "自由"; // 我免费了！
+	if (word == "debug")
+		return "人机";
+	if (word == "play")
+		return "双人";
 	if (word == "board width")
 		return "棋盘宽度";
 	if (word == "board height")

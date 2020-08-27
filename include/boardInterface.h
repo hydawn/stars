@@ -7,11 +7,14 @@
 using std::cin;
 using std::getline;
 using std::string;
+using std::invalid_argument;
 
 class BoardInterface {
 public:
 	BoardAnalyse* analyse;	// this might be more important?
 	BoardRecord	  record;
+	oneMove		  byOpponent;
+	oneMove		  byPlayer;
 
 	BoardInterface();
 	BoardInterface(BoardAnalyse& hb);
@@ -20,26 +23,33 @@ public:
 	void generate(short c, short r, short w) { analyse = new BoardAnalyse(c, r, w); }
 
 	// general
-	string getInput(const string mode);
-	string getInput(char plr, double& inputTime);
+	string getInput();
+	string getInput(char plr, double& inputTime, const string& mode);
 	short  getCustomInput(const string item);
 	bool   getStateFromInput();
 	bool   transformInput(char** dest, vector<string>& src, const int cols, const int rows);
 
 	// mode
-	string addMode();
 	string reverseMode();
-	virtual string debugMode(oneMove& byPlayer);
+	virtual string debugMode(const string& mode = "debug");
 	// string normalMode();
 	string settingsMode();
 	string defaultSettings();
 	string otherSettings();
-	string playMode();
-	string playBackMode();
+	string playbackMode();
 	string customMode();
-	virtual bool controlMode();
+	virtual bool controlMode(const string& firstMode = "debug");
 	string showRoutesMode();
 	string selfPlayMode();
+
+	// tools for mode
+	void add(string input);
+	void reverse(string input);
+	bool addStringConvert(string input);
+	bool addStringConvert(string input, oneMove& move);
+	bool reverseStringConvert(string input);
+	bool reverseStringConvert(string input, oneMove& move);
+	virtual short respond();
 
 	// ask & do
 	virtual bool askToReverse(bool yes);	// if yes == true, then default yes
@@ -60,5 +70,8 @@ public:
 	virtual bool isOver(const oneMove& move);
 	int autoTestMode(int startMove);
 };
+
+int	 myStoi(string word);
+bool xtoiFit(string word, int num);
 
 #endif

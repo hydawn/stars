@@ -87,11 +87,23 @@ well, this is clearly more organized than CharmedPython
 - capital fixed
 - cut output
 
+## 013 - multiple major changes
+- play mode's function changed to support double player
+- code structure improved
+- boardState.h: ancient bugs found & fixed
+- boardRecord.cpp-operator<<: test replay added
+- boardTest.cpp:debugMode: some-moves-won't-be-tracked-bug fixed, 
+- autoTest: make error message saved board's name
+- boardAnalyse.cpp: analyse function me-first rule added, related bug fixed
+- CMakeLists.txt: updated & refactored to make version control and language select easier
+- BoardInterface.cpp: new add & reverse input syntax added, old syntax improved
+- addMode deleted
+- main.cpp: args handle upgraded
+
 # TODO
 - sometimes settings just crash, why?
 - add a new strategy to avoid letting opp have more three in a row
 - change the last tag to 0.1.0 and add info: delete `#include "boardArea.h"`
-- refactor returnMove function
 - add GUI - I don't think so
 - Then I will stop
 

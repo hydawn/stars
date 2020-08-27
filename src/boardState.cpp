@@ -101,6 +101,28 @@ void BoardState::printHead() {
 	printf("\n");
 }
 
+bool BoardState::colCanAdd(const short col) {
+	if (col < 1 || col > cols)
+		return false;
+	if (top[col - 1] == rows)
+		return false;
+	return true;
+}
+
+bool BoardState::colCanRemove(const short col) {
+	if (col < 1 || col > cols)
+		return false;
+	if (top[col - 1] == 0)
+		return false;
+	return true;
+}
+
+char BoardState::getTopPiece(short col) {
+	if (!colCanRemove(col))
+		throw logic_error("getTopPiece: call this on an empty column");
+	return board[col - 1][top[col - 1] - 1];
+}
+
 bool BoardState::boardIsFull() {
 	for (short i = 1; i <= cols; ++i)
 		if (!colIsFull(i))
@@ -536,13 +558,14 @@ void BoardState::retInit(vector<oneMove>& his) {
 	// return the state to the 'initial state' accroding to the history move
 	for (vector<oneMove>::reverse_iterator riter = his.rbegin();
 		riter != his.rend();++riter) {
-		if (riter->mode=="debug"||riter->mode=="add"||riter->mode=="normal")
+		if (riter->mode == "debug" || riter->mode == "add" ||
+			riter->mode == "normal" || riter->mode == "test")
 			remove(riter->move);
 		else if (riter->mode=="reverse")
 			add(riter->player, riter->move);
 #ifdef STARS_DEBUG_INFO
 		else
-			throw logic_error("unexpected, unhandled mode in retInit in boardState.h");
+			throw logic_error("unexpected, unhandled mode in retInit in boardState.cpp");
 #endif	// STARS_DEBUG_INFO
 	}
 }

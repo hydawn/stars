@@ -3,16 +3,16 @@
 
 void BoardAnalyse::go(const char plr, const short move) {
 #ifdef STARS_DEBUG_INFO
-	if (state.colIsFull(move))
-		throw logic_error("Error: trying to add to a full column");
+	if (!state.colCanAdd(move))
+		throw logic_error("Error: trying to add in a wrong place");
 #endif
 	state.add(plr, move);
 }
 
 void BoardAnalyse::reverse(const short column) {
 #ifdef STARS_DEBUG_INFO
-	if (state.colIsEmpty(column))
-		throw logic_error("Error: tying to reverse an empty column");
+	if (!state.colCanRemove(column))
+		throw logic_error("Error: tying to reverse in a wrong place");
 #endif
 	state.remove(column);
 }
@@ -31,6 +31,8 @@ shortv BoardAnalyse::firstPoint(const char plr, shortv& nonFullList) {
 // check if game is over before call this
 // won't return free if list is empty, relax
 string BoardAnalyse::analyse(const char plr, shortv& list) {
+	// if going to change code below, note that should always check the 
+	// firstPoint of those who is going to go first
 #ifdef STARS_DEBUG_INFO
 	if (state.isOver() != 'N')
 		throw logic_error("game is over, yet analyse is called");
@@ -59,57 +61,61 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	}
 
 	// I'll go
-	shortv tempList, goodList;
+	shortv list1, goodList;
 	vIter  col = list.begin();
 	list	   = nonFull;
 	while (col != list.end()) {
 		state.add(plr, *col);
 		state.nonFullColumn(nonFull);
-		tempList = firstPoint(opp, nonFull);
-		if (!tempList.empty()) { // bad
+		list1 = firstPoint(opp, nonFull);
+		// it's opp's turn, so check opp first
+		if (!list1.empty()) { // bad
 			state.remove(*col);
 			col = list.erase(col);
 			continue;
 		}
-		tempList = firstPoint(plr, nonFull);
-		if (tempList.size() > 1) // good
+		list1 = firstPoint(plr, nonFull);
+		if (list1.size() > 1) // good
 			goodList.push_back(*col);
-		else if (tempList.size() == 1) {
-			state.add(opp, tempList[0]);
-			// now it's my turn
-			state.sweepFullColumn(nonFull, tempList[0]);
-			temp1 = firstPoint(opp, nonFull);
-			if (temp1.size() > 1) {
-				state.remove(tempList[0]);
+		else if (list1.size() == 1) {
+			shortv list2;
+			state.add(opp, list1[0]);
+			state.sweepFullColumn(nonFull, list1[0]);
+			list2 = firstPoint(plr, nonFull);
+			// now it's my turn, check plr first
+			if (!list2.empty()) {
+				goodList.push_back(*col);
+				state.remove(list1[0]);
+				state.remove(*col);
+				++col;
+				continue;
+			}
+			list2 = firstPoint(opp, nonFull);
+			if (list2.size() > 1) {
+				state.remove(list1[0]);
 				state.remove(*col);
 				col = list.erase(col);
 				continue;
 			}
-			if (temp1.size() == 1) {
-				shortv tempOpponent, tempPlayer;
-				state.add(plr, temp1[0]); // all the way size()==1 to here
-				state.sweepFullColumn(nonFull, temp1[0]);
-				tempOpponent = firstPoint(opp, nonFull);
-				tempPlayer	 = firstPoint(plr, nonFull);
-				state.remove(temp1[0]);
-				// opponent's turn
-				if (!tempOpponent.empty()) {
-					state.remove(tempList[0]);
-					state.remove(*col);
+			if (list2.size() == 1) {
+				shortv list3;
+				state.add(plr, list2[0]);
+				state.sweepFullColumn(nonFull, list2[0]);
+				list3 = firstPoint(opp, nonFull);
+				// opponent's turn, ckeck opp first
+				if (!list3.empty()) {
+					state.remove(list2[0], list1[0], *col);
 					col = list.erase(col);
 					continue;
 				}
+				list3 = firstPoint(plr, nonFull);
 				// this is new
-				if (tempPlayer.size() > 1)
+				if (list3.size() > 1)
 					goodList.push_back(*col);
+				state.remove(list2[0]);
 				//
 			}
-			else {
-				temp1 = firstPoint(plr, nonFull);
-				if (!temp1.empty()) // good
-					goodList.push_back(*col);
-			}
-			state.remove(tempList[0]);
+			state.remove(list1[0]);
 		}
 		state.remove(*col);
 		++col;

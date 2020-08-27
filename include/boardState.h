@@ -123,8 +123,13 @@ public:
 	void show();
 	void printHead();
 
+	// check
+	bool colCanAdd(const short col);
+	bool colCanRemove(const short col);
+
 	// getter
 	short getWinn() { return winn; }
+	char  getTopPiece(short col);
 
 	// is function
 	bool colIsFull(const short col) { return top[col - 1] == rows; }
@@ -148,7 +153,7 @@ public:
 	// change function
 	void add(const char plr, const short col) {
 #ifdef STARS_DEBUG_INFO
-		if (col < 0 || col > cols)
+		if (col < 1 || col > cols)
 			throw logic_error("trying to add in a wrong place");
 		if (top[col - 1] == rows)
 			throw logic_error("trying to add to a full column");
@@ -160,7 +165,7 @@ public:
 	}
 	void remove(const short col) {
 #ifdef STARS_DEBUG_INFO
-		if (col < 0 || col > cols)
+		if (col < 1 || col > cols)
 			throw logic_error("trying to remove in a wrong place");
 		if (top[col - 1] == 0)
 			throw logic_error("trying to remove from an empty column");
