@@ -100,6 +100,15 @@ well, this is clearly more organized than CharmedPython
 - addMode deleted
 - main.cpp: args handle upgraded
 
+## 014
+- exit shortcut changed from 0 to e - finally!
+- some byComputer bug fixed
+- game over output updated
+- most code formatted
+- clang-format tracked
+- some functions moved/added to boardTools.cpp
+- CMakeLists.txt: libs renamed
+
 # TODO
 - sometimes settings just crash, why?
 - add a new strategy to avoid letting opp have more three in a row

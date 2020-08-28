@@ -16,39 +16,50 @@ private:
 	string analyse(const char plr, shortv& list);
 
 public:
-	int maxcaltime;
+	int        maxcaltime;
 	BoardState state;
-	RouteTree routes;
+	RouteTree  routes;
 	BoardAnalyse() : state(8, 8, 4), routes(RouteTree()), maxcaltime(81) {}
-	BoardAnalyse(BoardAnalyse& ba) : maxcaltime(ba.maxcaltime), state(ba.state),
-		routes(ba.routes) {}
-	BoardAnalyse(BoardState board_) : state(board_),
-		routes(RouteTree()), maxcaltime(81) {}
-	BoardAnalyse(const short r, const short c, const short w) : state(r, c, w),
-		routes(RouteTree()), maxcaltime(81) {}
+	BoardAnalyse(BoardAnalyse& ba)
+		: maxcaltime(ba.maxcaltime), state(ba.state), routes(ba.routes) {}
+	BoardAnalyse(BoardState board_)
+		: state(board_), routes(RouteTree()), maxcaltime(81) {}
+	BoardAnalyse(const short r, const short c, const short w)
+		: state(r, c, w), routes(RouteTree()), maxcaltime(81) {}
 
 	// analyse function
 	/*
 	 * I should bear in mind that the whole concept of analyse function is to
 	 * narrow down the freeList, if not to gain "good" or "bad"
 	 */
-	string oneMoveAnalyseDebug(const char plr, const short col,
-		short goodNode, short badNode, const short depth,
+	string oneMoveAnalyseDebug(
+		const char plr, const short col, short goodNode, short badNode,
+		const short depth, const short maxDepth = 5);
+	string oneMoveAnalyse(
+		const char plr, const short col, const short depth,
 		const short maxDepth = 5);
-	string oneMoveAnalyse(const char plr, const short col, const short depth,
-		const short maxDepth = 5);
-	string returnMove(const char plr, shortv& list, const short depth);
-	string returnMoveDebug(const char plr, shortv& list, const short depth);
-	long long returnTime(const char plr, shortv& list, const short depth, string& word, bool trackRoute);
-	int		  respond(const char plr, oneMove& thisMove, bool showCal, bool showTime, bool starsOn, bool trackRoute);
+	string    returnMove(const char plr, shortv& list, const short depth);
+	string    returnMoveDebug(const char plr, shortv& list, const short depth);
+	long long returnTime(
+		const char plr, shortv& list, const short depth, string& word,
+		bool trackRoute);
+	int respond(
+		const char plr, oneMove& thisMove, bool showCal, bool showTime,
+		bool starsOn, bool trackRoute);
 
 	// recursive analyse
 	// simple and elegant, but too powerful for this game
-// #ifdef STARS_ADVANCED_FUNCTIONS
-	string returnSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
-	string recursiveSituation(const char plr, shortv& list, short returnMoveDepth = 3, int recursiveCount = 0, int countTop = 3);
-	long long recursiveTime(const char plr, shortv& list, const short returnMoveDepth, int countTop, string& word);
-// #endif
+	// #ifdef STARS_ADVANCED_FUNCTIONS
+	string returnSituation(
+		const char plr, shortv& list, short returnMoveDepth = 3,
+		int recursiveCount = 0, int countTop = 3);
+	string recursiveSituation(
+		const char plr, shortv& list, short returnMoveDepth = 3,
+		int recursiveCount = 0, int countTop = 3);
+	long long recursiveTime(
+		const char plr, shortv& list, const short returnMoveDepth, int countTop,
+		string& word);
+	// #endif
 
 	// change board
 	void go(const char plr, const short move);
@@ -70,7 +81,9 @@ public:
 	void starShow() { state.starShow(); }
 
 	// custom board
-	void customBoard(const short cl, const short ro, const short wi) { state.customBoard(cl, ro, wi); }
+	void customBoard(const short cl, const short ro, const short wi) {
+		state.customBoard(cl, ro, wi);
+	}
 };
 
-#endif
+#endif // _BOARDANALYSE_H_

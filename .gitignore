@@ -4,6 +4,5 @@ lbuild/
 release/
 test/
 jsoncpp/
-.clang-format
 Stars*
 test_*

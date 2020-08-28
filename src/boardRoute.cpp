@@ -7,10 +7,10 @@ using std::logic_error;
 long long RouteTree::branches = 0;
 
 void RouteNode::clone(const RouteNode& rn) {
-	data = rn.data;
+	data  = rn.data;
 	print = rn.print;
 	if (rn.prev)
-		prev  = new RouteNode(*rn.prev);
+		prev = new RouteNode(*rn.prev);
 	else
 		prev = nullptr;
 	for (RouteNode* i : rn.next) {
@@ -51,8 +51,7 @@ bool RouteNode::hasNext() {
 	++iter;
 	if (iter == prev->next.end())
 		return false;
-	// bugs here
-	for (vRi save = iter; save != prev->next.end();++save) {
+	for (vRi save = iter; save != prev->next.end(); ++save) {
 		if ((*save)->print)
 			return true;
 	}
@@ -74,7 +73,7 @@ void RouteNode::maskFlag(int flag) {
 	}
 	if (data == flag && prev && prev->next.size() == 1 && next.empty()) {
 		prev->print = false;
-		print = false;
+		print       = false;
 		return;
 	}
 
@@ -95,8 +94,11 @@ void RouteNode::resetMask() {
 		i->resetMask();
 }
 
-RouteTree::RouteTree(const RouteTree& rt) : crnt(rt.crnt), badNode(rt.badNode),
-	goodNode(rt.goodNode), freeNode(rt.freeNode) {
+RouteTree::RouteTree(const RouteTree& rt)
+	: crnt(rt.crnt),
+	  badNode(rt.badNode),
+	  goodNode(rt.goodNode),
+	  freeNode(rt.freeNode) {
 	head = new RouteNode(*rt.head);
 }
 
@@ -113,11 +115,11 @@ void RouteTree::free(vector<RouteNode*> list) {
 }
 
 void RouteTree::generate() {
-	head		= new RouteNode;
-	head->data	= 0;
+	head        = new RouteNode;
+	head->data  = 0;
 	head->print = true;
-	head->prev	= nullptr;
-	crnt		= head;
+	head->prev  = nullptr;
+	crnt        = head;
 }
 
 void RouteTree::clear() {
@@ -138,8 +140,8 @@ void RouteTree::forward(short data) {
 	if (crnt->next.empty())
 		throw logic_error("reached the end of the tree");
 #endif
-	vector<RouteNode *>::iterator iter = crnt->next.begin();
-	for (; iter != crnt->next.end();++iter)
+	vector<RouteNode*>::iterator iter = crnt->next.begin();
+	for (; iter != crnt->next.end(); ++iter)
 		if ((*iter)->data == data) {
 			crnt = *iter;
 			return;
@@ -157,7 +159,7 @@ void RouteTree::nextNode() {
 		throw logic_error("reached the end of the tree");
 #endif
 	vRi iter = crnt->prev->next.begin();
-	for (; iter != crnt->prev->next.end() && *iter != crnt;++iter)
+	for (; iter != crnt->prev->next.end() && *iter != crnt; ++iter)
 		;
 #ifdef STARS_DEBUG_INFO
 	if (iter == crnt->prev->next.end())
@@ -194,9 +196,9 @@ RouteNode* RouteTree::fastBackward(RouteNode* node, int num) {
 
 void RouteTree::add(short data) {
 	RouteNode* p = new RouteNode;
-	p->data		 = data;
-	p->prev		 = crnt;
-	p->print	 = true;
+	p->data      = data;
+	p->prev      = crnt;
+	p->print     = true;
 	crnt->next.push_back(p);
 }
 
@@ -245,7 +247,7 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 			cout << "free";
 		else
 			cout << node->data
-				//  << "\u2500\u2500 not considered";
+				 //  << "\u2500\u2500 not considered";
 				 << "-- not considered";
 		cout << endl;
 		return true;
@@ -267,7 +269,8 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 		for (int i = 0; i < level; ++i) {
 			if (fastBackward(*iter, level - i)->hasNext())
 				// cout << "\u2502" << "   ";
-				cout << "|" << "   ";
+				cout << "|"
+					 << "   ";
 			else
 				cout << ' ' << "   ";
 		}
@@ -279,12 +282,12 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 			cout << "-";
 		cout << "-- ";
 		// cout << "\u2500\u2500 ";
-		showRoute(*iter, level+1);
+		showRoute(*iter, level + 1);
 	}
 	return firstPrinted;
 }
 
-void RouteTree::show(RouteNode* node, int level)  {
+void RouteTree::show(RouteNode* node, int level) {
 	cout << node->data;
 	if (node->next.empty()) {
 		cout << endl;
@@ -292,7 +295,7 @@ void RouteTree::show(RouteNode* node, int level)  {
 	}
 
 	cout << " -- ";
-	show(node->next[0], level+1);
+	show(node->next[0], level + 1);
 	vRi iter = node->next.begin();
 	for (++iter; iter != node->next.end(); ++iter) {
 		for (int i = 0; i < level; ++i) {
@@ -303,7 +306,7 @@ void RouteTree::show(RouteNode* node, int level)  {
 		}
 		cout << '|';
 		cout << " -- ";
-		show(*iter, level+1);
+		show(*iter, level + 1);
 	}
 }
 /*

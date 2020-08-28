@@ -6,11 +6,11 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "shortList.h"
+#include "boardTools.h"
 
 #ifdef STARS_DEBUG_INFO
 using std::logic_error;
-#endif	// STARS_DEBUG_INFO
+#endif // STARS_DEBUG_INFO
 
 using std::runtime_error;
 using std::string;
@@ -20,7 +20,7 @@ typedef vector<short>::iterator vIter;
 typedef vector<short> shortv;
 *****/
 typedef ShortList::iterator vIter;
-typedef ShortList			shortv;
+typedef ShortList           shortv;
 
 class oneMove {
 public:
@@ -36,43 +36,50 @@ public:
 	add mode just have mode, move and player
 	reverse mode just have mode and move
 	*/
-	bool   byComputer;	// is this move taken by the computer
+	bool   byComputer; // is this move taken by the computer
 	bool   hintOn;
 	shortv list;
 	string mode;
-	short  move;  // the move that is actually been taken after the computer analyse
+	short  move; // the move that is been taken after the computer analyse
 	char   player;
-	short  suggestion;	// suggested move by the computer
-	double time;		// time taken for the computer to respond
+	short  suggestion; // suggested move by the computer
+	double time;       // time taken for the computer to respond
 	string word;
 
-	oneMove() : byComputer(true), hintOn(true), list(shortv()), mode(string()),
-				player(' '), suggestion(0), time(0), word(string()) {}
+	oneMove()
+		: byComputer(true),
+		  hintOn(true),
+		  list(shortv()),
+		  mode(string()),
+		  player(' '),
+		  suggestion(0),
+		  time(0),
+		  word(string()) {}
 	oneMove(Json::Value root) {
 		byComputer = root["byComputer"].asBool();
-		hintOn	   = root["hintOn"].asBool();
-		list	   = root["list"];
-		mode	   = root["mode"].asString();
-		move	   = root["move"].asInt();
-		player	   = root["player"].asInt();
+		hintOn     = root["hintOn"].asBool();
+		list       = root["list"];
+		mode       = root["mode"].asString();
+		move       = root["move"].asInt();
+		player     = root["player"].asInt();
 		suggestion = root["suggestion"].asInt();
-		time	   = root["time"].asDouble();
-		word	   = root["word"].asString();
+		time       = root["time"].asDouble();
+		word       = root["word"].asString();
 	}
 	operator Json::Value() {
 		Json::Value root;
 		root["byComputer"] = byComputer;
-		root["hintOn"]	   = hintOn;
-		root["list"]	   = list;
-		root["mode"]	   = mode;
-		root["move"]	   = move;
-		root["player"]	   = player;
+		root["hintOn"]     = hintOn;
+		root["list"]       = list;
+		root["mode"]       = mode;
+		root["move"]       = move;
+		root["player"]     = player;
 		root["suggestion"] = suggestion;
-		root["time"]	   = time;
-		root["word"]	   = word;
+		root["time"]       = time;
+		root["word"]       = word;
 		return root;
 	}
-	friend std::ostream &operator<<(std::ostream &os, oneMove &move);
+	friend std::ostream& operator<<(std::ostream& os, oneMove& move);
 };
 
 class BoardState {
@@ -83,16 +90,22 @@ public:
 	short* starArea;
 	short  rows;
 	short  cols;
-	short  winn;  // winning number
+	short  winn; // winning number
 #ifdef STARS_DEBUG_INFO
 	static int removeNumber;
 	static int addNumber;
 #endif
 
 	BoardState() : rows(8), cols(8), winn(4) { generate(); }
-	BoardState(const BoardState& input) : rows(input.rows), cols(input.cols), winn(input.winn) { generate(input.board, input.top); }
+	BoardState(const BoardState& input)
+		: rows(input.rows), cols(input.cols), winn(input.winn) {
+		generate(input.board, input.top);
+	}
 	BoardState(const Json::Value& root);
-	BoardState(const short r, const short c, const short w) : rows(r), cols(c), winn(w) { generate(); }
+	BoardState(const short r, const short c, const short w)
+		: rows(r), cols(c), winn(w) {
+		generate();
+	}
 	~BoardState() { free(); }
 
 	// construct
@@ -107,8 +120,8 @@ public:
 	operator Json::Value() {
 		Json::Value root;
 		root["board"]  = boardToJson();
-		root["top"]	   = topToJson();
-		root["row"]	   = rows;
+		root["top"]    = topToJson();
+		root["row"]    = rows;
 		root["column"] = cols;
 		root["winn"]   = winn;
 		return root;
@@ -147,8 +160,11 @@ public:
 	// random
 	short randomMove();
 	short randomMove(shortv& list);
-	short randomSuggestion(const char plr, shortv& list, const string& mode = "progressive");
-	short randomSuggestion(const char plr, shortv& list, shortv oppList, const string& mode = "progressive");
+	short randomSuggestion(
+		const char plr, shortv& list, const string& mode = "progressive");
+	short randomSuggestion(
+		const char plr, shortv& list, shortv oppList,
+		const string& mode = "progressive");
 
 	// change function
 	void add(const char plr, const short col) {
@@ -180,8 +196,8 @@ public:
 	}
 	// debug
 #ifdef STARS_DEBUG_INFO
-	int getRemoveNumber() { return removeNumber; }
-	int getAddNumber() { return addNumber; }
+	int  getRemoveNumber() { return removeNumber; }
+	int  getAddNumber() { return addNumber; }
 	bool match();
 #endif
 
@@ -202,8 +218,8 @@ public:
 			starArea[i] = n;
 	}
 	shortv aTopFullColumn();
-	int	   starNumber();
-	int	   threeRowCount(const char plr, shortv& safeList);
+	int    starNumber();
+	int    threeRowCount(const char plr, shortv& safeList);
 	shortv makeThreeCols(const char plr, shortv& safeList);
 	bool   specialPiece(const short col, const short ro);
 
@@ -211,4 +227,4 @@ public:
 	void retInit(vector<oneMove>& his);
 };
 
-#endif
+#endif // _BOARDHANDLE_H_

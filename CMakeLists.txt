@@ -28,28 +28,26 @@ target_include_directories(json_lib
 		${DEPENDENCIES_SOURCE_DIR}/include
 )
 
-add_library(stars_lib STATIC
+add_library(starboard_lib STATIC
 	src/boardAnalyse.cpp
 	src/boardInterface.cpp
 	src/boardRecord.cpp
 	src/boardRoute.cpp
 	src/boardState.cpp
 	src/boardTest.cpp
-	src/shortList.cpp
+	src/boardTools.cpp
 )
-target_include_directories(stars_lib
+target_include_directories(starboard_lib
 	PUBLIC 
 		${PROJECT_SOURCE_DIR}/include
 		${DEPENDENCIES_SOURCE_DIR}/include
 )
 
-add_executable(${PROJECT_NAME}
-	main.cpp
-)
+add_executable(${PROJECT_NAME} main.cpp)
 
 target_link_libraries(${PROJECT_NAME}
 	PRIVATE 
-		stars_lib
+		starboard_lib
 		json_lib
 )
 
@@ -61,7 +59,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 	)
 	message (STATUS "Current platform: Linux")
 	if (CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
-		target_compile_definitions(stars_lib 
+		target_compile_definitions(starboard_lib 
 			PUBLIC STARS_DEBUG_INFO
 		)
 		add_definitions(-DSTARS_VERSION_DEBUG="${STARS_VERSION_DEBUG}")
@@ -73,11 +71,12 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 		message (STATUS "Current build type: ${CMAKE_BUILD_TYPE} (without debug info)")
 	endif()
 elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	################## change this to make a release version ###################
+	################## change this to make a Debug version ###################
 	# set(CMAKE_BUILD_TYPE "Debug")
-	# set(CMAKE_BUILD_TYPE "Release")
+	set(CMAKE_BUILD_TYPE "Release")
 	################## change this to make a release version ###################
-	############### change this to make a Chinese version ######################
+	
+	############### change this to make a English version ######################
 	set(STARS_LANGUAGE_SETIING "English" CACHE STRING "Choose the language of program." FORCE)
 	# set(STARS_LANGUAGE_SETIING "Chinese" CACHE STRING "Choose the language of program." FORCE)
 	############### change this to make a Chinese version ######################
@@ -87,7 +86,7 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	if (CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
 		add_definitions(-DSTARS_VERSION_DEBUG="${STARS_VERSION_DEBUG}")
 		message (STATUS "Current version: ${STARS_VERSION_DEBUG}")
-		target_compile_definitions(stars_lib PUBLIC STARS_DEBUG_INFO)
+		target_compile_definitions(starboard_lib PUBLIC STARS_DEBUG_INFO)
 		message (STATUS "Current build type: ${CMAKE_BUILD_TYPE} (with debug info)")
 	else () # release and such
 		add_definitions(-DSTARS_VERSION_RELEASE="${STARS_VERSION_RELEASE}")
@@ -99,7 +98,7 @@ endif ()
 
 ## set language
 if (STARS_LANGUAGE_SETIING MATCHES "Chinese")
-	target_compile_definitions(stars_lib PUBLIC STARS_LANG_CHINESE)
+	target_compile_definitions(starboard_lib PUBLIC STARS_LANG_CHINESE)
 	message(STATUS "Program language: Chinese")
 elseif (STARS_LANGUAGE_SETIING MATCHES "English")
 	message(STATUS "Program language: English")

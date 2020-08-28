@@ -25,7 +25,8 @@ public:
 	void push_back(const short& ele) {
 #ifdef STARS_DEBUG_INFO
 		if (top == SHORTV_LENGTH)
-			throw logic_error("the end of ShortList, can't be pushed back further more");
+			throw logic_error(
+				"the end of ShortList, can't be pushed back further more");
 #endif
 		data[top++] = ele;
 	}
@@ -61,19 +62,14 @@ public:
 
 	// op
 	const short& operator[](const short index) const { return data[index]; }
-	short& operator[](const short index) { return data[index]; }
+	short&       operator[](const short index) { return data[index]; }
+	// trans
 	operator Json::Value() {
-	Json::Value root;
-	for (short i = 0; i < top; ++i)
-		root.append(data[i]);
-	return root;
+		Json::Value root;
+		for (short i = 0; i < top; ++i)
+			root.append(data[i]);
+		return root;
 	}
-};
-
-namespace MyShortList {
-	bool inList(ShortList& sl, short i);
-	void shortIntersection(ShortList& dest, ShortList& sour1, ShortList& sour2);
-	bool equal(ShortList& l1, ShortList& l2);
 };
 
 #endif

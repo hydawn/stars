@@ -7,54 +7,54 @@
 using std::cin;
 using std::getline;
 using std::string;
-using std::invalid_argument;
 
 class BoardInterface {
 public:
-	BoardAnalyse* analyse;	// this might be more important?
-	BoardRecord	  record;
-	oneMove		  byOpponent;
-	oneMove		  byPlayer;
+	BoardAnalyse* analyse; // this might be more important?
+	BoardRecord   record;
+	oneMove       byOpponent;
+	oneMove       byPlayer;
 
 	BoardInterface();
 	BoardInterface(BoardAnalyse& hb);
 	virtual ~BoardInterface();
 
-	void generate(short c, short r, short w) { analyse = new BoardAnalyse(c, r, w); }
+	void generate(short c, short r, short w) {
+		analyse = new BoardAnalyse(c, r, w);
+	}
 
 	// general
 	string getInput();
 	string getInput(char plr, double& inputTime, const string& mode);
 	short  getCustomInput(const string item);
 	bool   getStateFromInput();
-	bool   transformInput(char** dest, vector<string>& src, const int cols, const int rows);
+	bool   transformInput(
+		  char** dest, vector<string>& src, const int cols, const int rows);
 
 	// mode
-	string reverseMode();
+	string         reverseMode();
 	virtual string debugMode(const string& mode = "debug");
-	// string normalMode();
-	string settingsMode();
-	string defaultSettings();
-	string otherSettings();
-	string playbackMode();
-	string customMode();
-	virtual bool controlMode(const string& firstMode = "debug");
-	string showRoutesMode();
-	string selfPlayMode();
+	string         settingsMode();
+	string         defaultSettings();
+	string         otherSettings();
+	string         playbackMode();
+	string         customMode();
+	virtual bool   controlMode(const string& firstMode = "debug");
+	string         showRoutesMode();
 
 	// tools for mode
-	void add(string input);
-	void reverse(string input);
-	bool addStringConvert(string input);
-	bool addStringConvert(string input, oneMove& move);
-	bool reverseStringConvert(string input);
-	bool reverseStringConvert(string input, oneMove& move);
+	void          add(string input);
+	void          reverse(string input);
+	bool          addStringConvert(string input);
+	bool          addStringConvert(string input, oneMove& move);
+	bool          reverseStringConvert(string input);
+	bool          reverseStringConvert(string input, oneMove& move);
 	virtual short respond();
 
 	// ask & do
-	virtual bool askToReverse(bool yes);	// if yes == true, then default yes
+	virtual bool askToReverse(bool yes); // if yes == true, then default yes
 	virtual void askToSaveBoard(bool yes);
-	void importNewBoard();
+	void         importNewBoard();
 
 	// info
 	string getHelp(string mode);
@@ -67,11 +67,11 @@ public:
 	void showComment(oneMove& move);
 
 	// check
-	virtual bool isOver(const oneMove& move);
-	int autoTestMode(int startMove);
+	virtual bool isOver(const oneMove& move, const string& mode);
+	int          autoTestMode(int startMove);
 };
 
-int	 myStoi(string word);
+int  myStoi(string word);
 bool xtoiFit(string word, int num);
 
 #endif

@@ -1,35 +1,40 @@
+/*-- encoding:GBK --*/
 #include "boardTest.h"
 
 char BoardTest::lastMove = 'c';
 
-BoardTest::BoardTest(const vector<string>& args) : BoardInterface(), toWinn('N'),
-	showCalculate(record.getDefaultSettings("inDebugMode", "showCalculate")),
-	showTime(record.getDefaultSettings("inDebugMode", "showTime")),
-	askToReverseBool(record.getDefaultSettings("gameIsOver", "askToReverse")),
-	askToSaveBoardBool(record.getDefaultSettings("gameIsOver", "askToSaveBoard")),
-	lessPrint(false), noPrint(false) {
-	if (inVector(args, "--no-hint")) {
+BoardTest::BoardTest(const vector<string>& args)
+	: BoardInterface(),
+	  toWinn('N'),
+	  showCalculate(record.getDefaultSettings("inDebugMode", "showCalculate")),
+	  showTime(record.getDefaultSettings("inDebugMode", "showTime")),
+	  askToReverseBool(record.getDefaultSettings("gameIsOver", "askToReverse")),
+	  askToSaveBoardBool(
+		  record.getDefaultSettings("gameIsOver", "askToSaveBoard")),
+	  lessPrint(false),
+	  noPrint(false) {
+	if (MainArgsHandle::inVector(args, "--no-hint")) {
 		showCalculate = false;
-		showTime	  = false;
+		showTime      = false;
 	}
-	if (inVector(args, "--no-ask")) {
+	if (MainArgsHandle::inVector(args, "--no-ask")) {
 		askToReverseBool   = false;
 		askToSaveBoardBool = false;
 	}
-	if (inVector(args, "--less-print")) {
+	if (MainArgsHandle::inVector(args, "--less-print")) {
 		askToReverseBool   = false;
 		askToSaveBoardBool = false;
-		showCalculate	   = false;
-		showTime		   = false;
-		lessPrint		   = true;
+		showCalculate      = false;
+		showTime           = false;
+		lessPrint          = true;
 	}
-	if (inVector(args, "--no-print")) {
+	if (MainArgsHandle::inVector(args, "--no-print")) {
 		askToReverseBool   = false;
 		askToSaveBoardBool = false;
-		showCalculate	   = false;
-		showTime		   = false;
-		lessPrint		   = true;
-		noPrint			   = true;
+		showCalculate      = false;
+		showTime           = false;
+		lessPrint          = true;
+		noPrint            = true;
 	}
 }
 
@@ -60,13 +65,13 @@ string BoardTest::debugMode(const string& mode) {
 			printf("We are in play mode.\n");
 		byOpponent.byComputer = true;
 	}
-	string	input;
-	byPlayer.mode		  = "test-" + mode;
-	byPlayer.byComputer	  = true;
-	byOpponent.mode		  = "test-" + mode;
-	byOpponent.player	  = analyse->rPlayer(byPlayer.player);
-	char expectedWinner	  = '1';
-	int	 stepCount		  = 0;
+	string input;
+	byPlayer.mode       = "test-" + mode;
+	byPlayer.byComputer = true;
+	byOpponent.mode     = "test-" + mode;
+	byOpponent.player   = analyse->rPlayer(byPlayer.player);
+	char expectedWinner = '1';
+	int  stepCount      = 0;
 	if (!lessPrint) { // if no lessPrint
 		printf("We are in debug mode now\n");
 		analyse->show();
@@ -91,12 +96,15 @@ string BoardTest::debugMode(const string& mode) {
 			}
 			else if (isOver(byPlayer)) {
 				if (expectedWinner != byPlayer.player) {
-					throw logic_error("BoardTest::debugMode:expected winner changed in the end");
+					throw logic_error(
+						"BoardTest::debugMode:expected winner changed in the "
+						"end");
 				}
 				if (expectedWinner == '1') {
-					throw logic_error("BoardTest::debugMode: player suddenly wins");
+					throw logic_error(
+						"BoardTest::debugMode: player suddenly wins");
 				}
-				if(!lessPrint)
+				if (!lessPrint)
 					printf("Exit from test mode ...\n");
 				return "over";
 			}
@@ -104,10 +112,10 @@ string BoardTest::debugMode(const string& mode) {
 		else if (mode == "play") {
 			// player goes
 #ifndef STARS_DEBUG_INFO
-			byPlayer.move = myStoi(input);
+			byPlayer.move = ToInt::myStoi(input);
 #else
 			try {
-				byPlayer.move = myStoi(input);
+				byPlayer.move = ToInt::myStoi(input);
 			}
 			catch (const std::invalid_argument& e) {
 				std::cerr << e.what() << '\n';
@@ -116,17 +124,17 @@ string BoardTest::debugMode(const string& mode) {
 #endif // STARS_DEBUG_INFO
 			analyse->go(byPlayer.player, byPlayer.move);
 			if (!lessPrint)
-				printf("    %d:'%c' goes '%d'\n", ++stepCount, byPlayer.player, byPlayer.move);
+				printf(
+					"    %d:'%c' goes '%d'\n", ++stepCount, byPlayer.player,
+					byPlayer.move);
 			else if (!noPrint)
-				printf("%d:'%c' goes '%d'\t", ++stepCount, byPlayer.player, byPlayer.move);
-			record.push_back(byPlayer);	 // byPlayer end here
+				printf(
+					"%d:'%c' goes '%d'\t", ++stepCount, byPlayer.player,
+					byPlayer.move);
+			record.push_back(byPlayer); // byPlayer end here
 			if (isOver(byPlayer)) {
 				if (!noPrint)
-#ifndef STARS_LANG_CHINESE
 					cout << "Exit from " << mode << " mode ...\n";
-#else
-					cout << "Exit from " << toChinese(mode) << " mode ...\n";
-#endif // STARS_LANG_CHINESE
 				return "over";
 			}
 		}
@@ -145,9 +153,13 @@ string BoardTest::debugMode(const string& mode) {
 			byOpponent.move = byOpponent.suggestion;
 			analyse->go(byOpponent.player, byOpponent.move);
 			if (!lessPrint)
-				printf("    %d:'%c' goes '%d'\n", ++stepCount, byOpponent.player, byOpponent.move);
+				printf(
+					"    %d:'%c' goes '%d'\n", ++stepCount, byOpponent.player,
+					byOpponent.move);
 			else if (!noPrint)
-				printf("%d:'%c' goes '%d'\t", ++stepCount, byOpponent.player, byOpponent.move);
+				printf(
+					"%d:'%c' goes '%d'\t", ++stepCount, byOpponent.player,
+					byOpponent.move);
 			record.push_back(byOpponent);
 			if (!lessPrint) {
 				if (record.getDefaultSettings("inDebugMode", "showTime"))
@@ -162,29 +174,34 @@ string BoardTest::debugMode(const string& mode) {
 
 		// print hint
 		if (showCalculate) {
-			byPlayer.hintOn	= record.getDefaultSettings("inDebugMode", "hintOn");
+			byPlayer.hintOn =
+				record.getDefaultSettings("inDebugMode", "hintOn");
 			if (byPlayer.hintOn)
-				cout << "\nHere is hint provided for player " << byPlayer.player << endl;
+				cout << "\nHere is hint provided for player " << byPlayer.player
+					 << ":\n";
 		}
 
 		// see if expectedWinner is changed
 		if (byOpponent.word == "good" && stepCount > 3) {
 			if (expectedWinner != byOpponent.player && expectedWinner != '1') {
-				throw logic_error("BoardTest::debugMode: expected winner changed in good");
+				throw logic_error(
+					"BoardTest::debugMode: expected winner changed in good");
 			}
 			else
 				expectedWinner = byOpponent.player;
 		}
 		else if (byOpponent.word == "bad" && stepCount > 3) {
 			if (expectedWinner != byPlayer.player && expectedWinner != '1') {
-				throw logic_error("BoardTest::debugMode: expected winner changed in bad");
+				throw logic_error(
+					"BoardTest::debugMode: expected winner changed in bad");
 			}
 			else
 				expectedWinner = byPlayer.player;
 		}
 		if (isOver(byOpponent)) {
 			if (expectedWinner != byOpponent.player) {
-				throw logic_error("BoardTest::debugMode: expected winner changed in the end");
+				throw logic_error(
+					"BoardTest::debugMode: expected winner changed in the end");
 			}
 			if (expectedWinner == '1') {
 				throw logic_error("BoardTest::debugMode: player suddenly wins");
@@ -195,10 +212,9 @@ string BoardTest::debugMode(const string& mode) {
 		}
 
 		// recommend
-		byPlayer.suggestion = analyse->respond(byPlayer.player, byPlayer,
-			showCalculate, showTime,
-			record.getDefaultSettings("inDebugMode", "starsOn"),
-			false);
+		byPlayer.suggestion = analyse->respond(
+			byPlayer.player, byPlayer, showCalculate, showTime,
+			record.getDefaultSettings("inDebugMode", "starsOn"), false);
 		if (showCalculate && byPlayer.word != "bad")
 			printf("    %d is recommended\n", byPlayer.suggestion);
 
@@ -219,13 +235,9 @@ string BoardTest::debugMode(const string& mode) {
 
 short BoardTest::respond() {
 	if (showCalculate || showTime || !lessPrint)
-#ifndef STARS_LANG_CHINESE
 		printf("Info for player %c:\n", byOpponent.player);
-#else
-		printf("玩家 %c 信息：\n", byOpponent.player);
-#endif // STARS_LANG_CHINESE
-	byOpponent.suggestion = analyse->respond(byOpponent.player, byOpponent,
-		showCalculate, showTime,
+	byOpponent.suggestion = analyse->respond(
+		byOpponent.player, byOpponent, showCalculate, showTime,
 		record.getDefaultSettings("inDebugMode", "starsOn"),
 		record.getDefaultSettings("inDebugMode", "trackRoutes"));
 #ifdef STARS_DEBUG_INFO
@@ -244,7 +256,7 @@ void BoardTest::askToSaveBoard(bool yes) {
 bool BoardTest::isOver(const oneMove& move) {
 	if (analyse->gameIsOver() == move.player) {
 		toWinn = move.player;
-		if(!noPrint) {
+		if (!noPrint) {
 			cout << endl;
 			analyse->starShow();
 			if (move.byComputer)
@@ -256,7 +268,7 @@ bool BoardTest::isOver(const oneMove& move) {
 	}
 	if (analyse->gameIsOver() == analyse->rPlayer(move.player)) {
 		toWinn = move.player;
-		if(!noPrint) {
+		if (!noPrint) {
 			cout << endl;
 			analyse->starShow();
 			if (move.byComputer)
@@ -276,7 +288,7 @@ bool BoardTest::isOver(const oneMove& move) {
 
 bool BoardTest::controlMode(const string& firstMode) {
 	byPlayer.player = 'X';
-	string	lastPlayerMode, advice	= firstMode;
+	string lastPlayerMode, advice = firstMode;
 	if (advice.empty())
 		advice = "debug";
 	if (advice == "debug" || advice == "play")
@@ -298,22 +310,26 @@ bool BoardTest::controlMode(const string& firstMode) {
 		else if (advice == "custom")
 			advice = customMode();
 		else if (advice == "over") {
-			if (askToReverseBool &&
-				askToReverse(record.getDefaultSettings("gameIsOver", "defaultReverse"))) {
+			if (askToReverseBool && askToReverse(record.getDefaultSettings(
+										"gameIsOver", "defaultReverse"))) {
 				advice = reverseMode();
 				continue;
 			}
-			else if (record.getDefaultSettings("gameIsOver", "defaultReverse") && !lessPrint) {
+			else if (
+				record.getDefaultSettings("gameIsOver", "defaultReverse") &&
+				!lessPrint) {
 				advice = reverseMode();
 				continue;
 			}
 			if (askToSaveBoardBool)
-				askToSaveBoard(record.getDefaultSettings("gameIsOver", "defaultSaveBoard"));
-			else if (record.getDefaultSettings("gameIsOver", "defaultSaveBoard"))
+				askToSaveBoard(record.getDefaultSettings(
+					"gameIsOver", "defaultSaveBoard"));
+			else if (record.getDefaultSettings(
+						 "gameIsOver", "defaultSaveBoard"))
 				record.saveGame("test mode auto save", analyse->state);
 			break;
 		}
-		
+
 		// set last
 		if (advice == "last") {
 			advice = lastPlayerMode;
@@ -323,7 +339,9 @@ bool BoardTest::controlMode(const string& firstMode) {
 		++i;
 	}
 	if (!record.match())
-		throw runtime_error("current settings var in BoardRecord doesn't match with the default settings");
+		throw runtime_error(
+			"current settings var in BoardRecord doesn't match with the "
+			"default settings");
 	if (i == 100)
 		throw runtime_error("too much unhandled advice");
 	if (advice == "quit")
@@ -333,24 +351,17 @@ bool BoardTest::controlMode(const string& firstMode) {
 	return true;
 }
 
-bool inVector(vector<string> argv, const string& str) {
-	vector<string>::iterator iter = argv.begin();
-	for (; iter != argv.end(); ++iter)
-		if (*iter == str)
-			return true;
-	return false;
-}
-
 void autoTest(int n, const vector<string>& args) {
-	int i, err = 0, XWinn = 0, ZeroWinn = 0;
+	int    i, err = 0, XWinn = 0, ZeroWinn = 0;
 	string mode = "play";
-	if (!inVector(args, "--play"))
+	if (!MainArgsHandle::inVector(args, "--play"))
 		mode = "debug";
 	for (i = 0; i < n; ++i) {
 		try {
 			BoardTest test(args);
 			try {
-				test.byPlayer.suggestion = i % 8 + 1; // set play mode's first step
+				test.byPlayer.suggestion =
+					i % 8 + 1; // set play mode's first step
 				test.controlMode(mode);
 				if (test.toWinn == 'X')
 					++XWinn;
@@ -374,11 +385,13 @@ void autoTest(int n, const vector<string>& args) {
 		}
 		catch (const std::logic_error& e) {
 			std::cerr << e.what() << '\n';
-			cout << "logic_error occurred when creating or destroying BoardTest\n";
+			cout << "logic_error occurred when creating or destroying "
+					"BoardTest\n";
 		}
 		catch (const std::runtime_error& e) {
 			std::cerr << e.what() << '\n';
-			cout << "runtime_error occurred when creating or destroying BoardTest\n";
+			cout << "runtime_error occurred when creating or destroying "
+					"BoardTest\n";
 		}
 	}
 	cout << endl
