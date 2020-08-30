@@ -571,7 +571,8 @@ void BoardState::retInit(vector<oneMove>& his) {
 	for (vector<oneMove>::reverse_iterator riter = his.rbegin();
 		 riter != his.rend(); ++riter) {
 		if (riter->mode == "debug" || riter->mode == "add" ||
-			riter->mode == "normal" || riter->mode == "test")
+			riter->mode == "normal" || riter->mode == "test-debug" ||
+			riter->mode == "test-play")
 			remove(riter->move);
 		else if (riter->mode == "reverse")
 			add(riter->player, riter->move);
@@ -579,6 +580,9 @@ void BoardState::retInit(vector<oneMove>& his) {
 		else
 			throw logic_error(
 				"unexpected, unhandled mode in retInit in boardState.cpp");
+#else
+		else
+			remove(riter->move);
 #endif // STARS_DEBUG_INFO
 	}
 }

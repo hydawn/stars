@@ -1,6 +1,7 @@
 #ifndef _BOARDROUTE_H_
 #define _BOARDROUTE_H_ 1
 #include <vector>
+#include <string>
 #include <stdexcept>
 #include <iostream>
 #include "shortList.h"
@@ -8,6 +9,7 @@
 using std::cout;
 using std::endl;
 using std::runtime_error;
+using std::string;
 using std::vector;
 
 class RouteNode {
@@ -34,12 +36,12 @@ typedef vector<RouteNode*>::iterator vRi;
 
 class RouteTree {
 public:
-	RouteNode*       head;
-	RouteNode*       crnt;
-	int              badNode;
-	int              goodNode;
-	int              freeNode;
-	static long long branches;
+	RouteNode* head;
+	RouteNode* crnt;
+	int        badNode;
+	int        goodNode;
+	int        freeNode;
+	static int branches;
 	RouteTree() : badNode(0), goodNode(-1), freeNode(-2) { generate(); }
 	RouteTree(const RouteTree& rt);
 	~RouteTree() { free(head); }

@@ -4,7 +4,7 @@
 using std::logic_error;
 #endif
 
-long long RouteTree::branches = 0;
+int RouteTree::branches = 0;
 
 void RouteNode::clone(const RouteNode& rn) {
 	data  = rn.data;
@@ -236,6 +236,15 @@ void RouteTree::showRoute() {
 }
 
 bool RouteTree::showRoute(RouteNode* node, int level) {
+#ifdef STARS_PLATFORM_WINDOWS
+	string twoDot   = "-- ";
+	string oneDot   = "-";
+	string vertical = "|";
+#elif STARS_PLATFORM_LINUX
+	string twoDot   = "\u2500\u2500 ";
+	string oneDot   = "\u2514";
+	string vertical = "\u2502";
+#endif // STARS_PLATFORM
 	if (!node->print)
 		return false;
 	if (node->next.empty()) {
@@ -246,9 +255,7 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 		else if (node->data == -2)
 			cout << "free";
 		else
-			cout << node->data
-				 //  << "\u2500\u2500 not considered";
-				 << "-- not considered";
+			cout << node->data << twoDot << "not considered";
 		cout << endl;
 		return true;
 	}
@@ -260,68 +267,56 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 		if (!(*iter)->print)
 			continue;
 		if (!firstPrinted) { // print the first element
-			// cout << "\u2500\u2500 ";
-			cout << "-- ";
+			cout << twoDot;
 			showRoute(*iter, level + 1);
 			firstPrinted = true;
 			continue;
 		}
 		for (int i = 0; i < level; ++i) {
 			if (fastBackward(*iter, level - i)->hasNext())
-				// cout << "\u2502" << "   ";
-				cout << "|"
-					 << "   ";
+				cout << vertical << "   ";
 			else
 				cout << ' ' << "   ";
 		}
 		if ((*iter)->hasNext())
-			// cout << "\u251C";
-			cout << "|";
+			cout << vertical;
 		else
-			// cout << "\u2514";
-			cout << "-";
-		cout << "-- ";
-		// cout << "\u2500\u2500 ";
+			cout << oneDot;
+		cout << twoDot;
 		showRoute(*iter, level + 1);
 	}
 	return firstPrinted;
 }
 
 void RouteTree::show(RouteNode* node, int level) {
+#ifdef STARS_PLATFORM_WINDOWS
+	string twoDot   = "-- ";
+	string vertical = "|";
+#elif STARS_PLATFORM_LINUX
+	string twoDot   = "\u2500\u2500 ";
+	string vertical = "\u2502";
+#endif // STARS_PLATFORM
 	cout << node->data;
 	if (node->next.empty()) {
 		cout << endl;
 		return;
 	}
 
-	cout << " -- ";
+	cout << " " << twoDot;
 	show(node->next[0], level + 1);
 	vRi iter = node->next.begin();
 	for (++iter; iter != node->next.end(); ++iter) {
 		for (int i = 0; i < level; ++i) {
 			if (fastBackward(*iter, level - i)->hasNext())
-				cout << '|' << "    ";
+				cout << vertical << "    ";
 			else
 				cout << ' ' << "    ";
 		}
-		cout << '|';
-		cout << " -- ";
+		cout << vertical;
+		cout << " " << twoDot;
 		show(*iter, level + 1);
 	}
 }
-/*
-0    1    2    3
-3 -- 5 -- 3 -- 6 -- 7
-|    |         | -- 8
-|    |         | -- 12
-|    | -- 4 -- 3
-|    |    | -- 8
-|    | -- 9 -- 78
-|    | -- 2 -- 65
-|    |    | -- 1
-|    | -- 0 -- 8
-- -- 6
-*/
 
 int RouteTree::getBranches(int flag) {
 	if (flag == -1) {

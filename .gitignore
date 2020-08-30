@@ -3,6 +3,9 @@ build/
 lbuild/
 release/
 test/
-jsoncpp/
-Stars*
+.DS_Store
+._*
+Stars_*
+stars*
 test_*
+run.*

@@ -1,4 +1,4 @@
-# Stars |+|
+# Stars |+| &#x1f320; &#x2b50; &#x1f30f;
 A 1v1 & 8x8 command line based board game
 
 ![tag](./icon/tag.png)
@@ -22,23 +22,43 @@ Now X wins.
 
 Note that whenever you try to place a piece in a column, it always start piling from the button. You can't put a piece in the middle like any other proper board game would, which might bring boredom but certainly ease things up for me.
 
-# Play
+# Play &#x1F3AE;
 ## Windows
-Download .exe file in [here](https://github.com/DuanHanyu/Stars/releases), run it.  
+### Option 1: Download directly (Recommended)
+Download .zip file in [here](https://github.com/HanyuDuan/stars/releases), unzip it, click to run.  
+### Option 2: Build &#x1F528; with cmake  
+In powershell build an English version:
+```powershell
+git clone https://github.com/HanyuDuan/stars.git
+build
+```
+Or use 
+```powershell
+build Chinese
+```
+to build a Chinese version.  
+Use `.\stars -s` to start the game  
 
 ## Linux
-### Build using cmake
+### Build &#x1F528; with cmake
 ```sh
-git clone https://github.com/DuanHanyu/Stars.git
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
+git clone https://github.com/HanyuDuan/stars.git
+chmod +x build.sh
+./build.sh
 ```
-Use `./Stars start` to start the game, use `make install` to install the game, delete `/usr/local/bin/Stars` to uninstall.  
+Or use 
+```sh
+./build.sh Chinese
+```
+to build a Chinese version.  
+Use `./stars -s` to start the game.  
+`./build.sh install` to install, `./build.sh uninstall` to uninstall &#x1f5d1;  
+
+## macOS
+Same as Linux.  
 
 # Import
-You can see there's a lot of board in [oldTestingBoard.md](./oldTestingBoard.md). In case you want to import and play a new board, just enter `import` or `I` and you'll see this:  
+You can see there's a few board in [oldTestingBoard.md](./oldTestingBoard.md). If you want to import and play in a new board, just enter `import` or `I` and you'll see this:  
 ```
 In debug mode
 Player 'X' move> I
@@ -70,15 +90,15 @@ Other modes such as play back and custom just there to explore \~
 
 # Known bugs for unknown reasons
 ## A sudden stop
-If it stopped when you didn't ask it to or throw some errors and if you don't know why, calm down and follow these steps below:
+If it stopped when you didn't ask it to or throw some errors and if you don't know why, calm down and follow these three steps:  
 1. start up a new game
-2. play it like nothing has ever happened
-3. hope it won't suddenly stop in the middle of nowhere again &#x1F602;  
+2. play it like nothing ever happened
+3. hope it won't suddenly stop in the middle of nowhere again  
 
-Or you can tell me how it happened so that I might fix it one day &#129300;  
+Or you can tell me how it happened so that I might fix it one day &#x1F609;  
 
 ## Settings went nuts
-Sometimes your personal settings just disappear and reset to factory settings  
+Sometimes your personal settings get wiped out and reset to factory settings &#129300;  
 
 # Thanks
 [JsonCpp](https://github.com/open-source-parsers/jsoncpp) - from where those dependencies files are copied  

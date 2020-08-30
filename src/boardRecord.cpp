@@ -1,4 +1,4 @@
-/*-- encoding:GBK --*/
+/*-- encoding: UTF-8 --*/
 #include "boardRecord.h"
 
 // hard core code
@@ -39,14 +39,38 @@ string inFileSettings = addon +
 	"}\n";
 
 BoardRecord::~BoardRecord() {
-	writeSettings();
+	try {
+		match();
+	}
+	catch (const std::logic_error& e) {
+		cout << "logic_error when destory BoardRecord:\n\t";
+		std::cerr << e.what() << '\n';
+	}
+	catch (const std::runtime_error& e) {
+		cout << "runtime_error when destory BoardRecord:\n\t";
+		std::cerr << e.what() << '\n';
+	}
+	if(!settingsUnChanged)
+		writeSettings();
 	if (!games.empty())
 		writeGames();
 }
 
 std::ostream& operator<<(std::ostream& os, oneMove& move) {
 	os << "    mode = " << move.mode << ";\n";
-	if (move.mode == "normal" || move.mode == "debug" || move.mode == "test") {
+	
+
+	if (move.mode == "add")
+		os << "    add '" << move.player << "' in column " << move.move << endl;
+	else if (move.mode == "reverse")
+		os << "    remove column " << move.move << endl;
+	else if (
+		move.mode == "debug" || move.mode == "test-debug" ||
+		move.mode == "test-play") {
+		if (move.mode != "debug" && move.mode != "test-debug" &&
+			move.mode != "test-play")
+			os << "this mode " << move.mode
+			   << " is not supported, but treated as debug mode\n";
 		os << "    time used: " << move.time
 		   << "ms; hint on: " << std::boolalpha << move.hintOn
 		   << "; suggestion = " << move.suggestion
@@ -59,30 +83,22 @@ std::ostream& operator<<(std::ostream& os, oneMove& move) {
 		else
 			os << " by player '" << move.player << "':\n";
 	}
-	else if (move.mode == "add")
-		os << "    add '" << move.player << "' in column " << move.move << endl;
-	else if (move.mode == "reverse")
-		os << "    remove column " << move.move << endl;
 	return os;
 }
 
 void BoardRecord::getFile() {
-	std::ifstream inGames(gamesFileName);
-	if (inGames.is_open())
-		inGames >> games;
-	std::ifstream inSet(settingsFileName);
-	if (!inSet.is_open()) {
-		std::ofstream outSet(settingsFileName);
-		outSet << inFileSettings;
-		if (!outSet.is_open())
-			throw runtime_error(
-				"getFile: failed to create file, mission aborted");
-		outSet.close();
-		std::ifstream in(settingsFileName);
+	std::ifstream in(gamesFileName);
+	if (in.is_open()) // have savings
+		in >> games;
+	in.close();
+	in.open(settingsFileName);
+	if (in.is_open()) { // have savings
 		in >> settings;
+		return;
 	}
-	else
-		inSet >> settings;
+	// else
+	if(!importInFileSettings(&settings))
+		throw logic_error("can't parse in-file settings");
 }
 
 void BoardRecord::writeGames() {
@@ -96,6 +112,8 @@ void BoardRecord::writeGames() {
 }
 
 void BoardRecord::writeSettings() {
+	if (settingsUnChanged)
+		return;
 	std::ofstream outFile(settingsFileName);
 	if (!outFile.is_open()) {
 		cout << "Failed to open file \"" << settingsFileName << "\" to write\n";
@@ -103,6 +121,17 @@ void BoardRecord::writeSettings() {
 		throw runtime_error("writeSettings: can't open file to write settings");
 	}
 	outFile << settings;
+}
+
+bool BoardRecord::importInFileSettings(Json::Value* dest) {
+	Json::String            errors;
+	Json::CharReaderBuilder charRB;
+	Json::CharReader*       charReader(charRB.newCharReader());
+	if (!charReader->parse(
+			inFileSettings.c_str(),
+			inFileSettings.c_str() + inFileSettings.size(), dest, &errors))
+		return false;
+	return true;
 }
 
 void BoardRecord::saveGame(BoardState& state) {
@@ -118,14 +147,15 @@ void BoardRecord::saveGame(BoardState& state) {
 			printf("Care to give the board a name? (no as default) (No/yes)> ");
 #else
 		if (defaultGiveName)
-			printf("¸ø´æµµÃüÃû? (Ä¬ÈÏ yes) (no/Yes)> ");
+			printf("ç»™å­˜æ¡£å‘½å? (é»˜è®¤ yes) (no/Yes)> ");
 		else
-			printf("¸ø´æµµÃüÃû? (Ä¬ÈÏ no) (No/yes)> ");
+			printf("ç»™å­˜æ¡£å‘½å? (é»˜è®¤ no) (No/yes)> ");
 #endif // STARS_LANG_CHINESE
 
 		char name[256];
 		cin.getline(name, 256);
-		if ((defaultGiveName && !strlen(name)) || !strcmp(name, "yes")) {
+		if ((defaultGiveName && !strlen(name)) || !strcmp(name, "yes") ||
+			!strcmp(name, "y") || !strcmp(name, "Y")) {
 			cin.getline(name, 256);
 			if (strlen(name))
 				gameName = name;
@@ -134,8 +164,9 @@ void BoardRecord::saveGame(BoardState& state) {
 	saveGame(gameName, state);
 #ifndef STARS_LANG_CHINESE
 	cout << "game \"" << gameName << "\" is saved.\n";
+#else
+	cout << "æ¸¸æˆ \"" << gameName << "\" å·²å­˜æ¡£\n";
 #endif // STARS_LANG_CHINESE
-	cout << "ÓÎÏ· \"" << gameName << "\" ÒÑ´æµµ\n";
 }
 
 void BoardRecord::saveGame(const string& gameName, BoardState& state) {
@@ -224,6 +255,10 @@ void BoardRecord::showSettingsWithTags() {
 		 << "item\t\t\t"
 		 << "true/false\t"
 		 << "tagNumber\n";
+	cout << "---------\t"
+		 << "----\t\t\t"
+		 << "----------\t"
+		 << "---------\n";
 	char x = 'a';
 	for (members::iterator i = member.begin(); i != member.end(); ++i) {
 		char    y     = 'a';
@@ -243,10 +278,10 @@ void BoardRecord::showSettingsWithTags() {
 		++x;
 	}
 #else
-	cout << "Çé¿ö -- "
-		 << "ÏîÄ¿ -- "
-		 << "Õæ¼Ù -- "
-		 << "±êÇ©\n";
+	cout << "æƒ…å†µ -- "
+		 << "é¡¹ç›® -- "
+		 << "çœŸå‡ -- "
+		 << "æ ‡ç­¾\n";
 	char x = 'a';
 	for (members::iterator i = member.begin(); i != member.end(); ++i) {
 		char y = 'a';
@@ -277,12 +312,13 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 					 << std::boolalpha << !defaultSettings[*i][*j].asBool()
 					 << " to " << defaultSettings[*i][*j] << endl;
 #else
-				cout << toChinese(*i) << ": " << toChinese(*j) << " ÒÑ´Ó "
+				cout << toChinese(*i) << ": " << toChinese(*j) << " å·²ä»Ž "
 					 << std::boolalpha
 					 << toChinese(!defaultSettings[*i][*j].asBool())
-					 << " ¸ü¸Äµ½ "
+					 << " æ›´æ”¹åˆ° "
 					 << toChinese(defaultSettings[*i][*j].asBool()) << endl;
 #endif // STARS_LANG_CHINESE
+				settingsUnChanged = false;
 				return true;
 			}
 			++y;
@@ -290,6 +326,13 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 		++x;
 	}
 	return false;
+}
+
+void BoardRecord::changeOtherSettings(const string& name, const int time) {
+	if (settings["otherSettings"][name].asInt() != time) {
+		settings["otherSettings"][name] = time;
+		settingsUnChanged               = false;
+	}
 }
 
 string BoardRecord::showSavedGames(Json::Value& ret) {
@@ -303,10 +346,10 @@ string BoardRecord::showSavedGames(Json::Value& ret) {
 		printf("index number: %d/%d\n> ", i + 1, games.size());
 #else
 		printf(
-			"\nÈÕÆÚ: %sÃû: %s\nÆåÅÌ:\n", games[i]["date"].asCString(),
+			"\næ—¥æœŸ: %så: %s\næ£‹ç›˜:\n", games[i]["date"].asCString(),
 			games[i]["name"].asCString());
 		showSavedBoard(games[i]["state"]);
-		printf("Ë÷ÒýºÅ: %d/%d\n> ", i + 1, games.size());
+		printf("ç´¢å¼•å·: %d/%d\n> ", i + 1, games.size());
 #endif // STARS_LANG_CHINESE
 
 		while (true) {
@@ -344,7 +387,7 @@ string BoardRecord::showSavedGames(Json::Value& ret) {
 #ifndef STARS_LANG_CHINESE
 			cout << "Pardon?\n> ";
 #else
-			cout << "É¶£¿\n> ";
+			cout << "å•¥ï¼Ÿ\n> ";
 #endif // STARS_LANG_CHINESE
 		}
 		++i;
@@ -376,6 +419,8 @@ BoardRecord& BoardRecord::operator=(const BoardRecord& br) {
 
 // check if settings match
 bool BoardRecord::match() {
+	if (settingsUnChanged)
+		return true;
 	string dsString = "defaultSettings", osString = "otherSettings",
 		   mctString = "maxcaltime";
 #ifndef STARS_DEBUG_INFO
@@ -408,24 +453,20 @@ bool BoardRecord::match() {
 #endif // STARS_DEBUG_INFO
 
 	// get the "right default settings"
-	std::ifstream in(settingsFileName);
-	if (!in.is_open())
-		throw runtime_error("can't open settings file, match check aborted");
-	Json::Value  rightDs;
-	Json::Reader reader;
-	if (!reader.parse(inFileSettings, os))
+	Json::Value root, rightData;
+	if(!importInFileSettings(&root))
 		throw logic_error(
 			"can't parse in file settings file, match check aborted");
-	rightDs = os["defaultSettings"];
+	rightData = root["defaultSettings"];
 
 	// check if default settings match
 	members member = ds.getMemberNames();
 	for (members::iterator i = member.begin(); i != member.end(); ++i) {
-		if (!rightDs.isMember(*i))
+		if (!rightData.isMember(*i))
 			return false;
 		members inset = ds[*i].getMemberNames();
 		for (members::iterator j = inset.begin(); j != inset.end(); ++j) {
-			if (!rightDs[*i].isMember(*j)) {
+			if (!rightData[*i].isMember(*j)) {
 #ifdef STARS_DEBUG_INFO
 				cout << *i << " has no member " << *j << endl;
 #endif // STARS_DEBUG_INFO
@@ -435,67 +476,3 @@ bool BoardRecord::match() {
 	}
 	return true;
 }
-
-#ifdef STARS_LANG_CHINESE
-string toChinese(const string& word) {
-	if (word == "good")
-		return "ºÃ";
-	if (word == "bad")
-		return "»µ";
-	if (word == "free")
-		return "×ÔÓÉ"; // ÎÒÃâ·ÑÁË£¡
-	if (word == "debug")
-		return "ÈË»ú";
-	if (word == "play")
-		return "Ë«ÈË";
-	if (word == "board width")
-		return "ÆåÅÌ¿í¶È";
-	if (word == "board height")
-		return "ÆåÅÌ¸ß¶È";
-	if (word == "win number")
-		return "»ñÊ¤ËùÐèÁ¬ÅÅ×îÐ¡Êý";
-	if (word == "changeBoard")
-		return "¸ü»»ÆåÅÌ";
-	if (word == "askToSaveBoard")
-		return "Ñ¯ÎÊÆåÅÌÊÇ·ñ´æµµ";
-	if (word == "defaultSaveBoard")
-		return "Ä¬ÈÏÆåÅÌÊÇ·ñ´æµµ";
-	if (word == "gameIsOver")
-		return "ÓÎÏ·½áÊø";
-	if (word == "askToReverse")
-		return "Ñ¯ÎÊ½øÈë³·»ØÄ£Ê½";
-	if (word == "defaultReverse")
-		return "Ä¬ÈÏ½øÈë³·»ØÄ£Ê½";
-	if (word == "inCustomMode")
-		return "×Ô¶¨ÒåÄ£Ê½";
-	if (word == "inDebugMode")
-		return "ÆÕÍ¨Ä£Ê½";
-	if (word == "hintOn")
-		return "´ò¿ªÌáÊ¾";
-	if (word == "showCalculate")
-		return "ÏÔÊ¾³ÌÐò¼ÆËã¹ý³Ì";
-	if (word == "showTime")
-		return "ÏÔÊ¾ÓÃÊ±";
-	if (word == "starrySky")
-		return "ÐÇ¿Õ";
-	if (word == "starsOn")
-		return "ÇçÌì";
-	if (word == "trackRoutes")
-		return "×·×ÙÂ·¾¶";
-	if (word == "whenSaveGame")
-		return "±£´æÓÎÏ·";
-	if (word == "askGiveName")
-		return "Ñ¯ÎÊÃüÃû´æµµ";
-	if (word == "defaultGiveName")
-		return "Ä¬ÈÏÃüÃû´æµµ";
-	if (word == "maxcaltime")
-		return "×î´ó¼ÆËãÊ±¼ä";
-	cout << "Word = " << word << endl;
-	throw logic_error("toChinese: wrong input");
-}
-string toChinese(const bool word) {
-	if (word)
-		return "Õæ";
-	return "¼Ù";
-}
-#endif // STARS_LANG_CHINESE

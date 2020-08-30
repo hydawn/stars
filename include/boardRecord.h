@@ -16,11 +16,7 @@ private:
 	Json::Value settings;
 	string      gamesFileName;
 	string      settingsFileName;
-
-	// file control
-	void getFile();
-	void writeGames();
-	void writeSettings();
+	bool        settingsUnChanged;
 
 public:
 	vector<oneMove> historyMove;
@@ -28,10 +24,24 @@ public:
 	BoardRecord()
 		: historyMove(vector<oneMove>()),
 		  gamesFileName("Stars_games.json"),
-		  settingsFileName("Stars_settings.json") {
+		  settingsFileName("Stars_settings.json"),
+		  settingsUnChanged(true) {
+		getFile();
+	}
+	BoardRecord(const string& gname, const string& sname)
+		: historyMove(vector<oneMove>()),
+		  gamesFileName(gname),
+		  settingsFileName(sname),
+		  settingsUnChanged(true) {
 		getFile();
 	}
 	~BoardRecord();
+
+	// file control
+	void getFile();
+	void writeGames();
+	void writeSettings();
+	bool importInFileSettings(Json::Value* dest);
 
 	// record
 	void push_back(const oneMove& om) { historyMove.push_back(om); }
@@ -51,7 +61,9 @@ public:
         return settings["defaultSettings"].size();
 	}
 	void showSettingsWithTags();
+	// change settings
 	bool changeSettingsUsingTags(int tag1, int tag2);
+	void changeOtherSettings(const string& name, const int time);
 
 	// play back
 	int        getNumberOfSavedBoard() { return games.size(); }

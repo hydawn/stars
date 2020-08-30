@@ -6,12 +6,13 @@ cmake_minimum_required(VERSION "3.5")
 ## program
 set(STARS_VERSION_DEBUG "0.1.1-beta")
 set(STARS_VERSION_RELEASE "0.1.1")
-project("Stars" VERSION ${STARS_VERSION_RELEASE})
+project("stars" VERSION ${STARS_VERSION_RELEASE})
 if (NOT CMAKE_BUILD_TYPE)
+	message("Set build type to 'Debug' as none was specified.")
 	set(CMAKE_BUILD_TYPE "Debug")
 endif()
 if (NOT STARS_LANGUAGE_SETIING)
-	message("Setting language to 'English' as none was specified.")
+	message("Set language to 'English' as none was specified.")
 	set(STARS_LANGUAGE_SETIING "English" CACHE STRING "Choose the language of program." FORCE)
 	# Set the possible values of build type for cmake-gui
 	set_property(CACHE STARS_LANGUAGE_SETIING PROPERTY STRINGS "English" "Chinese")
@@ -54,7 +55,7 @@ target_link_libraries(${PROJECT_NAME}
 
 # Set macros
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-	target_compile_definitions(${PROJECT_NAME}
+	target_compile_definitions(starboard_lib
 		PUBLIC STARS_PLATFORM_LINUX
 	)
 	message (STATUS "Current platform: Linux")
@@ -73,14 +74,15 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	################## change this to make a Debug version ###################
 	# set(CMAKE_BUILD_TYPE "Debug")
-	set(CMAKE_BUILD_TYPE "Release")
 	################## change this to make a release version ###################
+	# set(CMAKE_BUILD_TYPE "Release")
 	
 	############### change this to make a English version ######################
-	set(STARS_LANGUAGE_SETIING "English" CACHE STRING "Choose the language of program." FORCE)
-	# set(STARS_LANGUAGE_SETIING "Chinese" CACHE STRING "Choose the language of program." FORCE)
+	# set(STARS_LANGUAGE_SETIING "English" CACHE STRING "Choose the language of program." FORCE)
 	############### change this to make a Chinese version ######################
-	target_compile_definitions(${PROJECT_NAME}
+	# set(STARS_LANGUAGE_SETIING "Chinese" CACHE STRING "Choose the language of program." FORCE)
+
+	target_compile_definitions(starboard_lib
 		PUBLIC STARS_PLATFORM_WINDOWS
 	)
 	if (CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
@@ -94,8 +96,38 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 		message (STATUS "Current build type: ${CMAKE_BUILD_TYPE} (without debug info)")
 	endif()
 	message (STATUS "Current platform: Windows")
-endif ()
+else() # Darwin maybe
+	message (STATUS "Current platform: ${CMAKE_SYSTEM_NAME}")
+	target_compile_definitions(starboard_lib
+		PUBLIC STARS_PLATFORM_LINUX # will use linux for mac and others for now
+	)
+	if (CMAKE_BUILD_TYPE MATCHES "Debug" OR CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
+		target_compile_definitions(starboard_lib 
+			PUBLIC STARS_DEBUG_INFO
+		)
+		add_definitions(-DSTARS_VERSION_DEBUG="${STARS_VERSION_DEBUG}")
+		message (STATUS "Current version: ${STARS_VERSION_DEBUG}")
+		message (STATUS "Current build type: ${CMAKE_BUILD_TYPE} (with debug info)")
+	else () # release
+		add_definitions(-DSTARS_VERSION_RELEASE="${STARS_VERSION_RELEASE}")
+		message (STATUS "Current version: ${STARS_VERSION_RELEASE}")
+		message (STATUS "Current build type: ${CMAKE_BUILD_TYPE} (without debug info)")
+		# try conditional compilation
+		include(CheckCXXCompilerFlag)
+		CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+		CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
 
+		# check results and add flag
+		if(COMPILER_SUPPORTS_CXX11)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+		elseif(COMPILER_SUPPORTS_CXX0X)
+			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+		else()
+			message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+		endif()
+	endif()
+endif ()
+		
 ## set language
 if (STARS_LANGUAGE_SETIING MATCHES "Chinese")
 	target_compile_definitions(starboard_lib PUBLIC STARS_LANG_CHINESE)

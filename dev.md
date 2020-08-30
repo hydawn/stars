@@ -1,4 +1,4 @@
-well, this is clearly more organized than CharmedPython
+well, this is clearly more unorganized than CharmedPython
 
 # cmt code
 ## 001
@@ -109,8 +109,21 @@ well, this is clearly more organized than CharmedPython
 - some functions moved/added to boardTools.cpp
 - CMakeLists.txt: libs renamed
 
+## 015 - build using script
+- build script added, build process automated
+- main args changed
+- won't generate Stars_settings.json if no settings is written
+- outer help info updated, suboptions used
+- tested in macOS
+- test-debug and test-play rebuild board bug fixed
+- keep it all lowercase to match program naming convention on *nix systems
+- inter help info updated, filename definition moved to class BoardInterface, toChinese moved to boardTools.cpp
+- README.md updated
+
+writing .cmd files is AAA disaster
+
 # TODO
-- sometimes settings just crash, why?
+- sometimes settings just crash, why - seldom happens now
 - add a new strategy to avoid letting opp have more three in a row
 - change the last tag to 0.1.0 and add info: delete `#include "boardArea.h"`
 - add GUI - I don't think so
@@ -471,7 +484,7 @@ now, it's `*col==3 *col1==1 *col2==1 *col2==1 *col4==2 *col5==1 *col6==2`
 2 move, and analyse() return a free instead of bad, if it can return a bad, then  
 it can release returnMove a lot of pressure?
 
-# performance improved - just a little
+# performance improved - just a little, maybe none
 However, it's more dangerous now  
 this nearly empty board (depth == 4)
 ```
@@ -497,14 +510,6 @@ takes 358ms or 795ms sometimes for `ShortList`, and takes 998ms for the normal `
 |0| |X|0|X|X|0|0|
 ```
 this however, `ShortList` takes 21ms, `vector<short>` takes 25ms
-
-
-
-
-# worth noticing
-
-## C string compare (char[])
-c style string have no overload at =, so I have to use !strcmp() which return 0 if two strings are the same
 
 ## C input
 if I use `cin >> word;` before using `cin.getline(input, 256);` I will always get a \0. So I have to add a `char disposal = cin.get();` to get rid of the `\0` that nobody want.  

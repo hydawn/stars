@@ -1,19 +1,15 @@
-/*-- encoding: GBK --*/
+/*-- encoding: UTF-8 --*/
 #include "boardAnalyse.h"
 
 void BoardAnalyse::go(const char plr, const short move) {
-#ifdef STARS_DEBUG_INFO
 	if (!state.colCanAdd(move))
 		throw logic_error("Error: trying to add in a wrong place");
-#endif
 	state.add(plr, move);
 }
 
 void BoardAnalyse::reverse(const short column) {
-#ifdef STARS_DEBUG_INFO
 	if (!state.colCanRemove(column))
 		throw logic_error("Error: tying to reverse in a wrong place");
-#endif
 	state.remove(column);
 }
 
@@ -1225,24 +1221,24 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 		cout << "    calculate time used: " << timeUsed << " ms\n";
 #else
 		if (showCal)
-			cout << "    Ã»ÓÐÐÇÐÇµÄ¼ÆËãÉî¶È = " << returnMoveDepth - 1 << endl;
+			cout << "    æ²¡æœ‰æ˜Ÿæ˜Ÿçš„è®¡ç®—æ·±åº¦ = " << returnMoveDepth - 1 << endl;
 	}
 	else if (showCal) {
 		if (starsOn)
-			cout << "    ÓÐÐÇÐÇµÄ¼ÆËãÉî¶È = " << returnMoveDepth - 1 << endl;
+			cout << "    æœ‰æ˜Ÿæ˜Ÿçš„è®¡ç®—æ·±åº¦ = " << returnMoveDepth - 1 << endl;
 		else 
-			cout << "    Ã»ÓÐÐÇÐÇµÄ¼ÆËãÉî¶È = " << returnMoveDepth - 1 << endl;
+			cout << "    æ²¡æœ‰æ˜Ÿæ˜Ÿçš„è®¡ç®—æ·±åº¦ = " << returnMoveDepth - 1 << endl;
 	}
 
 	// show info if needed
 	if (showCal) {
-		cout << "    Íæ¼Ò×´Ì¬ = " << toChinese(word) << ", ÍÆ¼öÁÐ±í = [ ";
+		cout << "    çŽ©å®¶çŠ¶æ€ = " << toChinese(word) << ", æŽ¨èåˆ—è¡¨ = [ ";
 		for (short c : plrList)
 			cout << c << " ";
 		printf("]\n");
 	}
 	if (showTime)
-		cout << "    ³ÌÐò¼ÆËãÓÃÊ± " << timeUsed << " ºÁÃë\n";
+		cout << "    ç¨‹åºè®¡ç®—ç”¨æ—¶ " << timeUsed << " æ¯«ç§’\n";
 #endif // STARS_LANG_CHINESE
 
 	// record, suggest and return

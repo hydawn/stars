@@ -25,4 +25,7 @@ vector<string> charListToVector(int argc, char* args[]);
 bool           inCharList(int argc, char* argv[], const string& str);
 } // namespace MainArgsHandle
 
+string toChinese(const string& word);
+string toChinese(const bool word);
+
 #endif // _MAINARGSHANDLE_H_

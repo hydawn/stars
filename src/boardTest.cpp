@@ -1,4 +1,3 @@
-/*-- encoding:GBK --*/
 #include "boardTest.h"
 
 char BoardTest::lastMove = 'c';
@@ -161,10 +160,8 @@ string BoardTest::debugMode(const string& mode) {
 					"%d:'%c' goes '%d'\t", ++stepCount, byOpponent.player,
 					byOpponent.move);
 			record.push_back(byOpponent);
-			if (!lessPrint) {
-				if (record.getDefaultSettings("inDebugMode", "showTime"))
-					cout << "    input time used: " << byPlayer.time << " ms\n";
-			}
+			if (record.getDefaultSettings("inDebugMode", "showTime") && showTime)
+				cout << "    input time used: " << byPlayer.time << " ms\n";
 			if (isOver(byOpponent)) {
 				if (!noPrint)
 					cout << "Exit from " << mode << " mode ...\n";
@@ -234,7 +231,7 @@ string BoardTest::debugMode(const string& mode) {
 }
 
 short BoardTest::respond() {
-	if (showCalculate || showTime || !lessPrint)
+	if (showCalculate && !lessPrint)
 		printf("Info for player %c:\n", byOpponent.player);
 	byOpponent.suggestion = analyse->respond(
 		byOpponent.player, byOpponent, showCalculate, showTime,
@@ -371,15 +368,23 @@ void autoTest(int n, const vector<string>& args) {
 			catch (const std::runtime_error& e) {
 				cout << "runtime_error: ";
 				std::cerr << e.what() << '\n';
-				string autoTest = "autoTest-with-error:";
-				test.record.saveGame(autoTest + e.what(), test.analyse->state);
+				string autoTest = "autoTest-error:";
+				test.record.saveGame(
+					autoTest + e.what() + "starsOn:" +
+						std::to_string(test.record.getDefaultSettings(
+							"inDebugMode", "starsOn")),
+					test.analyse->state);
 				++err;
 			}
 			catch (const std::logic_error& e) {
 				cout << "logic_error: ";
 				std::cerr << e.what() << '\n';
-				string autoTest = "autoTest-with-error:";
-				test.record.saveGame(autoTest + e.what(), test.analyse->state);
+				string autoTest = "autoTest-error:";
+				test.record.saveGame(
+					autoTest + e.what() + "starsOn:" +
+						std::to_string(test.record.getDefaultSettings(
+							"inDebugMode", "starsOn")),
+					test.analyse->state);
 				++err;
 			}
 		}

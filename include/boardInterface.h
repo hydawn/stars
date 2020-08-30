@@ -11,6 +11,8 @@ using std::string;
 class BoardInterface {
 public:
 	BoardAnalyse* analyse; // this might be more important?
+	string        gamesFilename;
+	string        settingsFilename;
 	BoardRecord   record;
 	oneMove       byOpponent;
 	oneMove       byPlayer;
