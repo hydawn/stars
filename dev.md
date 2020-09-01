@@ -123,6 +123,8 @@ well, this is clearly more unorganized than CharmedPython
 writing .cmd files is AAA disaster
 
 # TODO
+- tested which move will starsOn error occur, and act on it
+- new strategy to choose from a safe list: prevent opp from getting available three in a row, see that three in a column is meaningless
 - sometimes settings just crash, why - seldom happens now
 - add a new strategy to avoid letting opp have more three in a row
 - change the last tag to 0.1.0 and add info: delete `#include "boardArea.h"`

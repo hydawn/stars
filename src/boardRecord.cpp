@@ -282,6 +282,10 @@ void BoardRecord::showSettingsWithTags() {
 		 << "项目 -- "
 		 << "真假 -- "
 		 << "标签\n";
+	cout << "---------"
+		 << "--------"
+		 << "--------"
+		 << "----\n";
 	char x = 'a';
 	for (members::iterator i = member.begin(); i != member.end(); ++i) {
 		char y = 'a';

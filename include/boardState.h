@@ -156,6 +156,7 @@ public:
 	void nonFullColumn(shortv& nonFull);
 	void sweepFullColumn(shortv& nonFull, short col);
 	char rPlayer(const char plr);
+	int  pieceCount();
 
 	// random
 	short randomMove();

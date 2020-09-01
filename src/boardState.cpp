@@ -168,12 +168,19 @@ char BoardState::rPlayer(const char plr) {
 	throw runtime_error("No such player exist");
 }
 
+int BoardState::pieceCount() {
+	int count = 0;
+	for (int i = 0; i < cols; ++i)
+		count += top[i];
+	return count;
+}
+
 short BoardState::randomMove() {
 	shortv list;
 	nonFullColumn(list);
 #ifdef STARS_DEBUG_INFO
 	if (list.empty())
-		throw logic_error("trying randomMove() in an empty list");
+		throw logic_error("trying randomMove() in full board");
 #endif // STARS_DEBUG_INFO
 	return randomMove(list);
 }

@@ -64,7 +64,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 		state.add(plr, *col);
 		state.nonFullColumn(nonFull);
 		list1 = firstPoint(opp, nonFull);
-		// it's opp's turn, so check opp first
+		// it's not my turn to move, so check opp first
 		if (!list1.empty()) { // bad
 			state.remove(*col);
 			col = list.erase(col);
@@ -98,7 +98,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 				state.add(plr, list2[0]);
 				state.sweepFullColumn(nonFull, list2[0]);
 				list3 = firstPoint(opp, nonFull);
-				// opponent's turn, ckeck opp first
+				// opponent's turn, check opp first
 				if (!list3.empty()) {
 					state.remove(list2[0], list1[0], *col);
 					col = list.erase(col);
@@ -1166,10 +1166,10 @@ string BoardAnalyse::recursiveSituation(const char plr, shortv& list,
 int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 	bool showTime, bool starsOn, bool trackRoute) {
 	// list for myself
-	shortv plrList, oppList, nonFullList;
-	long long timeUsed		  = 0;
-	short	  returnMoveDepth = 2;
-	string	  word;
+	shortv    plrList, oppList, nonFullList;
+	long long timeUsed        = 0;
+	short     returnMoveDepth = 2;
+	string    word;
 
 	// pre-test
 	state.nonFullColumn(nonFullList);
@@ -1178,10 +1178,10 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 		throw logic_error("call respond with full board");
 	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
 		throw logic_error("call respond with ended game");
-#endif
+#endif // STARS_DEBUG_INFO
 
 	// analyse
-	if (starsOn && nonFullList.size() > 4)
+	if (starsOn && nonFullList.size() > 4) // && state.pieceCount() < cols*rows * 0.75 ?
 		state.areaTopTransform();
 	do {
 		timeUsed = returnTime(plr, plrList, ++returnMoveDepth, word, trackRoute);
