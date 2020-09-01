@@ -21,18 +21,23 @@ function checkArgs() {
         echo   ./changeEncoding.sh [from_encoding] [to-encoding]
         exit 1
     fi
-    if [ "$1" != "GBK" ] && [ "$1" != "UTF-8" ]; then
-        echo Such encoding is not supported
+    if [ "$1" != "gbk" ] && [ "$1" != "utf-8" ]; then
+        echo Encoding $1 is not supported
         echo Usage:
         echo   ./changeEncoding.sh [from_encoding] [to-encoding]
         exit 1
     fi
-    if [ "$2" != "GBK" ] && [ "$2" != "UTF-8" ]; then
-        echo Such encoding is not supported
+    if [ "$2" != "gbk" ] && [ "$2" != "utf-8" ]; then
+        echo Encoding $2 is not supported
         echo Usage:
         echo   ./changeEncoding.sh [from_encoding] [to-encoding]
         exit 1
     fi
+}
+
+# check if files is all utf-8 and won't need to convert
+function getFileEncoding() {
+    file -i $1 | cut -d "=" -f2
 }
 
 function wentWrong() {
@@ -41,13 +46,19 @@ function wentWrong() {
 
 # -- main -- #
 checkArgs $1 $2
+if [ "${from_encoding}" == "${to_encoding}" ]; then
+    exit 0
+fi
 echo "To encoding: ${to_encoding}"
 for fileName in "${filesToConvert[@]}"
 do
-    if [ "${from_encoding}" != "${to_encoding}" ]; then
+    if [ `getFileEncoding ${fileName}` != ${to_encoding} ]; then
+        echo Current `getFileEncoding ${fileName}` doesnt match with ${to_encoding} as expected
         iconv ${fileName} --from-code=${from_encoding} \
         --to-code=${to_encoding} --output=tempWorking.cpp || \
         wentWrong ${fileName}
         mv tempWorking.cpp ${fileName}
+        else
+        echo "they match, do nothing"
     fi
 done

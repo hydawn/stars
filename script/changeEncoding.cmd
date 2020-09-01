@@ -22,14 +22,14 @@ if "%2" equ "" (
     echo Usage: cmd /c script/changeEncoding [from_encoding] [to_encoding]
     exit 1
 )
-if "%1" neq "GBK" (
-if "%1" neq "UTF-8" (
-    echo Wrong use of argument, only need GBK and UTF-8 - at leat on my computer
+if "%1" neq "gbk" (
+if "%1" neq "utf-8" (
+    echo Wrong use of argument, only need gbk and utf-8 - at leat on my computer
     exit 1
 ))
-if "%2" neq "GBK" (
-if "%2" neq "UTF-8" (
-    echo Wrong use of argument, only need GBK and UTF-8 - at leat on my computer
+if "%2" neq "gbk" (
+if "%2" neq "utf-8" (
+    echo Wrong use of argument, only need gbk and utf-8 - at leat on my computer
     exit 1
 ))
 

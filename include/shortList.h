@@ -72,4 +72,4 @@ public:
 	}
 };
 
-#endif
+#endif // _SHORTLIST_H_GUARD_

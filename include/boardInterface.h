@@ -70,10 +70,9 @@ public:
 
 	// check
 	virtual bool isOver(const oneMove& move, const string& mode);
-	int          autoTestMode(int startMove);
 };
 
 int  myStoi(string word);
 bool xtoiFit(string word, int num);
 
-#endif
+#endif // _BOARDINTERFACE_H_

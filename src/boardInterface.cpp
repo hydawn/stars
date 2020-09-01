@@ -400,11 +400,9 @@ string BoardInterface::debugMode(const string& mode) {
 	}
 #else
 	if (mode == "debug") {
-		printf("人机模式\n");
 		byOpponent.byComputer = !byPlayer.byComputer;
 	}
 	else {
-		printf("双人模式\n");
 		byOpponent.byComputer = false;
 	}
 #endif // STARS_LANG_CHINESE
@@ -1420,12 +1418,12 @@ string BoardInterface::getInfo(string input) {
 		"of three piece in a row is helpful.\nGood luck!\n" + end;
 	string info = head + "\nA 1v1 & 8x8 command line based board game\n" +
 #	ifndef STARS_DEBUG_INFO
-				  "\n------------------------------- version " + version +
-				  " ---------------------------------\n" +
+				  "\n-------------------------------- version " + version +
+				  " --------------------------------\n" +
 #	endif
 #	ifdef STARS_DEBUG_INFO
-				  "\n---------------------------- version " + version +
-				  " -------------------------------\n" +
+				  "\n------------------------------ version " + version +
+				  " -----------------------------\n" +
 #	endif
 				  "                                                            "
 				  "      by Duan Hanyu\n" +
@@ -1694,99 +1692,3 @@ bool BoardInterface::isOver(const oneMove& move, const string& mode) {
 	}
 	return false;
 }
-
-#ifdef STARS_DEBUG_INFO
-int BoardInterface::autoTestMode(int startMove) {
-	int  errCount = 0, stepCount = 1;
-	char expectedWinner = '1';
-	// show time
-	oneMove byOpponent, byPlayer;
-	byPlayer.player   = 'X';
-	byPlayer.move     = startMove;
-	byOpponent.player = '0';
-
-	printf("We are in auto test mode now\n");
-
-	// main loop
-	while (true) {
-		// player goes
-		analyse->go(byPlayer.player, byPlayer.move);
-		printf(
-			"%d:'%c' goes '%d'\t", stepCount, byPlayer.player, byPlayer.move);
-		if (isOver(byPlayer)) {
-			if (analyse->gameIsOver() != expectedWinner)
-				cout << "What? why?\n";
-			return errCount;
-		}
-
-		// opp respond
-		try {
-			byOpponent.move = analyse->respond(
-				byOpponent.player, byOpponent, false, false,
-				record.getDefaultSettings("inDebugMode", "starsOn"), false);
-
-			// see if expectedWinner is changed
-			if (byOpponent.word == "good" && stepCount > 3) {
-				if (expectedWinner != byOpponent.player &&
-					expectedWinner != '1') {
-					++errCount;
-					cout << "Expected winner changed from " << expectedWinner
-						 << " to " << byOpponent.player << ", why?\n";
-					cout << "player " << byPlayer.player << " goes "
-						 << byPlayer.move
-						 << ", then opp respond with the board:\n";
-					analyse->starShow();
-					printf("\n\n\n\n");
-					expectedWinner = byOpponent.player;
-				}
-				else
-					expectedWinner = byOpponent.player;
-			}
-			else if (byOpponent.word == "bad" && stepCount > 3) {
-				if (expectedWinner != byPlayer.player &&
-					expectedWinner != '1') {
-					++errCount;
-					cout << "Expected winner changed from " << expectedWinner
-						 << " to " << byPlayer.player << ", why?\n";
-					cout << "player " << byPlayer.player << " goes "
-						 << byPlayer.move
-						 << ", then opp respond with the board:\n";
-					analyse->starShow();
-					printf("\n\n\n\n");
-					expectedWinner = byPlayer.player;
-					// cout << "Hit anything to continue ...";
-					// cin.get();
-				}
-				else
-					expectedWinner = byPlayer.player;
-			}
-		}
-		catch (const std::exception& e) {
-			errCount++;
-			std::cerr << e.what() << '\n';
-			cout << "Error occurred after player '" << byPlayer.player
-				 << "' goes " << byPlayer.move
-				 << "\nWhen another player is responding to the following "
-					"board:\n";
-			analyse->starShow();
-
-			// if in Visual Studio
-			cout << "Let's try again and let VS catch the error>\n";
-			byOpponent.move = analyse->respond(
-				byOpponent.player, byOpponent, false, false,
-				record.getDefaultSettings("inDebugMode", "starsOn"), false);
-		}
-#	ifdef STARS_DEBUG_INFO
-		if (!byOpponent.list.empty() &&
-			!MyShortList::inList(byOpponent.list, byOpponent.move))
-			throw logic_error("suggestion not in safe list");
-#	endif // STARS_DEBUG_INFO
-
-		// change the player
-		std::swap(byPlayer.player, byOpponent.player);
-		std::swap(byPlayer.move, byOpponent.move);
-		++stepCount;
-	}
-	return errCount;
-}
-#endif // STARS_DEBUG_INFO
