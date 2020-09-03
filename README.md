@@ -30,11 +30,11 @@ Download .zip file in [here](https://github.com/HanyuDuan/stars/releases), unzip
 In powershell build an English version:
 ```powershell
 git clone https://github.com/HanyuDuan/stars.git
-build
+.\build
 ```
 Or use 
 ```powershell
-build Chinese
+.\build Chinese
 ```
 to build a Chinese version.  
 Use `.\stars -s` to start the game  
