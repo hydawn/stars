@@ -39,12 +39,14 @@ void displayHelp(string mode = "help") {
 		throw invalid_argument("no help info");
 	}
 	cout
-		<< "Usage:" << endl
+		<< "Usage:\n" 
 		<< "  stars\n"
 		<< "  stars [options]\n"
 		<< "  stars [--test] <number> [suboption] ...\n"
+		<< '\n'
 		<< "  If not installed, use '" << stars << "' instead\n"
-		<< endl
+		<< '\n'
+		<< '\n'
 		<< "Options:            Description\n"
 		<< "  -s, --start         start the game in debug mode (default)\n"
 		<< "  -p, --play          start the game in play mode\n"
@@ -52,11 +54,11 @@ void displayHelp(string mode = "help") {
 		<< "  -S, --settings      go into settings mode\n"
 		<< "  -v, --version       show version\n"
 		<< "  -t, --test          test the game, several suboptions available\n"
-		<< endl
-		<< "It is not recommended to use --test without suboptions\n"
-		<< endl
+		<< '\n'
+		<< "  It is not recommended to use --test without suboptions\n"
+		<< '\n'
 		<< "Use " << stars
-		<< " --help [option] to see help for available suboptions\n";
+		<< " --help [option] to see help for available suboptions" << endl;
 }
 
 bool argsHandle(int argc, char* argv[], string& firstMode) {
