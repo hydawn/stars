@@ -123,6 +123,11 @@ well, this is clearly more unorganized than CharmedPython
 writing .cmd files is AAA disaster
 
 # TODO
+- cut that giant ugly for-loops
+- change if-else to switch
+- send every printing to one class, so that multi-language can be achieved more easily.
+- add the word: consecutive
+- new idea: let oneMoveAnalyseDebug call returnMoveDebug when oneMoveAnalyseDebug got a free but in returnMoveDebug, it not till the maxNumber then, need to add new args in oneMoveAnalyseDebug
 - tested which move will starsOn error occur, and act on it
 - new strategy to choose from a safe list: prevent opp from getting available three in a row, see that three in a column is meaningless
 - sometimes settings just crash, why - seldom happens now

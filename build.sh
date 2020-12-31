@@ -5,13 +5,6 @@ lang="English"
 buildType="Release"
 buildDir="build"
 
-# function checkRoot() {
-#     if [ $EUID -ne 0 ]; then
-#         echo "Please run $0 as root"
-#         exit 1
-#     fi
-# }
-
 function build() {
     mkdir -p $1
     cd $1
