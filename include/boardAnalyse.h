@@ -10,15 +10,19 @@ using std::string;
 using namespace std::chrono;
 
 class BoardAnalyse {
+	friend class BoardTest;
+	friend class BoardInterface;
+	friend void autoTest(int n, const vector<string>& args);
+
 private:
 	// analyse
 	shortv firstPoint(const char plr, shortv& nfc);
 	string analyse(const char plr, shortv& list);
 
-public:
 	int        maxcaltime;
 	BoardState state;
 	RouteTree  routes;
+public:
 	BoardAnalyse() : state(8, 8, 4), routes(RouteTree()), maxcaltime(81) {}
 	BoardAnalyse(BoardAnalyse& ba)
 		: maxcaltime(ba.maxcaltime), state(ba.state), routes(ba.routes) {}

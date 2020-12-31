@@ -84,7 +84,10 @@ public:
 
 class BoardState {
 	// handles the memory allocate and ways to change the board
-public:
+	friend class BoardAnalyse;
+	friend class BoardInterface;
+
+private:
 	char** board;
 	short* top;
 	short* starArea;
@@ -96,6 +99,7 @@ public:
 	static int addNumber;
 #endif
 
+public:
 	BoardState() : rows(8), cols(8), winn(4) { generate(); }
 	BoardState(const BoardState& input)
 		: rows(input.rows), cols(input.cols), winn(input.winn) {

@@ -9,7 +9,11 @@ using std::getline;
 using std::string;
 
 class BoardInterface {
-public:
+	friend class BoardTest;
+	friend class BoardRecord;
+	friend void autoTest(int n, const vector<string>& args);
+
+private:
 	BoardAnalyse* analyse; // this might be more important?
 	string        gamesFilename;
 	string        settingsFilename;
@@ -17,6 +21,7 @@ public:
 	oneMove       byOpponent;
 	oneMove       byPlayer;
 
+public:
 	BoardInterface();
 	BoardInterface(BoardAnalyse& hb);
 	virtual ~BoardInterface();
