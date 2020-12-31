@@ -784,7 +784,7 @@ string BoardInterface::playbackMode() {
 		"those games.\n");
 	printf(
 		"Or type c to continue to play the board that is currently "
-		"displayed. ");
+		"displayed.\n");
 	printf("Use d/rm/delete/remove to delete the current board, e to exit.\n");
 	printf("Explore!\n");
 	Json::Value game;
@@ -1074,7 +1074,7 @@ string BoardInterface::showRoutesMode() {
 		 << " possibilities in this node\n"
 		 << routes.getBranches(-2) << " of them is free, "
 		 << routes.getBranches(-1) << " of them is good and "
-		 << routes.getBranches(0) << " of them is bad for the program\n";
+		 << routes.getBranches(0) << " of them is bad for the\nprogram\n";
 	cout << "We'll be showing:\na. free routes\nb. good routes\nc. bad routes\n"
 		 << "d. all routes\n";
 	if (next.size() == 1 && next[0]->next.empty() &&
@@ -1224,23 +1224,23 @@ string BoardInterface::getHelp(string mode) {
 			"\nUse <piece><column number> to place a piece in a column without "
 			"auto-respond.\n"
 			"\nUse r<column number> to reverse an action\n\n" +
-			"Options\n" + "  e/exit             exit from a certain mode\n" +
-			"  q/quit             quit the whole game\n" +
-			"  C/custom           custom board height, width and win number (4 "
+			"Options\n" + "  e  / exit             exit from a certain mode\n" +
+			"  q  / quit             quit the whole game\n" +
+			"  C  / custom           custom board height, width and win number (4 "
 			"by default)\n" +
-			"  h/help             show help message of the current mode\n" +
-			"  p/play             play mode - play with others\n" +
-			"  P/playback         playback mode - playback saved games\n" +
-			"  S/show             show the current board\n" +
-			"  s/settings         view and change the settings\n" +
-			"  st/show stars      show stars\n" +
-			"  sv/save            save the current game in file "+gamesFilename+"\n" +
-			"  sr/show routes     show routes that the program has examined\n" +
-			"  t/tips             tips I wrote to help other player (you) to "
+			"  h  / help             show help message of the current mode\n" +
+			"  p  / play             play mode - play with others\n" +
+			"  P  / playback         playback mode - playback saved games\n" +
+			"  S  / show             show the current board\n" +
+			"  s  / settings         view and change the settings\n" +
+			"  st / show stars       show stars\n" +
+			"  sv / save             save the current game in file "+gamesFilename+"\n" +
+			"  sr / show routes      show routes that the program has examined\n" +
+			"  t  / tips             tips I wrote to help other player (you) to "
 			"play the game\n" +
-			"  w/winn             show win number (4 by default) in case you "
+			"  w  / winn             show win number (4 by default) in case you "
 			"forgot\n" +
-			"  i/info             information about the game\n\n" +
+			"  i  / info             information about the game\n\n" +
 			enterForMore,
 		head +
 			"If hintOn is true, then when the program says your word = good, "
@@ -1257,13 +1257,13 @@ string BoardInterface::getHelp(string mode) {
 			"\nNote that area that's covered by the stars cannot be accessed by "
 			"the program,\n" +
 			"therefore might contain surprises.\n" + "\nOther options\n" +
-			"  c/change     change the player\n" +
-			"  H/hint       show hint for the previous step\n"
-			"  I/import     import a new board from input, the new board must "
+			"  c / change     change the player\n" +
+			"  H / hint       show hint for the previous step\n"
+			"  I / import     import a new board from input, the new board must "
 			"fit in with\n" +
-			"               the current board\n" +
-			"  m/move       force the program to take a move now\n" +
-			"  r/reverse    into reverse mode - reverse some moves\n" + enjoy +
+			"                 the current board\n" +
+			"  m / move       force the program to take a move now\n" +
+			"  r / reverse    into reverse mode - reverse some moves\n" + enjoy +
 			end};
 #else
 	string enjoy = "玩的开心!\n";
@@ -1282,21 +1282,21 @@ string BoardInterface::getHelp(string mode) {
 			"\n输入数字下棋，程序会自动回应，四子连成一条线则获胜，注意棋子只能"
 			"从下往上叠起\n\n" +
 			"选项               效果\n" +
-			"  e/exit             退出所在模式\n" +
-			"  q/quit             退出游戏\n" +
-			"  C/custom           "
+			"  e  / exit             退出所在模式\n" +
+			"  q  / quit             退出游戏\n" +
+			"  C  / custom           "
 			"自定义棋盘长宽和获胜所需最小成排棋子数（默认4）\n" +
-			"  h/help             显示当前模式帮助文档\n" +
-			"  p/play             双人模式\n" +
-			"  P/playback         读档回放模式 - 回放已有存档\n" +
-			"  S/show             显示当前棋盘\n" +
-			"  s/settings         进入设置模式\n" +
-			"  st/show stars      显示星星\n" +
-			"  sv/save            将游戏文件存档在" + gamesFilename + "里\n" +
-			"  sr/show routes     显示程序计算过的路径\n" +
-			"  t/tips             显示游戏玩法提示\n" +
-			"  w/winn             显示获胜所需最小成排棋子数\n" +
-			"  i/info             显示游戏信息\n\n" + enterForMore,
+			"  h  / help             显示当前模式帮助文档\n" +
+			"  p  / play             双人模式\n" +
+			"  P  / playback         读档回放模式 - 回放已有存档\n" +
+			"  S  / show             显示当前棋盘\n" +
+			"  s  / settings         进入设置模式\n" +
+			"  st / show stars       显示星星\n" +
+			"  sv / save             将游戏文件存档在" + gamesFilename + "里\n" +
+			"  sr / show routes      显示程序计算过的路径\n" +
+			"  t  / tips             显示游戏玩法提示\n" +
+			"  w  / winn             显示获胜所需最小成排棋子数\n" +
+			"  i  / info             显示游戏信息\n\n" + enterForMore,
 		head +
 			"\n如果打开提示（hintOn）为真，那么当程序显示玩家状态为好时，如果玩"
 			"家选择遵循推荐\n" +
@@ -1312,11 +1312,11 @@ string BoardInterface::getHelp(string mode) {
 			"注意有星星的地方程序是看不到的，所以不会推荐，但这并不说明那儿是好"
 			"或者坏只能说\n" +
 			"明那儿远\n\n" + "其他选项\n" +
-			"  c/change     人机玩家身份互换\n" +
-			"  H/hint       显示上一步的提示\n" +
-			"  I/import     导入新棋盘，注意新旧棋盘的大小必须相同\n" +
-			"  m/move       使程序立刻走一步（不等待玩家输入）\n" +
-			"  r/reverse    进入撤回模式\n" + enjoy + end};
+			"  c / change     人机玩家身份互换\n" +
+			"  H / hint       显示上一步的提示\n" +
+			"  I / import     导入新棋盘，注意新旧棋盘的大小必须相同\n" +
+			"  m / move       使程序立刻走一步（不等待玩家输入）\n" +
+			"  r / reverse    进入撤回模式\n" + enjoy + end};
 #endif // STARS_LANG_CHINESE
 	if (mode == "debug") {
 		string                   input;
