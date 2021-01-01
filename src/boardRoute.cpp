@@ -60,8 +60,9 @@ bool RouteNode::hasNext() {
 
 // flag = 1, 0, -1, -2. 1 is for those that are not considered
 void RouteNode::maskFlag(int flag) {
-	if (flag == 1) { // mask those not considered
-		if (!(data == 0 || data == -1 || data == -2) && next.empty()) {
+	if (flag == 1) {
+		// mask those not considered
+		if (!(data == goodNode || data == badNode || data == freeNode) && next.empty()) {
 			print = false;
 			return;
 		}
@@ -94,11 +95,7 @@ void RouteNode::resetMask() {
 		i->resetMask();
 }
 
-RouteTree::RouteTree(const RouteTree& rt)
-	: crnt(rt.crnt),
-	  badNode(rt.badNode),
-	  goodNode(rt.goodNode),
-	  freeNode(rt.freeNode) {
+RouteTree::RouteTree(const RouteTree& rt) : crnt(rt.crnt) {
 	head = new RouteNode(*rt.head);
 }
 
@@ -248,11 +245,11 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 	if (!node->print)
 		return false;
 	if (node->next.empty()) {
-		if (node->data == 0)
+		if (node->data == badNode)
 			cout << "bad";
-		else if (node->data == -1)
+		else if (node->data == goodNode)
 			cout << "good";
-		else if (node->data == -2)
+		else if (node->data == freeNode)
 			cout << "free";
 		else
 			cout << node->data << twoDot << "not considered";
@@ -302,7 +299,7 @@ void RouteTree::show(RouteNode* node, int level) {
 		return;
 	}
 
-	cout << " " << twoDot;
+	cout << ' ' << twoDot;
 	show(node->next[0], level + 1);
 	vRi iter = node->next.begin();
 	for (++iter; iter != node->next.end(); ++iter) {
@@ -313,23 +310,23 @@ void RouteTree::show(RouteNode* node, int level) {
 				cout << ' ' << "    ";
 		}
 		cout << vertical;
-		cout << " " << twoDot;
+		cout << ' ' << twoDot;
 		show(*iter, level + 1);
 	}
 }
 
 int RouteTree::getBranches(int flag) {
-	if (flag == -1) {
-		crnt->maskFlag(-2);
-		crnt->maskFlag(0);
+	if (flag == goodNode) {
+		crnt->maskFlag(freeNode);
+		crnt->maskFlag(badNode);
 	}
-	else if (flag == 0) {
-		crnt->maskFlag(-2);
-		crnt->maskFlag(-1);
+	else if (flag == badNode) {
+		crnt->maskFlag(freeNode);
+		crnt->maskFlag(goodNode);
 	}
-	else if (flag == -2) {
-		crnt->maskFlag(-1);
-		crnt->maskFlag(0);
+	else if (flag == freeNode) {
+		crnt->maskFlag(goodNode);
+		crnt->maskFlag(badNode);
 	}
 	branches = 0;
 	branchCounter(crnt);

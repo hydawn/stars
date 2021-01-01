@@ -12,6 +12,10 @@ using std::runtime_error;
 using std::string;
 using std::vector;
 
+const int goodNode = -1;
+const int badNode  = 0;
+const int freeNode = -2;
+
 class RouteNode {
 public:
 	short              data;
@@ -38,11 +42,8 @@ class RouteTree {
 public:
 	RouteNode* head;
 	RouteNode* crnt;
-	int        badNode;
-	int        goodNode;
-	int        freeNode;
 	static int branches;
-	RouteTree() : badNode(0), goodNode(-1), freeNode(-2) { generate(); }
+	RouteTree() { generate(); }
 	RouteTree(const RouteTree& rt);
 	~RouteTree() { free(head); }
 

@@ -182,7 +182,7 @@ string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
 			word = "free";
 	}
 	else
-		routes.add(routes.freeNode);
+		routes.add(freeNode);
 	state.remove(col);
 	routes.backward();
 	return word;

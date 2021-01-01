@@ -1072,14 +1072,14 @@ string BoardInterface::showRoutesMode() {
 #ifndef STARS_LANG_CHINESE
 	cout << "The program examined " << routeBranches
 		 << " possibilities in this node\n"
-		 << routes.getBranches(-2) << " of them is free, "
-		 << routes.getBranches(-1) << " of them is good and "
-		 << routes.getBranches(0) << " of them is bad for the\nprogram\n";
+		 << routes.getBranches(freeNode) << " of them is free, "
+		 << routes.getBranches(goodNode) << " of them is good and "
+		 << routes.getBranches(badNode) << " of them is bad for the\nprogram\n";
 	cout << "We'll be showing:\na. free routes\nb. good routes\nc. bad routes\n"
 		 << "d. all routes\n";
 	if (next.size() == 1 && next[0]->next.empty() &&
-		(next[0]->data == routes.goodNode || next[0]->data == routes.badNode ||
-		 next[0]->data == routes.freeNode))
+		(next[0]->data == goodNode || next[0]->data == badNode ||
+		 next[0]->data == freeNode))
 		nextFlag = true; // next is a flag
 	else {
 		cout << "or see less in the next node choosing from:\n[ ";
@@ -1094,13 +1094,13 @@ string BoardInterface::showRoutesMode() {
 	string tryAgain = "No such move, let's try again";
 #else
 	cout << "程序为自己检验了 " << routeBranches << "种路径，其中有 "
-		 << routes.getBranches(-2) << " 个自由 " << routes.getBranches(-1)
-		 << " 个好和 " << routes.getBranches(0) << " 个坏\n";
+		 << routes.getBranches(freeNode) << " 个自由 " << routes.getBranches(goodNode)
+		 << " 个好和 " << routes.getBranches(badNode) << " 个坏\n";
 	cout << "通过输入相应字母，本程序将展示：\na. 自由的路径\nb. 好的路径\nc. "
 		 << "坏的路径\nd. 所有路径\n";
 	if (next.size() == 1 && next[0]->next.empty() &&
-		(next[0]->data == routes.goodNode || next[0]->data == routes.badNode ||
-		 next[0]->data == routes.freeNode))
+		(next[0]->data == goodNode || next[0]->data == badNode ||
+		 next[0]->data == freeNode))
 		nextFlag = true; // next is a flag
 	else {
 		cout << "或者输入相应数字选择进入如下路径，查看该路径下的种种可能\n[ ";
