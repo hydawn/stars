@@ -47,9 +47,8 @@ bool xtoiFit(const string& word, int num) {
 namespace MainArgsHandle {
 vector<string> charListToVector(int argc, char* args[]) {
 	vector<string> rax;
-	for (int i = 0; i < argc; ++i) {
+	for (int i = 0; i < argc; ++i)
 		rax.push_back(args[i]);
-	}
 	return rax;
 }
 
@@ -60,7 +59,7 @@ bool inCharList(int argc, char* argv[], const string& str) {
 	return false;
 }
 
-bool inVector(vector<string> argv, const string& str) {
+bool inVector(vector<string>& argv, const string& str) {
 	vector<string>::iterator iter = argv.begin();
 	for (; iter != argv.end(); ++iter)
 		if (*iter == str)
