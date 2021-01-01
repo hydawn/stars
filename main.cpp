@@ -13,8 +13,8 @@ void displayHelp(string mode = "help") {
 	string testHelp =
 		"Option:\n"
 		"  -t, --test\n\n"
-		"Description:\n  Test the game by automatically play it in a specified "
-		"mode for a few rounds\n\n"
+		"Description:\n  Test the game by automatically playing it in a "
+		"specified mode for a few rounds\n\n"
 		"Usage:\n"
 		"  stars --test <number> [suboption] [suboption]\n\n"
 		"Suboptions:\n"
@@ -44,8 +44,6 @@ void displayHelp(string mode = "help") {
 		<< "  stars [options]\n"
 		<< "  stars [--test] <number> [suboption] ...\n"
 		<< '\n'
-		<< "  If not installed, use '" << stars << "' instead\n"
-		<< '\n'
 		<< '\n'
 		<< "Options:            Description\n"
 		<< "  -s, --start         start the game in debug mode (default)\n"
@@ -57,8 +55,8 @@ void displayHelp(string mode = "help") {
 		<< '\n'
 		<< "  It is not recommended to use --test without suboptions\n"
 		<< '\n'
-		<< "Use " << stars
-		<< " --help [option] to see help for available suboptions" << endl;
+		<< "Use '" << "stars"
+		<< " --help [option]' to see help for available suboptions" << endl;
 }
 
 bool argsHandle(int argc, char* argv[], string& firstMode) {
@@ -203,7 +201,6 @@ int main(int argc, char* argv[]) {
 	catch (const std::runtime_error& e) {
 		cout << "stars: runtime_error: ";
 		std::cerr << e.what() << '\n';
-		cout << "a bug perhaps\n";
 		cout << "Over, hit 'Enter' to close ...";
 		cin.get();
 		return 1;

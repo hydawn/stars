@@ -406,6 +406,5 @@ void autoTest(int n, const vector<string>& args) {
 		 << "Player 0 goes first\n"
 		 << "Player X win:\t\t" << XWinn << " times" << endl
 		 << "Player 0 win:\t\t" << ZeroWinn << " times" << endl
-		 << "Over, hit 'Enter' to close ...";
-	cin.get();
+		 << "Over.";
 }
