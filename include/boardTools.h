@@ -20,7 +20,7 @@ bool xtoiFit(const string& word, int num);
 } // namespace ToInt
 
 namespace MainArgsHandle {
-bool           inVector(vector<string> argv, const string& str);
+bool           inVector(const vector<string>& argv, const string& str);
 vector<string> charListToVector(int argc, char* args[]);
 bool           inCharList(int argc, char* argv[], const string& str);
 } // namespace MainArgsHandle

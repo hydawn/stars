@@ -1,6 +1,7 @@
 /*-- encoding: UTF-8 --*/
 #include <stdexcept>
 #include <iostream>
+#include <algorithm>
 #include "boardTools.h"
 
 namespace MyShortList {
@@ -59,12 +60,8 @@ bool inCharList(int argc, char* argv[], const string& str) {
 	return false;
 }
 
-bool inVector(vector<string>& argv, const string& str) {
-	vector<string>::iterator iter = argv.begin();
-	for (; iter != argv.end(); ++iter)
-		if (*iter == str)
-			return true;
-	return false;
+bool inVector(const vector<string>& argv, const string& str) {
+	return argv.end() != std::find(argv.begin(), argv.end(), str);
 }
 } // namespace MainArgsHandle
 
