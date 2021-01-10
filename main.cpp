@@ -113,7 +113,7 @@ bool argsHandle(int argc, char* argv[], string& firstMode) {
 					rounds = ToInt::myStoi(argv[2]);
 				}
 				catch (const std::exception&) {
-					printf("Invalid option: %s", argv[2]);
+					printf("Invalid option: %s\n", argv[2]);
 					throw invalid_argument("wrong usage of option --test");
 				}
 			}
@@ -134,7 +134,7 @@ bool argsHandle(int argc, char* argv[], string& firstMode) {
 			autoTest(rounds, MainArgsHandle::charListToVector(argc, argv));
 			return false;
 		}
-		printf("option %s doesn't exit or wrong usage", argv[1]);
+		printf("option %s doesn't exit or wrong usage\n", argv[1]);
 		throw invalid_argument("invalid option");
 	}
 	return true;
