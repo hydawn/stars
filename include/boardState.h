@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "boardTools.h"
+#include "tools.h"
 
 using std::logic_error;
 using std::runtime_error;

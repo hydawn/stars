@@ -1,7 +1,6 @@
 #ifndef _BOARDTEST_H_
 #define _BOARDTEST_H_ 1
 #include "boardInterface.h"
-#include "boardTools.h"
 
 // reload getInput to test
 class BoardTest : public BoardInterface {

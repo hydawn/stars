@@ -3,7 +3,6 @@
 #include <fstream>
 #include <iostream>
 #include "boardState.h"
-#include "boardTools.h"
 
 using std::cin;
 using std::cout;

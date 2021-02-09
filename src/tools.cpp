@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
-#include "boardTools.h"
+#include "tools.h"
 
 namespace MyShortList {
 bool inList(vector<int>& sl, int i) {
@@ -54,13 +54,6 @@ vector<string> charListToVector(int argc, char* args[]) {
 	for (int i = 0; i < argc; ++i)
 		rax.push_back(args[i]);
 	return rax;
-}
-
-bool inCharList(int argc, char* argv[], const string& str) {
-	for (int i = 0; i < argc; ++i)
-		if (!strcmp(argv[i], str.c_str()))
-			return true;
-	return false;
 }
 
 bool inVector(const vector<string>& argv, const string& str) {
