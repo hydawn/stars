@@ -8,19 +8,12 @@
 #include <vector>
 #include "boardTools.h"
 
-#ifdef STARS_DEBUG_INFO
 using std::logic_error;
-#endif // STARS_DEBUG_INFO
-
 using std::runtime_error;
 using std::string;
 using std::vector;
-/*****
-typedef vector<short>::iterator vIter;
-typedef vector<short> shortv;
-*****/
-typedef ShortList::iterator vIter;
-typedef ShortList           shortv;
+typedef vector<int>::iterator vIter;
+typedef vector<int> shortv;
 
 class oneMove {
 public:
@@ -36,49 +29,19 @@ public:
 	add mode just have mode, move and player
 	reverse mode just have mode and move
 	*/
-	bool   byComputer; // is this move taken by the computer
-	bool   hintOn;
+	bool   byComputer = true; // is this move taken by the computer
+	bool   hintOn = true;
 	shortv list;
 	string mode;
 	short  move; // the move that is been taken after the computer analyse
-	char   player;
-	short  suggestion; // suggested move by the computer
-	double time;       // time taken for the computer to respond
+	char   player = '0';
+	short  suggestion = 0; // suggested move by the computer
+	double time = 0;       // time taken for the computer to respond
 	string word;
 
-	oneMove()
-		: byComputer(true),
-		  hintOn(true),
-		  list(shortv()),
-		  mode(string()),
-		  player(' '),
-		  suggestion(0),
-		  time(0),
-		  word(string()) {}
-	oneMove(Json::Value root) {
-		byComputer = root["byComputer"].asBool();
-		hintOn     = root["hintOn"].asBool();
-		list       = root["list"];
-		mode       = root["mode"].asString();
-		move       = root["move"].asInt();
-		player     = root["player"].asInt();
-		suggestion = root["suggestion"].asInt();
-		time       = root["time"].asDouble();
-		word       = root["word"].asString();
-	}
-	operator Json::Value() {
-		Json::Value root;
-		root["byComputer"] = byComputer;
-		root["hintOn"]     = hintOn;
-		root["list"]       = list;
-		root["mode"]       = mode;
-		root["move"]       = move;
-		root["player"]     = player;
-		root["suggestion"] = suggestion;
-		root["time"]       = time;
-		root["word"]       = word;
-		return root;
-	}
+	oneMove() {}
+	oneMove(const Json::Value& root);
+	operator Json::Value();
 	friend std::ostream& operator<<(std::ostream& os, oneMove& move);
 };
 
@@ -94,10 +57,8 @@ private:
 	short  rows;
 	short  cols;
 	short  winn; // winning number
-#ifdef STARS_DEBUG_INFO
 	static int removeNumber;
 	static int addNumber;
-#endif
 
 public:
 	BoardState() : rows(8), cols(8), winn(4) { generate(); }
@@ -159,7 +120,7 @@ public:
 	// tools
 	void nonFullColumn(shortv& nonFull);
 	void sweepFullColumn(shortv& nonFull, short col);
-	char rPlayer(const char plr);
+	char rPlayer(const char plr) { return plr ^ 0x68; }
 	int  pieceCount();
 
 	// random
@@ -184,7 +145,9 @@ public:
 #endif
 		board[col - 1][top[col - 1]++] = plr;
 	}
-	void remove(const short col) {
+	void remove() {}
+	template<typename T, typename... Args>
+	void remove(const T col, Args... args) {
 #ifdef STARS_DEBUG_INFO
 		if (col < 1 || col > cols)
 			throw logic_error("trying to remove in a wrong place");
@@ -193,18 +156,11 @@ public:
 		++removeNumber;
 #endif
 		board[col - 1][(top[col - 1]--) - 1] = ' ';
-	}
-	void remove(const short first, const short second, const short third) {
-		remove(first);
-		remove(second);
-		remove(third);
+		remove(args...);
 	}
 	// debug
-#ifdef STARS_DEBUG_INFO
-	int  getRemoveNumber() { return removeNumber; }
-	int  getAddNumber() { return addNumber; }
-	bool match();
-#endif
+	bool match() { return removeNumber == addNumber; }
+	bool valid();
 
 	// refresh
 	void refreshBoard(char** b);

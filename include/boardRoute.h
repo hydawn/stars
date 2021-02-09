@@ -4,7 +4,6 @@
 #include <string>
 #include <stdexcept>
 #include <iostream>
-#include "shortList.h"
 
 using std::cout;
 using std::endl;
@@ -18,13 +17,14 @@ const int freeNode = -2;
 
 class RouteNode {
 public:
-	short              data;
-	bool               print;
-	RouteNode*         prev;
+	RouteNode*         prev = nullptr;
 	vector<RouteNode*> next;
+	short              data = 0;
+	bool               print = true;
 
-	RouteNode()
-		: data(0), print(true), prev(nullptr), next(vector<RouteNode*>()) {}
+	RouteNode() {}
+	RouteNode(RouteNode* prev_, const short data_)
+		: prev(prev_), next(vector<RouteNode*>()), data(data_), print(true) {}
 	RouteNode(const RouteNode& rn) { clone(rn); }
 
 	void clone(const RouteNode& rn);
@@ -67,7 +67,7 @@ public:
 
 	// change
 	void add(short data);
-	void add(ShortList& list);
+	void add(vector<int>& list);
 
 	// related to show
 	void showRoute();         // for boardAnalyse

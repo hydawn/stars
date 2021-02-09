@@ -29,7 +29,7 @@ public:
 			  record.getDefaultSettings("gameIsOver", "askToSaveBoard")),
 		  lessPrint(false),
 		  noPrint(false) {}
-	BoardTest(const vector<string>& option);
+	BoardTest(const vector<string>& args);
 
 	// virtual
 	virtual bool   askToReverse(bool yes) { return false; }

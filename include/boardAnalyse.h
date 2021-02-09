@@ -42,28 +42,19 @@ public:
 	string oneMoveAnalyse(
 		const char plr, const short col, const short depth,
 		const short maxDepth = 5);
-	string    returnMove(const char plr, shortv& list, const short depth);
-	string    returnMoveDebug(const char plr, shortv& list, const short depth);
 	long long returnTime(
-		const char plr, shortv& list, const short depth, string& word,
-		bool trackRoute);
+		const char plr, shortv& list, const int depth, string& word);
 	int respond(
 		const char plr, oneMove& thisMove, bool showCal, bool showTime,
 		bool starsOn, bool trackRoute);
 
 	// recursive analyse
-	// simple and elegant, but too powerful for this game
-	// #ifdef STARS_ADVANCED_FUNCTIONS
-	string returnSituation(
-		const char plr, shortv& list, short returnMoveDepth = 3,
-		int recursiveCount = 0, int countTop = 3);
+	string recursiveSituationRoute(
+		const char plr, shortv& list, int returnMoveDepth = 3,
+		int recCount = 0, int countTop = 3);
 	string recursiveSituation(
-		const char plr, shortv& list, short returnMoveDepth = 3,
-		int recursiveCount = 0, int countTop = 3);
-	long long recursiveTime(
-		const char plr, shortv& list, const short returnMoveDepth, int countTop,
-		string& word);
-	// #endif
+		const char plr, shortv& list, int returnMoveDepth = 3,
+		int recCount = 0, bool firstRound = true);
 
 	// change board
 	void go(const char plr, const short move);
@@ -87,6 +78,13 @@ public:
 	// custom board
 	void customBoard(const short cl, const short ro, const short wi) {
 		state.customBoard(cl, ro, wi);
+	}
+
+	// check matching
+	void checkMatch();
+	void clearMatch() {
+		state.addNumber    = 0;
+		state.removeNumber = 0;
 	}
 };
 

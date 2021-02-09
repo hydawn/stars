@@ -16,6 +16,7 @@ void displayHelp(string mode = "help") {
 		"Description:\n  Test the game by automatically playing it in a "
 		"specified mode for a few rounds\n\n"
 		"Usage:\n"
+		"  stars --test\n"
 		"  stars --test <number> [suboption] [suboption]\n\n"
 		"Suboptions:\n"
 		"  --debug             test debug mode (default)\n"
@@ -26,7 +27,7 @@ void displayHelp(string mode = "help") {
 		"  --no-print          print only the finishing result\n\n"
 		"The argument <number> must follow the option test closely, the "
 		"program will\n"
-		"test the game for that number of rounds. If argument <number> is not "
+		"run the game for that number of rounds. If argument <number> is not "
 		"given\n"
 		"it will be set to one by default.\n\n"
 		"[suboption] can also be omitted and set to its default value\n";

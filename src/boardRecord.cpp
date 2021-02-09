@@ -405,7 +405,7 @@ void BoardRecord::showSavedBoard(const Json::Value& state) {
 }
 
 void BoardRecord::refreshHistoryMove(const Json::Value& hm) {
-	for (oneMove om : hm) {
+	for (const oneMove om : hm) {
 		historyMove.push_back(om);
 	}
 }

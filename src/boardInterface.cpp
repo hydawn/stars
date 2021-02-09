@@ -1,6 +1,8 @@
 /*-- encoding: UTF-8 --*/
 #include "boardInterface.h"
 
+const int maxBoardSize = 32;
+
 BoardInterface::BoardInterface()
 	: gamesFilename("Stars_games.json"),
 	  settingsFilename("Stars_settings.json"),
@@ -245,9 +247,9 @@ short BoardInterface::getCustomInput(const string item) {
 	short customNumber;
 	while (true) {
 #ifndef STARS_LANG_CHINESE
-		cout << item << " (2~" << SHORTV_LENGTH - 1 << ") = ";
+		cout << item << " (2~" << maxBoardSize << ") = ";
 #else
-		cout << toChinese(item) << " (2~" << SHORTV_LENGTH - 1 << ") = ";
+		cout << toChinese(item) << " (2~" << maxBoardSize << ") = ";
 #endif // STARS_LANG_CHINESE
 		cin.getline(input, 16);
 		if (!strcmp(input, "e") || !strcmp(input, "exit"))
@@ -266,7 +268,7 @@ short BoardInterface::getCustomInput(const string item) {
 			continue;
 		}
 
-		if (customNumber > 1 && customNumber < SHORTV_LENGTH - 1)
+		if (customNumber > 1 && customNumber < maxBoardSize)
 			return customNumber;
 #ifndef STARS_LANG_CHINESE
 		cout << "Let's try again\n";

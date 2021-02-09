@@ -1,8 +1,6 @@
 #include "boardRoute.h"
 
-#ifdef STARS_DEBUG_INFO
 using std::logic_error;
-#endif
 
 int RouteTree::branches = 0;
 
@@ -192,16 +190,13 @@ RouteNode* RouteTree::fastBackward(RouteNode* node, int num) {
 }
 
 void RouteTree::add(short data) {
-	RouteNode* p = new RouteNode;
-	p->data      = data;
-	p->prev      = crnt;
-	p->print     = true;
+	RouteNode* p = new RouteNode(crnt, data);
 	crnt->next.push_back(p);
 }
 
-void RouteTree::add(ShortList& list) {
-	for (ShortList::iterator iter = list.begin(); iter != list.end(); ++iter)
-		add(*iter);
+void RouteTree::add(vector<int>& list) {
+	for (int i : list)
+		add(i);
 }
 
 void RouteTree::showRoute(int flag) {

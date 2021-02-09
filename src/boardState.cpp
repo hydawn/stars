@@ -1,9 +1,37 @@
+#include <algorithm>
 #include "boardState.h"
 
-#ifdef STARS_DEBUG_INFO
+
 int BoardState::removeNumber;
 int BoardState::addNumber;
-#endif
+
+
+oneMove::oneMove(const Json::Value& root) {
+	byComputer = root["byComputer"].asBool();
+	hintOn     = root["hintOn"].asBool();
+	// list       = root["list"];
+	MyShortList::copy(list, root["list"]);
+	mode       = root["mode"].asString();
+	move       = root["move"].asInt();
+	player     = root["player"].asInt();
+	suggestion = root["suggestion"].asInt();
+	time       = root["time"].asDouble();
+	word       = root["word"].asString();
+}
+
+oneMove::operator Json::Value() {
+	Json::Value root;
+	root["byComputer"] = byComputer;
+	root["hintOn"]     = hintOn;
+	root["list"]       = MyJson::trans(list);
+	root["mode"]       = mode;
+	root["move"]       = move;
+	root["player"]     = player;
+	root["suggestion"] = suggestion;
+	root["time"]       = time;
+	root["word"]       = word;
+	return root;
+}
 
 BoardState::BoardState(const Json::Value& root)
 	: rows(root["row"].asInt()),
@@ -123,7 +151,7 @@ bool BoardState::colCanRemove(const short col) {
 
 char BoardState::getTopPiece(short col) {
 	if (!colCanRemove(col))
-		throw logic_error("getTopPiece: call this on an empty column");
+		throw std::logic_error("getTopPiece: call this on an empty column");
 	return board[col - 1][top[col - 1] - 1];
 }
 
@@ -144,28 +172,20 @@ char BoardState::isOver() {
 
 void BoardState::nonFullColumn(shortv& nonFull) {
 	nonFull.clear();
-	for (short i = 0; i < cols; ++i)
+	for (int i = 0; i < cols; ++i)
 		if (top[i] != starArea[i])
 			nonFull.push_back(i + 1);
 }
 
 void BoardState::sweepFullColumn(shortv& nonFull, short col) {
 	if (top[col - 1] == starArea[col - 1])
-		nonFull.del(col);
+		nonFull.erase(std::find(nonFull.begin(), nonFull.end(), col));
 	shortv realNonFull;
 	nonFullColumn(realNonFull);
 #ifdef STARS_DEBUG_INFO
-	if (!MyShortList::equal(nonFull, realNonFull))
+	if (nonFull != realNonFull)
 		throw logic_error("this non-full and the real non-full didn't match");
 #endif
-}
-
-char BoardState::rPlayer(const char plr) {
-	if (plr == 'X')
-		return '0';
-	if (plr == '0')
-		return 'X';
-	throw runtime_error("No such player exist");
 }
 
 int BoardState::pieceCount() {
@@ -290,10 +310,9 @@ short BoardState::randomSuggestion(
 	return randomSuggestion(plr, intersectionList, mode);
 }
 
-#ifdef STARS_DEBUG_INFO
-bool BoardState::match() {
-	for (short i = 0; i < cols; ++i) {
-		short j = 0;
+bool BoardState::valid() {
+	for (int i = 0; i < cols; ++i) {
+		int j = 0;
 		while (j < rows && (board[i][j] == 'X' || board[i][j] == '0'))
 			++j;
 		if (top[i] != j)
@@ -301,7 +320,6 @@ bool BoardState::match() {
 	}
 	return true;
 }
-#endif
 
 bool BoardState::winPieceNearBy(const short col, const short ro) {
 	// grow up, right, upright, downright

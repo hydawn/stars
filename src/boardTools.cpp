@@ -5,14 +5,11 @@
 #include "boardTools.h"
 
 namespace MyShortList {
-bool inList(ShortList& sl, short i) {
-	for (short j : sl)
-		if (j == i)
-			return true;
-	return false;
+bool inList(vector<int>& sl, int i) {
+	return sl.end() != find(sl.begin(), sl.end(), i);
 }
 
-void shortIntersection(ShortList& dest, ShortList& sour1, ShortList& sour2) {
+void shortIntersection(vector<int>& dest, vector<int>& sour1, vector<int>& sour2) {
 	dest.clear();
 	if (sour1.empty())
 		return;
@@ -22,19 +19,25 @@ void shortIntersection(ShortList& dest, ShortList& sour1, ShortList& sour2) {
 	}
 }
 
-bool equal(ShortList& l1, ShortList& l2) {
-	if (l1.size() != l2.size())
-		return false;
-	for (short i = 0; i < l1.size(); ++i)
-		if (l1[i] != l2[i])
-			return false;
-	return true;
+void copy(vector<int>& list, const Json::Value& root) {
+	list.clear();
+	for (int i = 0; i < root.size(); ++i)
+		list.push_back(root[i].asInt());
 }
-}; // namespace MyShortList
+} // namespace MyShortList
+
+namespace MyJson {
+Json::Value trans(const vector<int>& list) {
+	Json::Value root;
+	for (int i : list)
+		root.append(i);
+	return root;
+}
+} // namespace MyJson
 
 namespace ToInt {
-int myStoi(string word) {
-	int num = std::stoi(word); // stupid stoi
+int myStoi(const string word) {
+	int num = std::stoi(word);
 	if (!xtoiFit(word, num))
 		throw std::invalid_argument("myStoi::invalid_argument");
 	return num;
