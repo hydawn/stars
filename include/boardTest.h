@@ -4,7 +4,9 @@
 
 // reload getInput to test
 class BoardTest : public BoardInterface {
-public:
+	friend void autoTest(int n, const vector<string>& args);
+
+private:
 	char toWinn;
 	bool showCalculate;
 	bool showTime;
@@ -16,6 +18,7 @@ public:
 
 	static char lastMove;
 
+public:
 	BoardTest()
 		: BoardInterface(),
 		  toWinn('N'),

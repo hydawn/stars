@@ -15,21 +15,29 @@ using std::vector;
 typedef vector<int>::iterator vIter;
 typedef vector<int> shortv;
 
+class BoardState;
+class BoardAnalyse;
+class BoardInterface;
+class BoardTest;
+
 class oneMove {
-public:
+	friend class BoardState;
+	friend class BoardAnalyse;
+	friend class BoardInterface;
+	friend class BoardTest;
+	friend void autoTest(int n, const vector<string>& args);
+
+private :
 	/*
-	respond can give oneMove player, word,
-	list, time(by computer),
-	mode function can give oneMove mode, move, time(by a person), byComputer,
-	suggestion, player(reverse & add), then push back to boardRecord
-	*/
-	/*
-	debug has them all
-	normal doesn't have suggestion
-	add mode just have mode, move and player
-	reverse mode just have mode and move
-	*/
-	bool   byComputer = true; // is this move taken by the computer
+	 * respond can give oneMove player, word,
+	 * list, time(by computer),
+	 * mode function can give oneMove mode, move, time(by a person),
+	 * byComputer, suggestion, player(reverse & add), then push back to
+	 * boardRecord debug has them all normal doesn't have suggestion add
+	 * mode just have mode, move and player reverse mode just have mode and
+	 * move
+	 * */
+	bool byComputer = true; // is this move taken by the computer
 	bool   hintOn = true;
 	shortv list;
 	string mode;
@@ -39,6 +47,7 @@ public:
 	double time = 0;       // time taken for the computer to respond
 	string word;
 
+public:
 	oneMove() {}
 	oneMove(const Json::Value& root);
 	operator Json::Value();

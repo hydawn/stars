@@ -15,13 +15,20 @@ const int goodNode = -1;
 const int badNode  = 0;
 const int freeNode = -2;
 
+class RouteTree;
+class BoardInterface;
+
 class RouteNode {
-public:
+	friend class RouteTree;
+	friend class BoardInterface;
+
+private:
 	RouteNode*         prev = nullptr;
 	vector<RouteNode*> next;
 	short              data = 0;
 	bool               print = true;
 
+public:
 	RouteNode() {}
 	RouteNode(RouteNode* prev_, const short data_)
 		: prev(prev_), next(vector<RouteNode*>()), data(data_), print(true) {}
@@ -38,11 +45,16 @@ public:
 
 typedef vector<RouteNode*>::iterator vRi;
 
+
 class RouteTree {
-public:
+	friend class BoardInterface;
+
+private:
 	RouteNode* head;
 	RouteNode* crnt;
 	static int branches;
+
+public:
 	RouteTree() { generate(); }
 	RouteTree(const RouteTree& rt);
 	~RouteTree() { free(head); }
