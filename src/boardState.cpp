@@ -1,29 +1,29 @@
+#include <iostream>
 #include <algorithm>
 #include "boardState.h"
 
+using std::cout;
 
 int BoardState::removeNumber;
 int BoardState::addNumber;
 
 
-oneMove::oneMove(const Json::Value& root) {
-	byComputer = root["byComputer"].asBool();
-	hintOn     = root["hintOn"].asBool();
-	// list       = root["list"];
-	MyShortList::copy(list, root["list"]);
-	mode       = root["mode"].asString();
-	move       = root["move"].asInt();
-	player     = root["player"].asInt();
-	suggestion = root["suggestion"].asInt();
-	time       = root["time"].asDouble();
-	word       = root["word"].asString();
-}
+oneMove::oneMove(const Json::Value& root)
+	: mode(std::move(root["mode"].asString())),
+	  word(std::move(root["word"].asString())),
+	  list(std::move(MyJson::toVectorInt(root["list"]))),
+	  time(root["time"].asDouble()),
+	  move(root["move"].asInt()),
+	  suggestion(root["suggestion"].asInt()),
+	  player(root["player"].asInt()),
+	  byComputer(root["byComputer"].asBool()),
+	  hintOn(root["hintOn"].asBool()) {}
 
 oneMove::operator Json::Value() {
 	Json::Value root;
 	root["byComputer"] = byComputer;
 	root["hintOn"]     = hintOn;
-	root["list"]       = MyJson::trans(list);
+	root["list"]       = MyJson::toValue(list);
 	root["mode"]       = mode;
 	root["move"]       = move;
 	root["player"]     = player;
@@ -34,137 +34,75 @@ oneMove::operator Json::Value() {
 }
 
 BoardState::BoardState(const Json::Value& root)
-	: rows(root["row"].asInt()),
-	  cols(root["column"].asInt()),
+	: board(vector<string>(root["column"].asInt())),
+	  top(vector<int>(board.size())),
+	  starArea(vector<int>(board.size())),
+	  rows(root["row"].asInt()),
+	  cols(board.size()),
 	  winn(root["winn"].asInt()) {
-	generate();
-	for (short i = 0; i < cols; ++i) {
-		strcpy(board[i], root["board"][i].asCString());
-		top[i] = root["top"][i].asInt();
+	for (int i = 0; i < cols; ++i) {
+		board[i] = std::move(root["board"][i].asString());
+		top[i]   = root["top"][i].asInt();
 	}
-}
-
-void BoardState::generate() {
-	board    = new char*[cols];
-	top      = new short[cols];
-	starArea = new short[cols];
-	for (short i = 0; i < cols; ++i) {
-		top[i]      = 0;
-		starArea[i] = rows;
-		board[i]    = new char[rows + 1];
-		for (short j = 0; j < rows; ++j)
-			board[i][j] = ' ';
-	}
-}
-
-void BoardState::generate(char** b, const short* t) {
-	board    = new char*[cols];
-	top      = new short[cols];
-	starArea = new short[cols];
-	for (short i = 0; i < cols; ++i) {
-		board[i]    = new char[rows + 1];
-		top[i]      = t[i];
-		starArea[i] = rows;
-	}
-	refreshBoard(b);
-}
-
-void BoardState::free() {
-	freeBoard(board, cols);
-	delete[] top;
-	delete[] starArea;
-}
-
-void BoardState::freeBoard(char** b, int length) {
-	for (short i = 0; i < length; ++i)
-		delete[] b[i];
-	delete[] b;
-}
-
-BoardState& BoardState::operator=(const BoardState& bh) {
-	if (this == &bh)
-		return *this;
-	free();
-	cols = bh.cols;
-	rows = bh.rows;
-	winn = bh.winn;
-	generate(bh.board, bh.top);
-	return *this;
 }
 
 Json::Value BoardState::boardToJson() {
 	Json::Value root;
-	for (short i = 0; i < cols; ++i) {
-		board[i][rows] = '\0';
-		root.append(board[i]);
-	}
+	for (const string& str : board)
+		root.append(str);
 	return root;
 }
 
 Json::Value BoardState::topToJson() {
-	return arraryToJson(top, cols);
-}
-
-template <typename T>
-Json::Value BoardState::arraryToJson(T a[], int n) {
 	Json::Value root;
-	for (int i = 0; i < n; ++i)
-		root.append(a[i]);
+	for (const int i : top)
+		root.append(i);
 	return root;
 }
 
-void BoardState::show() {
-	short i = 1;
+void BoardState::show() const {
 	printHead();
-	for (short i = rows - 1; i > -1; --i) {
-		for (short j = 0; j < cols; ++j)
-			printf("|%c", board[j][i]);
-		printf("|\n");
+	int i = 1;
+	for (int i = rows - 1; ~i; --i) {
+		for (int j = 0; j < cols; ++j)
+			cout << '|' << board[j][i];
+		cout << "|\n";
 	}
 }
 
-void BoardState::printHead() {
+void BoardState::printHead() const {
 	for (int i = 1; i <= cols; ++i) {
 		if (i <= 10)
-			printf(" %d", i);
-		else
-			printf("%d", i);
+			cout << ' ';
+		cout << i;
 	}
-	printf("\n");
+	cout << '\n';
 }
 
-bool BoardState::colCanAdd(const short col) {
-	if (col < 1 || col > cols)
-		return false;
-	if (top[col - 1] == rows)
-		return false;
-	return true;
+bool BoardState::colCanAdd(const int col) {
+	return col > 0 && col <= cols && top[col - 1] != rows;
 }
 
-bool BoardState::colCanRemove(const short col) {
-	if (col < 1 || col > cols)
-		return false;
-	if (top[col - 1] == 0)
-		return false;
-	return true;
+bool BoardState::colCanRemove(const int col) {
+	return col > 0 && col <= cols && top[col - 1] != 0;
 }
 
-char BoardState::getTopPiece(short col) {
+char BoardState::getTopPiece(const int col) {
 	if (!colCanRemove(col))
 		throw std::logic_error("getTopPiece: call this on an empty column");
 	return board[col - 1][top[col - 1] - 1];
 }
 
 bool BoardState::boardIsFull() {
-	for (short i = 1; i <= cols; ++i)
-		if (!colIsFull(i))
+	for (const int i : top)
+		if (i != rows)
 			return false;
 	return true;
 }
 
 char BoardState::isOver() {
-	for (short i = 0; i < cols; ++i)
-		for (short j = 0; j < top[i]; ++j)
+	for (int i = 0; i < cols; ++i)
+		for (int j = 0; j < top[i]; ++j)
 			if (winPieceNearBy(i, j))
 				return board[i][j];
 	return 'N';
@@ -172,12 +110,12 @@ char BoardState::isOver() {
 
 void BoardState::nonFullColumn(shortv& nonFull) {
 	nonFull.clear();
-	for (int i = 0; i < cols; ++i)
+	for (int i = 0; i < (int)top.size(); ++i)
 		if (top[i] != starArea[i])
 			nonFull.push_back(i + 1);
 }
 
-void BoardState::sweepFullColumn(shortv& nonFull, short col) {
+void BoardState::sweepFullColumn(shortv& nonFull, int col) {
 	if (top[col - 1] == starArea[col - 1])
 		nonFull.erase(std::find(nonFull.begin(), nonFull.end(), col));
 	shortv realNonFull;
@@ -190,12 +128,12 @@ void BoardState::sweepFullColumn(shortv& nonFull, short col) {
 
 int BoardState::pieceCount() {
 	int count = 0;
-	for (int i = 0; i < cols; ++i)
-		count += top[i];
+	for (const int i : top)
+		count += i;
 	return count;
 }
 
-short BoardState::randomMove() {
+int BoardState::randomMove() {
 	shortv list;
 	nonFullColumn(list);
 #ifdef STARS_DEBUG_INFO
@@ -205,7 +143,7 @@ short BoardState::randomMove() {
 	return randomMove(list);
 }
 
-short BoardState::randomMove(shortv& list) {
+int BoardState::randomMove(shortv& list) {
 #ifdef STARS_DEBUG_INFO
 	if (list.empty())
 		throw logic_error("trying randomMove(shortv& list) in an empty list");
@@ -214,30 +152,30 @@ short BoardState::randomMove(shortv& list) {
 	return list[rand() % list.size()];
 }
 
-short BoardState::randomSuggestion(
+int BoardState::randomSuggestion(
 	const char plr, shortv& list, const string& mode) {
 	shortv opp2, opp1, plr2, plr1;
 	char   opp = rPlayer(plr);
 	srand((unsigned)time(NULL));
-	for (vIter col = list.begin(); col != list.end(); ++col) {
-		if (colIsFull(*col) || colIsEmpty(*col))
-			;
-		else if (board[*col - 1][top[*col - 1] - 1] == plr) {
-			if (top[*col - 1] - 1 > 0 &&
-				board[*col - 1][top[*col - 1] - 2] == plr)
-				plr2.push_back(*col);
+	for (const int col : list) {
+		if (colIsFull(col) || colIsEmpty(col))
+			continue;
+		string& line = board[col - 1];
+		int     head = top[col - 1] - 1;
+		if (line[head] == plr) {
+			if (head > 0 && line[head - 1] == plr)
+				plr2.push_back(col);
 			else
-				plr1.push_back(*col);
+				plr1.push_back(col);
 		}
 		else {
-			if (top[*col - 1] - 1 > 0 &&
-				board[*col - 1][top[*col - 1] - 2] == opp)
-				opp2.push_back(*col);
+			if (head > 0 && line[head - 1] == opp)
+				opp2.push_back(col);
 			else
-				opp1.push_back(*col);
+				opp1.push_back(col);
 		}
 	}
-	short ran = rand() % 100;
+	int ran = rand() % 100;
 	if (mode == "progressive") {
 		if (!plr2.empty() && ran < 72)
 			return randomMove(plr2);
@@ -273,7 +211,7 @@ short BoardState::randomSuggestion(
 	return randomMove(list);
 }
 
-short BoardState::randomSuggestion(
+int BoardState::randomSuggestion(
 	const char plr, shortv& list, shortv oppList, const string& mode) {
 #ifdef STARS_DEBUG_INFO
 	if (list.empty())
@@ -321,11 +259,11 @@ bool BoardState::valid() {
 	return true;
 }
 
-bool BoardState::winPieceNearBy(const short col, const short ro) {
+bool BoardState::winPieceNearBy(const int col, const int ro) {
 	// grow up, right, upright, downright
-	short i       = 1;
-	char  present = board[col][ro];
-	bool  canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
+	int  i       = 1;
+	char present = board[col][ro];
+	bool canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
 		 canDown = ro >= winn - 1;
 	if (canRight) {
 		// right
@@ -359,13 +297,12 @@ bool BoardState::winPieceNearBy(const short col, const short ro) {
 	return false;
 }
 
-bool BoardState::winPieceButOne(
-	const short col, const short ro, const short win) {
+bool BoardState::winPieceButOne(const int col, const int ro, const int win) {
 	// grow right, upright, downright
-	short i         = 1;
-	bool  butOneMet = false;
-	char  present   = board[col][ro];
-	bool  canUp = ro <= top[col] - win, canRight = col <= cols - win,
+	int  i         = 1;
+	bool butOneMet = false;
+	char present   = board[col][ro];
+	bool canUp = ro <= top[col] - win, canRight = col <= cols - win,
 		 canDown = ro >= win - 1;
 	if (!canRight)
 		return false;
@@ -404,47 +341,33 @@ bool BoardState::winPieceButOne(
 	return false;
 }
 
-void BoardState::refreshBoard(char** hb) {
-	for (short i = 0; i < cols; ++i)
-		for (short j = 0; j < rows; ++j)
-			board[i][j] = hb[i][j];
-}
-
-void BoardState::refreshTop() {
-	for (short i = 0; i < cols; ++i) {
-		short j = 0;
-		while (j < rows && board[i][j] != ' ')
-			++j;
-		top[i] = j;
-	}
-}
-
-void BoardState::customBoard(const short cl, const short ro, const short wi) {
-	free();
-	cols = cl;
-	rows = ro;
-	winn = wi;
-	generate();
+void BoardState::customBoard(const int cl, const int ro, const int wi) {
+	cols     = cl;
+	rows     = ro;
+	winn     = wi;
+	board    = std::move(vector<string>(cols, string(rows, ' ')));
+	top      = std::move(vector<int>(cols, 0));
+	starArea = std::move(vector<int>(cols, rows));
 }
 
 void BoardState::areaTopTransform() {
-	for (short i = 0; i < cols; ++i)
+	for (int i = 0; i < cols; ++i)
 		starArea[i] = 0;
-	for (short i = 0; i < cols; ++i)
+	for (int i = 0; i < cols; ++i)
 		setATopWithTop(i, top[i]);
 
 	// check for bulks of piece
-	for (short i = 0; i < cols - 1; ++i) {
-		if (top[i] && top[i + 1]) {
-			setATopWithNumber(i + 3, 1);
-			setATopWithNumber(i - 2, 1);
+	for (int i = 1; i < cols; ++i) {
+		if (top[i] && top[i - 1]) {
+			setATopWithNumber(i + 2, 1);
+			setATopWithNumber(i - 3, 1);
 		}
 	}
 
 	// then check for overflow
-	for (short i = 0; i < cols; ++i)
-		if (starArea[i] > rows)
-			starArea[i] = rows;
+	for (int& i : starArea)
+		if (i > rows)
+			i = rows;
 
 	// check if stars are even
 	int stars = starNumber();
@@ -452,12 +375,13 @@ void BoardState::areaTopTransform() {
 		return;
 	// randomly chose a non-full column and add it
 	shortv starNotZero, starNotFull, inter;
-	for (short i = 0; i < cols; ++i) {
+	for (int i = 0; i < cols; ++i) {
+		// not full of stars(maybe doesn't have stars)
 		if (starArea[i])
-			starNotFull.push_back(
-				i + 1); // not full of stars(maybe doesn't have stars)
+			starNotFull.push_back(i + 1);
+		// have stars but may be full of stars
 		if (rows != starArea[i])
-			starNotZero.push_back(i + 1); // have stars but may be full of stars
+			starNotZero.push_back(i + 1);
 	}
 	MyShortList::shortIntersection(inter, starNotFull, starNotZero);
 	if (inter.empty())
@@ -467,31 +391,27 @@ void BoardState::areaTopTransform() {
 }
 
 void BoardState::areaTopRestore() {
-	for (short i = 0; i < cols; ++i)
-		starArea[i] = rows;
+	for (int& i : starArea)
+		i = rows;
 }
 
 void BoardState::starShow() {
 	areaTopTransform();
-	short i = 1;
-	for (; i <= cols && i <= 10; ++i)
-		printf(" %d", i);
-	for (; i <= cols; ++i)
-		printf("%d", i);
-	printf("\n");
-	for (short i = rows - 1; i > -1; --i) {
-		for (short j = 0; j < cols; ++j) {
+	printHead();
+
+	for (int i = rows - 1; ~i; --i) {
+		for (int j = 0; j < cols; ++j) {
 			if (i < starArea[j])
-				printf("|%c", board[j][i]);
+				cout << '|' << board[j][i];
 			else
-				printf("|+");
+				cout << "|+";
 		}
-		printf("|\n");
+		cout << "|\n";
 	}
 	areaTopRestore();
 }
 
-void BoardState::setATopWithTop(short i, short t) {
+void BoardState::setATopWithTop(int i, int t) {
 	// important numbers here!
 	if (t == 0)
 		return;
@@ -505,7 +425,7 @@ void BoardState::setATopWithTop(short i, short t) {
 shortv BoardState::aTopFullColumn() {
 	areaTopTransform();
 	shortv list;
-	for (short i = 0; i < cols; ++i)
+	for (int i = 0; i < cols; ++i)
 		if (starArea[i] == 0)
 			list.push_back(i + 1);
 	return list;
@@ -523,8 +443,8 @@ int BoardState::starNumber() {
 int BoardState::threeRowCount(const char plr, shortv& safeList) {
 	int rax = 0;
 	winn--;
-	for (short i = 0; i < cols; ++i)
-		for (short j = 0; j < top[i]; ++j)
+	for (int i = 0; i < cols; ++i)
+		for (int j = 0; j < top[i]; ++j)
 			if (specialPiece(i, j) || winPieceButOne(i, j, winn + 1))
 				++rax;
 	winn++;
@@ -534,7 +454,7 @@ int BoardState::threeRowCount(const char plr, shortv& safeList) {
 shortv BoardState::makeThreeCols(const char plr, shortv& safeList) {
 	shortv rax;
 	int    counter;
-	for (short i : safeList) {
+	for (int i : safeList) {
 		counter = threeRowCount(plr, safeList);
 		add(plr, i);
 		counter -= threeRowCount(plr, safeList);
@@ -545,11 +465,11 @@ shortv BoardState::makeThreeCols(const char plr, shortv& safeList) {
 	return rax;
 }
 
-bool BoardState::specialPiece(const short col, const short ro) {
+bool BoardState::specialPiece(const int col, const int ro) {
 	// grow up, right, upright, downright
-	short i       = 1;
-	char  present = board[col][ro];
-	bool  canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
+	int  i       = 1;
+	char present = board[col][ro];
+	bool canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
 		 canDown = ro >= winn - 1;
 	if (canRight) {
 		// right
@@ -591,15 +511,21 @@ bool BoardState::specialPiece(const short col, const short ro) {
 	return false;
 }
 
-void BoardState::retInit(vector<oneMove>& his) {
+void BoardState::refreshTop() noexcept {
+	top = vector<int>(cols, 0);
+	for (int i = 0; i < cols; ++i)
+		top[i] = find(board[i].begin(), board[i].end(), ' ') - board[i].begin();
+}
+
+void BoardState::retInit(const vector<oneMove>& history) {
 	// return the state to the 'initial state' accroding to the history move
-	for (vector<oneMove>::reverse_iterator riter = his.rbegin();
-		 riter != his.rend(); ++riter) {
-		if (riter->mode == "debug" || riter->mode == "add" ||
-			riter->mode == "normal" || riter->mode == "test-debug" ||
-			riter->mode == "test-play")
+	for (auto riter = history.rbegin(); riter != history.rend(); ++riter) {
+		const string& currentMode = riter->mode;
+		if (currentMode == "debug" || currentMode == "add" ||
+			currentMode == "normal" || currentMode == "test-debug" ||
+			currentMode == "test-play")
 			remove(riter->move);
-		else if (riter->mode == "reverse")
+		else if (currentMode == "reverse")
 			add(riter->player, riter->move);
 #ifdef STARS_DEBUG_INFO
 		else

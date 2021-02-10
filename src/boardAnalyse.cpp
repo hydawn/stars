@@ -1,14 +1,9 @@
 /*-- encoding: UTF-8 --*/
+#include <algorithm>
 #include <numeric>
 #include "boardAnalyse.h"
 
 using std::logic_error;
-
-void BoardAnalyse::go(const char plr, const short move) {
-	if (!state.colCanAdd(move))
-		throw logic_error("Error: trying to add in a wrong place");
-	state.add(plr, move);
-}
 
 void BoardAnalyse::reverse(const int column) {
 	if (!state.colCanRemove(column))
@@ -140,7 +135,7 @@ string BoardAnalyse::oneMoveAnalyse(
 		word = oneMoveAnalyse(opp, list.front(), depth + 1, maxDepth);
 	if (word == "good")
 		word = "bad";
-	else
+	else if (word == "bad")
 		word = "good";
 	state.remove(col);
 	return word;
@@ -182,7 +177,86 @@ string BoardAnalyse::oneMoveAnalyseTrackRoute(
 }
 
 string BoardAnalyse::recursiveSituationTrackRoute(
-	const char plr, shortv& list, int recDepth, int recCount, bool firstRound) {
+	const char plr, shortv& list, int recDepth, int recCount) {
+	/*
+	 * record which position is good in the first round
+	 * in other rounds, return immediately when detected a good point
+	 * */
+
+	// checking
+	if (list.empty()) {
+		throw logic_error("recursiveSituation: given list is empty");
+		return "end";
+	}
+	if (state.isOver() != 'N')
+		throw logic_error(
+			"game is over, yet recursiveSituationTrackRoute is called");
+	if (state.boardIsFull())
+		throw logic_error(
+			"board is full, yet recursiveSituationTrackRoute is called");
+	// checking __
+
+	// if the situation is quite clear, just return
+	string word = analyse(plr, list);
+	if (word == "good" || word == "bad")
+		return word;
+
+	// if must return, but can do one move analysis
+	if (recDepth <= recCount) {
+		if (list.size() == 1) {
+			int node = -(plr >> 6);
+			// if plr == 0, then goodNode should be -1
+			return oneMoveAnalyseTrackRoute(plr, list.front(), ~node, node);
+		}
+		routes.add(freeNode);
+		return "free";
+	}
+	++recCount;
+
+	char   opp = state.rPlayer(plr);
+	shortv nextList, badList;
+
+	routes.add(list);
+	routes.forward(list.front());
+	for (const int col : list) {
+		state.add(plr, col);
+		word = analyse(opp, nextList);
+		if (word == "good") {
+			routes.add(badNode);
+			badList.push_back(col);
+		}
+		else if (word == "bad") {
+			routes.add(goodNode);
+			state.remove(col);
+			routes.backward();
+			return "good";
+		}
+		else {
+			word =
+				recursiveSituationTrackRoute(opp, nextList, recDepth, recCount);
+			if (word == "good")
+				badList.push_back(col);
+			else if (word == "bad") {
+				state.remove(col);
+				routes.backward();
+				return "good";
+			}
+		}
+
+		state.remove(col);
+		routes.nextNode();
+	}
+	routes.backward();
+
+	for (const int i : badList)
+		list.erase(find(list.begin(), list.end(), i));
+	if (list.empty())
+		return "bad";
+	return "free";
+}
+
+string BoardAnalyse::recursiveSituationTrackRouteFirstRound(
+	const char plr, shortv& list, int recDepth, int recCount) {
 	/*
 	 * record which position is good in the first round
 	 * in other rounds, return immediately when detected a good point
@@ -196,32 +270,34 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 		return "end";
 	}
 	if (state.isOver() != 'N')
-		throw logic_error("game is over, yet recursiveSituation is called");
+		throw logic_error(
+			"game is over, yet recursiveSituationTrackRoute is called");
 	if (state.boardIsFull())
-		throw logic_error("board is full, yet recursiveSituation is called");
+		throw logic_error(
+			"board is full, yet recursiveSituationTrackRoute is called");
 	// checking done
 
 	// if the situation is quite clear, just return
 	string word = analyse(plr, list);
-	if (word == "good" || word == "bad" /* || list.size() == 1 */)
+	if (word == "good" || word == "bad")
 		return word;
 
-	// if must return, but:
+	// if must return, but can do one move analysis
 	if (recDepth <= recCount) {
-		if (list.size() == 1)
-			return oneMoveAnalyseTrackRoute(
-				plr, list.front(), goodNode, badNode);
+		if (list.size() == 1) {
+			int node = -(plr >> 6);
+			// if plr == 0, then goodNode should be -1
+			return oneMoveAnalyseTrackRoute(plr, list.front(), ~node, node);
+		}
 		routes.add(freeNode);
 		return "free";
 	}
 	++recCount;
 
-	char   opp      = state.rPlayer(plr);
-	int    badCount = 0;
-	shortv nextList, goodList;
+	char   opp = state.rPlayer(plr);
+	shortv nextList, goodList, badList;
 
-	if (firstRound)
-		routes.clear();
+	routes.clear();
 	routes.add(list);
 	routes.forward(list.front());
 	for (const int col : list) {
@@ -229,30 +305,19 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 		word = analyse(opp, nextList);
 		if (word == "good") {
 			routes.add(badNode);
-			++badCount;
+			badList.push_back(col);
 		}
 		else if (word == "bad") {
 			routes.add(goodNode);
-			if (!firstRound) {
-				state.remove(col);
-				routes.backward();
-				return "good";
-			}
 			goodList.push_back(col);
 		}
 		else {
-			word = recursiveSituationTrackRoute(opp, nextList, recDepth,
-				recCount, false);
+			word =
+				recursiveSituationTrackRoute(opp, nextList, recDepth, recCount);
 			if (word == "good")
-				++badCount;
-			else if (word == "bad") {
-				if (!firstRound) {
-					state.remove(col);
-					routes.backward();
-					return "good";
-				}
+				badList.push_back(col);
+			else if (word == "bad")
 				goodList.push_back(col);
-			}
 		}
 
 		state.remove(col);
@@ -260,17 +325,20 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 	}
 	routes.backward();
 
-	if (badCount == list.size())
-		return "bad";
 	if (false == goodList.empty()) {
-		list = goodList;
+		list = std::move(goodList);
 		return "good";
 	}
+	// get the difference between badList and list
+	for (const int i : badList)
+		list.erase(find(list.begin(), list.end(), i));
+	if (list.empty())
+		return "bad";
 	return "free";
 }
 
 string BoardAnalyse::recursiveSituation(
-	const char plr, shortv& list, int recDepth, int recCount, bool firstRound) {
+	const char plr, shortv& list, int recDepth, int recCount) {
 	// checking
 	if (list.empty()) {
 		throw logic_error("recursiveSituation: given list is empty");
@@ -280,11 +348,11 @@ string BoardAnalyse::recursiveSituation(
 		throw logic_error("game is over, yet recursiveSituation is called");
 	if (state.boardIsFull())
 		throw logic_error("board is full, yet recursiveSituation is called");
-	// checking done
+	// checking __
 
 	// if the situation is quite clear, just return
 	string word = analyse(plr, list);
-	if (word == "good" || word == "bad" /* || list.size() == 1 */)
+	if (word == "good" || word == "bad")
 		return word;
 
 	// if must return, but:
@@ -295,32 +363,80 @@ string BoardAnalyse::recursiveSituation(
 	}
 	++recCount;
 
-	char   opp      = state.rPlayer(plr);
-	int    badCount = 0;
+	char   opp = state.rPlayer(plr);
 	shortv nextList, goodList;
+
+	for (auto iter = list.begin(); iter != list.end();) {
+		state.add(plr, *iter);
+		word = analyse(opp, nextList);
+		if (word == "free")
+			word = recursiveSituation(opp, nextList, recDepth, recCount);
+		state.remove(*iter);
+
+		if (word == "good")
+			iter = list.erase(iter);
+		else if (word == "bad")
+			return "good";
+		else
+			++iter;
+	}
+
+	if (list.empty())
+		return "bad";
+	return "free";
+}
+
+string BoardAnalyse::recursiveSituationFirstRound(
+	const char plr, shortv& list, int recDepth, int recCount) {
+	// checking
+	if (list.empty()) {
+		throw logic_error("recursiveSituation: given list is empty");
+		return "end";
+	}
+	if (state.isOver() != 'N')
+		throw logic_error("game is over, yet recursiveSituation is called");
+	if (state.boardIsFull())
+		throw logic_error("board is full, yet recursiveSituation is called");
+	// checking __
+
+	// if the situation is quite clear, just return
+	string word = analyse(plr, list);
+	if (word == "good" || word == "bad")
+		return word;
+
+	// if must return, but:
+	if (recDepth <= recCount) {
+		if (list.size() == 1)
+			return oneMoveAnalyse(plr, list.front());
+		return "free";
+	}
+	++recCount;
+
+	char   opp = state.rPlayer(plr);
+	shortv nextList, goodList, badList;
 
 	for (const int col : list) {
 		state.add(plr, col);
 		word = analyse(opp, nextList);
 		if (word == "free")
-			word = recursiveSituation(opp, nextList, recDepth, recCount, false);
+			word = recursiveSituation(opp, nextList, recDepth, recCount);
 		state.remove(col);
 
 		if (word == "good")
-			++badCount;
-		else if (word == "bad") {
-			if (!firstRound)
-				return "good";
+			badList.push_back(col);
+		else if (word == "bad")
 			goodList.push_back(col);
-		}
 	}
 
-	if (badCount == list.size())
-		return "bad";
 	if (false == goodList.empty()) {
 		list = goodList;
 		return "good";
 	}
+	// do a set difference
+	for (const int i : badList)
+		list.erase(find(list.begin(), list.end(), i));
+	if (list.empty())
+		return "bad";
 	return "free";
 }
 
@@ -358,7 +474,7 @@ int BoardAnalyse::respond(
 		recursiveSituation(state.rPlayer(plr), oppList, recDepth);
 	state.areaTopRestore();
 
-	// in case something unpleasent happens:
+	// in case something unpleasent happens - why do I need this?
 	if (starsOn && word != "free" && recDepth > 5 && timeUsed < maxcaltime &&
 		nonFullList.size() < 12) {
 		recDepth = 2;
@@ -367,15 +483,14 @@ int BoardAnalyse::respond(
 		} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
 #ifndef STARS_LANG_CHINESE
 		if (showCal)
-			cout << "    calculation depth without stars = " << recDepth - 1
+			cout << "    calculation depth without stars = " << recDepth
 				 << endl;
 	}
 	else if (showCal) {
 		if (starsOn)
-			cout << "    calculation depth with stars = " << recDepth - 1
-				 << endl;
+			cout << "    calculation depth with stars = " << recDepth << endl;
 		else
-			cout << "    calculation depth without stars = " << recDepth - 1
+			cout << "    calculation depth without stars = " << recDepth
 				 << endl;
 	}
 
@@ -387,7 +502,7 @@ int BoardAnalyse::respond(
 		printf("]\n");
 	}
 	if (showTime)
-		cout << "    calculate time used: " << timeUsed << " ms\n";
+		cout << "    calculation time: " << timeUsed << " ms\n";
 #else
 		if (showCal)
 			cout << "    没有星星的计算深度 = " << recDepth - 1 << endl;
@@ -438,10 +553,10 @@ long long BoardAnalyse::returnTime(
 	clearMatch();
 	auto start = system_clock::now();
 	if (track)
-		word = recursiveSituationTrackRoute(plr, list, recDepth);
+		word = recursiveSituationTrackRouteFirstRound(plr, list, recDepth);
 	else
-		word = recursiveSituation(plr, list, recDepth);
-	auto end   = system_clock::now();
+		word = recursiveSituationFirstRound(plr, list, recDepth);
+	auto end = system_clock::now();
 	checkMatch();
 	return duration_cast<milliseconds>(end - start).count();
 }

@@ -50,7 +50,7 @@ BoardRecord::~BoardRecord() {
 		cout << "runtime_error when destory BoardRecord:\n\t";
 		std::cerr << e.what() << '\n';
 	}
-	if(!settingsUnChanged)
+	if (!settingsUnChanged)
 		writeSettings();
 	if (!games.empty())
 		writeGames();
@@ -58,7 +58,7 @@ BoardRecord::~BoardRecord() {
 
 std::ostream& operator<<(std::ostream& os, oneMove& move) {
 	os << "    mode = " << move.mode << ";\n";
-	
+
 
 	if (move.mode == "add")
 		os << "    add '" << move.player << "' in column " << move.move << endl;
@@ -97,7 +97,7 @@ void BoardRecord::getFile() {
 		return;
 	}
 	// else
-	if(!importInFileSettings(&settings))
+	if (!importInFileSettings(&settings))
 		throw logic_error("can't parse in-file settings");
 }
 
@@ -404,10 +404,9 @@ void BoardRecord::showSavedBoard(const Json::Value& state) {
 	bstate.show();
 }
 
-void BoardRecord::refreshHistoryMove(const Json::Value& hm) {
-	for (const oneMove om : hm) {
-		historyMove.push_back(om);
-	}
+void BoardRecord::refreshHistoryMove(Json::Value& hm) {
+	for (oneMove om : hm)
+		historyMove.push_back(std::move(om));
 }
 
 BoardRecord& BoardRecord::operator=(const BoardRecord& br) {
@@ -458,7 +457,7 @@ bool BoardRecord::match() {
 
 	// get the "right default settings"
 	Json::Value root, rightData;
-	if(!importInFileSettings(&root))
+	if (!importInFileSettings(&root))
 		throw logic_error(
 			"can't parse in file settings file, match check aborted");
 	rightData = root["defaultSettings"];

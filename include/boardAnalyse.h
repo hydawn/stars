@@ -1,7 +1,6 @@
 #ifndef _BOARDANALYSE_H_
 #define _BOARDANALYSE_H_ 1
 
-#include <string.h>
 #include <chrono>
 #include "boardRecord.h"
 #include "boardRoute.h"
@@ -22,6 +21,7 @@ private:
 	int        maxcaltime;
 	BoardState state;
 	RouteTree  routes;
+
 public:
 	BoardAnalyse() : state(8, 8, 4), routes(RouteTree()), maxcaltime(81) {}
 	BoardAnalyse(BoardAnalyse& ba)
@@ -35,13 +35,7 @@ public:
 	/*
 	 * I should bear in mind that the whole concept of analyse function is to
 	 * narrow down the freeList, if not to gain "good" or "bad"
-	 */
-	string oneMoveAnalyseTrackRoute(
-		const char plr, const short col, short goodNode, short badNode,
-		const short depth = 0, const short maxDepth = 5);
-	string oneMoveAnalyse(
-		const char plr, const short col, const short depth = 0,
-		const short maxDepth = 5);
+	 * */
 	long long returnTime(
 		const char plr, shortv& list, const int depth, string& word,
 		const bool track);
@@ -51,14 +45,26 @@ public:
 
 	// recursive analyse
 	string recursiveSituationTrackRoute(
-		const char plr, shortv& list, int returnMoveDepth = 3, int recCount = 0,
-		bool firstRound = true);
+		const char plr, shortv& list, int returnMoveDepth = 3,
+		int recCount = 0);
+	string recursiveSituationTrackRouteFirstRound(
+		const char plr, shortv& list, int returnMoveDepth = 3,
+		int recCount = 0);
 	string recursiveSituation(
 		const char plr, shortv& list, int returnMoveDepth = 3,
-		int recCount = 0, bool firstRound = true);
+		int recCount = 0);
+	string recursiveSituationFirstRound(
+		const char plr, shortv& list, int returnMoveDepth = 3,
+		int recCount = 0);
+	string oneMoveAnalyseTrackRoute(
+		const char plr, const short col, short goodNode, short badNode,
+		const short depth = 0, const short maxDepth = 5);
+	string oneMoveAnalyse(
+		const char plr, const short col, const short depth = 0,
+		const short maxDepth = 5);
 
 	// change board
-	void go(const char plr, const short move);
+	void go(const char plr, const short move) { state.add(plr, move); }
 	void reverse(const int column);
 
 	// is function

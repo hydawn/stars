@@ -10,28 +10,23 @@ using std::endl;
 
 typedef Json::Value::Members members;
 
+class BoardInterface;
+
 class BoardRecord {
+	friend class BoardInterface;
+
 private:
-	Json::Value settings;
-	string      gamesFileName;
-	string      settingsFileName;
-	bool        settingsUnChanged;
+	vector<oneMove> historyMove;
+	Json::Value     settings;
+	Json::Value     games;
+	string          gamesFileName     = "Stars_games.json";
+	string          settingsFileName  = "Stars_settings.json";
+	bool            settingsUnChanged = true;
 
 public:
-	vector<oneMove> historyMove;
-	Json::Value     games;
-	BoardRecord()
-		: historyMove(vector<oneMove>()),
-		  gamesFileName("Stars_games.json"),
-		  settingsFileName("Stars_settings.json"),
-		  settingsUnChanged(true) {
-		getFile();
-	}
+	BoardRecord() { getFile(); }
 	BoardRecord(const string& gname, const string& sname)
-		: historyMove(vector<oneMove>()),
-		  gamesFileName(gname),
-		  settingsFileName(sname),
-		  settingsUnChanged(true) {
+		: gamesFileName(gname), settingsFileName(sname) {
 		getFile();
 	}
 	~BoardRecord();
@@ -44,6 +39,7 @@ public:
 
 	// record
 	void push_back(const oneMove& om) { historyMove.push_back(om); }
+	void push_back(oneMove&& om) { historyMove.push_back(om); }
 	void pop_back() { historyMove.pop_back(); }
 
 	// save & clear & refresh
@@ -70,9 +66,9 @@ public:
 	BoardState getInitState(const int& index);
 	void       showSavedBoard(const Json::Value& state);
 	string     showSavedGames(Json::Value& ret);
-	void       refreshHistoryMove(const Json::Value& hm);
+	void       refreshHistoryMove(Json::Value& hm);
 
-	//oper
+	// oper
 	BoardRecord& operator=(const BoardRecord& br);
 
 	// check

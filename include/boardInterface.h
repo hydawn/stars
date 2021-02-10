@@ -36,7 +36,8 @@ public:
 	short  getCustomInput(const string item);
 	bool   getStateFromInput();
 	bool   transformInput(
-		  char** dest, vector<string>& src, const int cols, const int rows);
+		  vector<string>& dest, vector<string>& src, const int cols,
+		  const int rows);
 
 	// mode
 	string         reverseMode();
@@ -50,11 +51,11 @@ public:
 	string         showRoutesMode();
 
 	// tools for mode
-	void          add(string input);
-	void          reverse(string input);
-	bool          addStringConvert(string input);
+	void          add(string& input);
+	void          reverse(string& input);
+	bool          addStringConvert(string& input);
 	bool          addStringConvert(string input, oneMove& move);
-	bool          reverseStringConvert(string input);
+	bool          reverseStringConvert(string& input);
 	bool          reverseStringConvert(string input, oneMove& move);
 	virtual short respond();
 

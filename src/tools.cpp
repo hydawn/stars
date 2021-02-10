@@ -9,14 +9,13 @@ bool inList(vector<int>& sl, int i) {
 	return sl.end() != find(sl.begin(), sl.end(), i);
 }
 
-void shortIntersection(vector<int>& dest, vector<int>& sour1, vector<int>& sour2) {
-	dest.clear();
-	if (sour1.empty())
-		return;
-	for (short i : sour1) {
-		if (inList(sour2, i))
-			dest.push_back(i);
-	}
+void shortIntersection(vector<int>& dst, vector<int>& src1, vector<int>& src2) {
+	dst.clear();
+	std::sort(src1.begin(), src1.end());
+	std::sort(src2.begin(), src2.end());
+	std::set_intersection(
+		src1.begin(), src1.end(), src2.begin(), src2.end(),
+		std::back_inserter(dst));
 }
 
 void copy(vector<int>& list, const Json::Value& root) {
@@ -27,23 +26,30 @@ void copy(vector<int>& list, const Json::Value& root) {
 } // namespace MyShortList
 
 namespace MyJson {
-Json::Value trans(const vector<int>& list) {
+Json::Value toValue(const vector<int>& list) {
 	Json::Value root;
 	for (int i : list)
 		root.append(i);
-	return root;
+	return std::move(root);
+}
+
+vector<int> toVectorInt(const Json::Value& root) {
+	vector<int> list;
+	for (int i = 0; i < root.size(); ++i)
+		list.push_back(root[i].asInt());
+	return list;
 }
 } // namespace MyJson
 
 namespace ToInt {
-int myStoi(const string word) {
+int myStoi(const string& word) {
 	int num = std::stoi(word);
 	if (!xtoiFit(word, num))
 		throw std::invalid_argument("myStoi::invalid_argument");
 	return num;
 }
 
-bool xtoiFit(const string& word, int num) {
+bool xtoiFit(const string& word, const int num) {
 	return std::to_string(num).size() == word.size();
 }
 } // namespace ToInt
