@@ -10,7 +10,7 @@ void BoardAnalyse::go(const char plr, const short move) {
 	state.add(plr, move);
 }
 
-void BoardAnalyse::reverse(const short column) {
+void BoardAnalyse::reverse(const int column) {
 	if (!state.colCanRemove(column))
 		throw logic_error("Error: tying to reverse in a wrong place");
 	state.remove(column);
@@ -18,7 +18,7 @@ void BoardAnalyse::reverse(const short column) {
 
 shortv BoardAnalyse::firstPoint(const char plr, shortv& nonFullList) {
 	shortv firstPointList;
-	for (short col : nonFullList) {
+	for (int col : nonFullList) {
 		state.add(plr, col);
 		if (plr == state.isOver())
 			firstPointList.push_back(col);
@@ -30,11 +30,12 @@ shortv BoardAnalyse::firstPoint(const char plr, shortv& nonFullList) {
 // check if game is over before call this
 // won't return free if list is empty, relax
 string BoardAnalyse::analyse(const char plr, shortv& list) {
-	// if going to change code below, note that should always check the 
+	// if going to change code below, note that should always check the
 	// firstPoint of those who is going to go first
 #ifdef STARS_DEBUG_INFO
-	if (state.isOver() != 'N')
+	if (state.isOver() != 'N') {
 		throw logic_error("game is over, yet analyse is called");
+	}
 #endif
 	shortv nonFull, temp1;
 
@@ -46,14 +47,15 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 		return "good";
 
 	char opp = state.rPlayer(plr);
-	list	 = firstPoint(opp, nonFull);
+	list     = firstPoint(opp, nonFull);
 	if (list.size() > 1)
 		return "bad";
 	if (list.size() == 1) {
-		state.add(plr, list[0]);
-		state.sweepFullColumn(nonFull, list[0]);
+		int frontPos = list.front();
+		state.add(plr, frontPos);
+		state.sweepFullColumn(nonFull, frontPos);
 		temp1 = firstPoint(opp, nonFull);
-		state.remove(list[0]);
+		state.remove(frontPos);
 		if (!temp1.empty())
 			return "bad";
 		return "free";
@@ -61,7 +63,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 
 	// I'll go
 	shortv list1, goodList;
-	list	   = nonFull;
+	list = nonFull;
 	for (auto col = list.begin(); col != list.end();) {
 		state.add(plr, *col);
 		state.nonFullColumn(nonFull);
@@ -125,44 +127,37 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	return "free";
 }
 
-string BoardAnalyse::oneMoveAnalyse(const char plr, const short col,
-	const short depth, const short maxDepth) {
-	// only analyse when there's one move to take
-	char  opp = state.rPlayer(plr);
+string BoardAnalyse::oneMoveAnalyse(
+	const char plr, const short col, const short depth, const short maxDepth) {
+	// only analyse one Move
+	char   opp = state.rPlayer(plr);
 	string word;
 	shortv list;
 
 	state.add(plr, col);
 	word = analyse(opp, list);
-	if (word == "good") {
+	if (word == "free" && list.size() == 1 && depth < maxDepth)
+		word = oneMoveAnalyse(opp, list.front(), depth + 1, maxDepth);
+	if (word == "good")
 		word = "bad";
-	}
-	else if (word == "bad") {
+	else
 		word = "good";
-	}
-	else if (list.size() == 1 && depth < maxDepth) {
-		word = oneMoveAnalyse(opp, list[0], depth + 1, maxDepth);
-		if (word == "good")
-			word = "bad";
-		else if (word == "bad")
-			word = "good";
-	}
 	state.remove(col);
 	return word;
 }
 
-string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
-	short goodNode, short badNode, const short depth, const short maxDepth) {
+string BoardAnalyse::oneMoveAnalyseTrackRoute(
+	const char plr, const short col, short goodNode, short badNode,
+	const short depth, const short maxDepth) {
 	// only analyse one Move
-	char  opp = state.rPlayer(plr);
-	short freeNode = -2;
-	string word;
+	char   opp = state.rPlayer(plr);
 	shortv list;
 
 	routes.add(col);
 	routes.forward(col);
+
 	state.add(plr, col);
-	word = analyse(opp, list);
+	string word = analyse(opp, list);
 	if (word == "good") {
 		routes.add(badNode);
 		word = "bad";
@@ -172,13 +167,12 @@ string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
 		word = "good";
 	}
 	else if (list.size() == 1 && depth < maxDepth) {
-		word = oneMoveAnalyseDebug(opp, list[0], badNode, goodNode, depth + 1, maxDepth);
+		word = oneMoveAnalyseTrackRoute(
+			opp, list.front(), badNode, goodNode, depth + 1, maxDepth);
 		if (word == "good")
 			word = "bad";
 		else if (word == "bad")
 			word = "good";
-		else
-			word = "free";
 	}
 	else
 		routes.add(freeNode);
@@ -187,17 +181,14 @@ string BoardAnalyse::oneMoveAnalyseDebug(const char plr, const short col,
 	return word;
 }
 
-string BoardAnalyse::recursiveSituation(
-	const char plr, shortv& list, int returnMoveDepth, int recCount,
-	bool firstRound) {
+string BoardAnalyse::recursiveSituationTrackRoute(
+	const char plr, shortv& list, int recDepth, int recCount, bool firstRound) {
 	/*
 	 * record which position is good in the first round
 	 * in other rounds, return immediately when detected a good point
-	 * // TODO - get route track working
 	 * */
-	if (returnMoveDepth <= recCount)
-		return "free";
-	++recCount;
+	// ? how do I do, if I want one function to track route, but don't want the
+	// ? other call to do almost the same thing but don't track it
 
 	// checking
 	if (list.empty()) {
@@ -215,16 +206,106 @@ string BoardAnalyse::recursiveSituation(
 	if (word == "good" || word == "bad" /* || list.size() == 1 */)
 		return word;
 
-	char opp = state.rPlayer(plr);
-	int  badCount = 0;
+	// if must return, but:
+	if (recDepth <= recCount) {
+		if (list.size() == 1)
+			return oneMoveAnalyseTrackRoute(
+				plr, list.front(), goodNode, badNode);
+		routes.add(freeNode);
+		return "free";
+	}
+	++recCount;
+
+	char   opp      = state.rPlayer(plr);
+	int    badCount = 0;
 	shortv nextList, goodList;
+
+	if (firstRound)
+		routes.clear();
+	routes.add(list);
+	routes.forward(list.front());
+	for (const int col : list) {
+		state.add(plr, col);
+		word = analyse(opp, nextList);
+		if (word == "good") {
+			routes.add(badNode);
+			++badCount;
+		}
+		else if (word == "bad") {
+			routes.add(goodNode);
+			if (!firstRound) {
+				state.remove(col);
+				routes.backward();
+				return "good";
+			}
+			goodList.push_back(col);
+		}
+		else {
+			word = recursiveSituationTrackRoute(opp, nextList, recDepth,
+				recCount, false);
+			if (word == "good")
+				++badCount;
+			else if (word == "bad") {
+				if (!firstRound) {
+					state.remove(col);
+					routes.backward();
+					return "good";
+				}
+				goodList.push_back(col);
+			}
+		}
+
+		state.remove(col);
+		routes.nextNode();
+	}
+	routes.backward();
+
+	if (badCount == list.size())
+		return "bad";
+	if (false == goodList.empty()) {
+		list = goodList;
+		return "good";
+	}
+	return "free";
+}
+
+string BoardAnalyse::recursiveSituation(
+	const char plr, shortv& list, int recDepth, int recCount, bool firstRound) {
+	// checking
+	if (list.empty()) {
+		throw logic_error("recursiveSituation: given list is empty");
+		return "end";
+	}
+	if (state.isOver() != 'N')
+		throw logic_error("game is over, yet recursiveSituation is called");
+	if (state.boardIsFull())
+		throw logic_error("board is full, yet recursiveSituation is called");
+	// checking done
+
+	// if the situation is quite clear, just return
+	string word = analyse(plr, list);
+	if (word == "good" || word == "bad" /* || list.size() == 1 */)
+		return word;
+
+	// if must return, but:
+	if (recDepth <= recCount) {
+		if (list.size() == 1)
+			return oneMoveAnalyse(plr, list.front());
+		return "free";
+	}
+	++recCount;
+
+	char   opp      = state.rPlayer(plr);
+	int    badCount = 0;
+	shortv nextList, goodList;
+
 	for (const int col : list) {
 		state.add(plr, col);
 		word = analyse(opp, nextList);
 		if (word == "free")
-			word = recursiveSituation(
-				opp, nextList, returnMoveDepth, recCount, false);
+			word = recursiveSituation(opp, nextList, recDepth, recCount, false);
 		state.remove(col);
+
 		if (word == "good")
 			++badCount;
 		else if (word == "bad") {
@@ -243,12 +324,13 @@ string BoardAnalyse::recursiveSituation(
 	return "free";
 }
 
-int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
-	bool showTime, bool starsOn, bool trackRoute) {
+int BoardAnalyse::respond(
+	const char plr, oneMove& thisMove, bool showCal, bool showTime,
+	bool starsOn, bool trackRoute) {
 	// list for myself
 	shortv    plrList(state.cols), oppList(state.cols), nonFullList;
-	long long timeUsed        = 0;
-	short     returnMoveDepth = 2;
+	long long timeUsed = 0;
+	short     recDepth = 2;
 	string    word;
 	std::iota(plrList.begin(), plrList.end(), 1);
 	std::iota(oppList.begin(), oppList.end(), 1);
@@ -263,33 +345,38 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 #endif // STARS_DEBUG_INFO
 
 	// analyse
-	if (starsOn && nonFullList.size() > 4) // && state.pieceCount() < cols*rows * 0.75 ?
+	// && state.pieceCount() < cols*rows * 0.75 ?
+	if (starsOn && nonFullList.size() > 4)
 		state.areaTopTransform();
 	do {
-		timeUsed = returnTime(plr, plrList, ++returnMoveDepth, word);
-	} while (word == "free" && timeUsed < maxcaltime && returnMoveDepth < 10);
+		timeUsed = returnTime(plr, plrList, ++recDepth, word, trackRoute);
+	} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
 	// this opp list is for the random suggestion functions
-	if (returnMoveDepth > 2)
-		recursiveSituation(state.rPlayer(plr), oppList, returnMoveDepth - 1);
+	if (recDepth > 2)
+		recursiveSituation(state.rPlayer(plr), oppList, recDepth - 1);
 	else
-		recursiveSituation(state.rPlayer(plr), oppList, returnMoveDepth);
+		recursiveSituation(state.rPlayer(plr), oppList, recDepth);
 	state.areaTopRestore();
 
 	// in case something unpleasent happens:
-	if (starsOn && word != "free" && returnMoveDepth > 5 && timeUsed < maxcaltime && nonFullList.size() < 12) {
-		returnMoveDepth = 2;
+	if (starsOn && word != "free" && recDepth > 5 && timeUsed < maxcaltime &&
+		nonFullList.size() < 12) {
+		recDepth = 2;
 		do {
-			timeUsed = returnTime(plr, plrList, ++returnMoveDepth, word);
-		} while (word == "free" && timeUsed < maxcaltime && returnMoveDepth < 10);
+			timeUsed = returnTime(plr, plrList, ++recDepth, word, trackRoute);
+		} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
 #ifndef STARS_LANG_CHINESE
 		if (showCal)
-			cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
+			cout << "    calculation depth without stars = " << recDepth - 1
+				 << endl;
 	}
 	else if (showCal) {
 		if (starsOn)
-			cout << "    calculation depth with stars = " << returnMoveDepth - 1 << endl;
-		else 
-			cout << "    calculation depth without stars = " << returnMoveDepth - 1 << endl;
+			cout << "    calculation depth with stars = " << recDepth - 1
+				 << endl;
+		else
+			cout << "    calculation depth without stars = " << recDepth - 1
+				 << endl;
 	}
 
 	// show info if needed
@@ -303,13 +390,13 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 		cout << "    calculate time used: " << timeUsed << " ms\n";
 #else
 		if (showCal)
-			cout << "    没有星星的计算深度 = " << returnMoveDepth - 1 << endl;
+			cout << "    没有星星的计算深度 = " << recDepth - 1 << endl;
 	}
 	else if (showCal) {
 		if (starsOn)
-			cout << "    有星星的计算深度 = " << returnMoveDepth - 1 << endl;
-		else 
-			cout << "    没有星星的计算深度 = " << returnMoveDepth - 1 << endl;
+			cout << "    有星星的计算深度 = " << recDepth - 1 << endl;
+		else
+			cout << "    没有星星的计算深度 = " << recDepth - 1 << endl;
 	}
 
 	// show info if needed
@@ -346,11 +433,15 @@ int BoardAnalyse::respond(const char plr, oneMove& thisMove, bool showCal,
 }
 
 long long BoardAnalyse::returnTime(
-	const char plr, shortv& list, const int returnMoveDepth, string& word) {
+	const char plr, shortv& list, const int recDepth, string& word,
+	const bool track) {
 	clearMatch();
 	auto start = system_clock::now();
-	word = recursiveSituation(plr, list, returnMoveDepth);
-	auto end = system_clock::now();
+	if (track)
+		word = recursiveSituationTrackRoute(plr, list, recDepth);
+	else
+		word = recursiveSituation(plr, list, recDepth);
+	auto end   = system_clock::now();
 	checkMatch();
 	return duration_cast<milliseconds>(end - start).count();
 }
@@ -361,12 +452,11 @@ void BoardAnalyse::checkMatch() {
 	if (!state.match()) {
 		cout << "add for " << state.addNumber << " times\n"
 			 << "remove for " << state.removeNumber << "times\n"
-			 << "called " << called << " times"
-			 << endl;
+			 << "called " << called << " times" << endl;
 		throw logic_error("add and remove doesn't match");
 	}
 	else {
-		state.addNumber = 0;
+		state.addNumber    = 0;
 		state.removeNumber = 0;
 		// cout << "called " << called << " times, match" << endl;
 	}

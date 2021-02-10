@@ -36,29 +36,30 @@ public:
 	 * I should bear in mind that the whole concept of analyse function is to
 	 * narrow down the freeList, if not to gain "good" or "bad"
 	 */
-	string oneMoveAnalyseDebug(
+	string oneMoveAnalyseTrackRoute(
 		const char plr, const short col, short goodNode, short badNode,
-		const short depth, const short maxDepth = 5);
+		const short depth = 0, const short maxDepth = 5);
 	string oneMoveAnalyse(
-		const char plr, const short col, const short depth,
+		const char plr, const short col, const short depth = 0,
 		const short maxDepth = 5);
 	long long returnTime(
-		const char plr, shortv& list, const int depth, string& word);
+		const char plr, shortv& list, const int depth, string& word,
+		const bool track);
 	int respond(
 		const char plr, oneMove& thisMove, bool showCal, bool showTime,
 		bool starsOn, bool trackRoute);
 
 	// recursive analyse
-	string recursiveSituationRoute(
-		const char plr, shortv& list, int returnMoveDepth = 3,
-		int recCount = 0, int countTop = 3);
+	string recursiveSituationTrackRoute(
+		const char plr, shortv& list, int returnMoveDepth = 3, int recCount = 0,
+		bool firstRound = true);
 	string recursiveSituation(
 		const char plr, shortv& list, int returnMoveDepth = 3,
 		int recCount = 0, bool firstRound = true);
 
 	// change board
 	void go(const char plr, const short move);
-	void reverse(const short column);
+	void reverse(const int column);
 
 	// is function
 	// getter
