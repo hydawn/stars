@@ -91,7 +91,7 @@ public:
 
 	// counter
 	int  getBranches(int flag = 1);
-	void branchCounter(RouteNode* node);
+	void branchCounter(const RouteNode* node);
 };
 
 #endif // _BOARDROUTE_H_

@@ -60,7 +60,8 @@ bool RouteNode::hasNext() {
 void RouteNode::maskFlag(int flag) {
 	if (flag == 1) {
 		// mask those not considered
-		if (!(data == goodNode || data == badNode || data == freeNode) && next.empty()) {
+		if (!(data == goodNode || data == badNode || data == freeNode) &&
+			next.empty()) {
 			print = false;
 			return;
 		}
@@ -227,27 +228,32 @@ void RouteTree::showRoute() {
 	}
 }
 
-bool RouteTree::showRoute(RouteNode* node, int level) {
 #ifdef STARS_PLATFORM_WINDOWS
-	string twoDot   = "-- ";
-	string oneDot   = "-";
-	string vertical = "|";
+string twoDot   = "-- ";
+string oneDot   = "-";
+string vertical = "|";
 #elif STARS_PLATFORM_LINUX
-	string twoDot   = "\u2500\u2500 ";
-	string oneDot   = "\u2514";
-	string vertical = "\u2502";
+string twoDot   = "\u2500\u2500 ";
+string oneDot   = "\u2514";
+string vertical = "\u2502";
 #endif // STARS_PLATFORM
+bool RouteTree::showRoute(RouteNode* node, int level) {
 	if (!node->print)
 		return false;
 	if (node->next.empty()) {
-		if (node->data == badNode)
-			cout << "bad";
-		else if (node->data == goodNode)
-			cout << "good";
-		else if (node->data == freeNode)
-			cout << "free";
-		else
-			cout << node->data << twoDot << "not considered";
+		switch (node->data) {
+			case badNode:
+				cout << "bad";
+				break;
+			case goodNode:
+				cout << "good";
+				break;
+			case freeNode:
+				cout << "free";
+				break;
+			default:
+				cout << node->data << twoDot << "not considered";
+		}
 		cout << endl;
 		return true;
 	}
@@ -281,13 +287,6 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 }
 
 void RouteTree::show(RouteNode* node, int level) {
-#ifdef STARS_PLATFORM_WINDOWS
-	string twoDot   = "-- ";
-	string vertical = "|";
-#elif STARS_PLATFORM_LINUX
-	string twoDot   = "\u2500\u2500 ";
-	string vertical = "\u2502";
-#endif // STARS_PLATFORM
 	cout << node->data;
 	if (node->next.empty()) {
 		cout << endl;
@@ -304,8 +303,7 @@ void RouteTree::show(RouteNode* node, int level) {
 			else
 				cout << ' ' << "    ";
 		}
-		cout << vertical;
-		cout << ' ' << twoDot;
+		cout << vertical << ' ' << twoDot;
 		show(*iter, level + 1);
 	}
 }
@@ -330,12 +328,12 @@ int RouteTree::getBranches(int flag) {
 	return branches;
 }
 
-void RouteTree::branchCounter(RouteNode* node) {
+void RouteTree::branchCounter(const RouteNode* node) {
 	if (node->next.empty()) {
 		if (node->print && node->prev && node->prev->next.size() == 1)
 			++branches;
 	}
 	else
-		for (RouteNode* i : node->next)
+		for (const RouteNode* i : node->next)
 			branchCounter(i);
 }
