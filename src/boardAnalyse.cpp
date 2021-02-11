@@ -185,7 +185,7 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 
 	// checking
 	if (list.empty()) {
-		throw logic_error("recursiveSituation: given list is empty");
+		throw logic_error("recursiveSituationTrackRoute: given list is empty");
 		return "end";
 	}
 	if (state.isOver() != 'N')
@@ -265,16 +265,14 @@ string BoardAnalyse::recursiveSituationTrackRouteFirstRound(
 	// ? other call to do almost the same thing but don't track it
 
 	// checking
-	if (list.empty()) {
-		throw logic_error("recursiveSituation: given list is empty");
-		return "end";
-	}
 	if (state.isOver() != 'N')
 		throw logic_error(
-			"game is over, yet recursiveSituationTrackRoute is called");
+			"game is over, yet recursiveSituationTrackRouteFirstRound is "
+			"called");
 	if (state.boardIsFull())
 		throw logic_error(
-			"board is full, yet recursiveSituationTrackRoute is called");
+			"board is full, yet recursiveSituationTrackRouteFirstRound is "
+			"called");
 	// checking done
 
 	// if the situation is quite clear, just return
@@ -389,14 +387,12 @@ string BoardAnalyse::recursiveSituation(
 string BoardAnalyse::recursiveSituationFirstRound(
 	const char plr, shortv& list, int recDepth, int recCount) {
 	// checking
-	if (list.empty()) {
-		throw logic_error("recursiveSituation: given list is empty");
-		return "end";
-	}
 	if (state.isOver() != 'N')
-		throw logic_error("game is over, yet recursiveSituation is called");
+		throw logic_error(
+			"game is over, yet recursiveSituationFirstRound is called");
 	if (state.boardIsFull())
-		throw logic_error("board is full, yet recursiveSituation is called");
+		throw logic_error(
+			"board is full, yet recursiveSituationFirstRound is called");
 	// checking __
 
 	// if the situation is quite clear, just return
@@ -444,12 +440,10 @@ int BoardAnalyse::respond(
 	const char plr, oneMove& thisMove, bool showCal, bool showTime,
 	bool starsOn, bool trackRoute) {
 	// list for myself
-	shortv    plrList(state.cols), oppList(state.cols), nonFullList;
+	shortv    plrList, oppList, nonFullList;
 	long long timeUsed = 0;
 	short     recDepth = 2;
 	string    word;
-	std::iota(plrList.begin(), plrList.end(), 1);
-	std::iota(oppList.begin(), oppList.end(), 1);
 
 	// pre-test
 	state.nonFullColumn(nonFullList);
@@ -462,6 +456,7 @@ int BoardAnalyse::respond(
 
 	// analyse
 	// && state.pieceCount() < cols*rows * 0.75 ?
+	state.areaTopRestore();
 	if (starsOn && nonFullList.size() > 4)
 		state.areaTopTransform();
 	do {
@@ -469,9 +464,9 @@ int BoardAnalyse::respond(
 	} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
 	// this opp list is for the random suggestion functions
 	if (recDepth > 2)
-		recursiveSituation(state.rPlayer(plr), oppList, recDepth - 1);
+		recursiveSituationFirstRound(state.rPlayer(plr), oppList, recDepth - 1);
 	else
-		recursiveSituation(state.rPlayer(plr), oppList, recDepth);
+		recursiveSituationFirstRound(state.rPlayer(plr), oppList, recDepth);
 	state.areaTopRestore();
 
 	// in case something unpleasent happens - why do I need this?
