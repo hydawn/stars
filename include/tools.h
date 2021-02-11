@@ -13,7 +13,6 @@ using std::vector;
 namespace MyShortList {
 bool inList(vector<int>&, int);
 void shortIntersection(vector<int>& dst, vector<int>& src1, vector<int>& src2);
-void copy(vector<int>&, const Json::Value&);
 } // namespace MyShortList
 
 
