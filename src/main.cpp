@@ -40,7 +40,7 @@ void displayHelp(string mode = "help") {
 		throw invalid_argument("no help info");
 	}
 	cout
-		<< "Usage:\n" 
+		<< "Usage:\n"
 		<< "  stars\n"
 		<< "  stars [options]\n"
 		<< "  stars [--test] <number> [suboption] ...\n"
@@ -56,7 +56,8 @@ void displayHelp(string mode = "help") {
 		<< '\n'
 		<< "  It is not recommended to use --test without suboptions\n"
 		<< '\n'
-		<< "Use '" << "stars"
+		<< "Use '"
+		<< "stars"
 		<< " --help [option]' to see help for available suboptions" << endl;
 }
 
@@ -143,26 +144,10 @@ bool argsHandle(int argc, char* argv[], string& firstMode) {
 
 int main(int argc, char* argv[]) {
 	string firstMode;
-#ifdef STARS_DEBUG_INFO
-	char a[8]  = "./stars";
-	char b[5]  = "test";
-	char c[4]  = "1";
-	char d[16] = "--less-print";
-	char e[16] = "--no-ask";
-	char f[16] = "--play";
-	// char* fakeArgv[] = {a, b, c, d, e, f};
-	char* fakeArgv[] = {a, b, e};
-	try {
-		// if (!argsHandle(3, fakeArgv, firstMode))
-		if (!argsHandle(argc, argv, firstMode))
-			return 0;
-	}
-#else
 	try {
 		if (!argsHandle(argc, argv, firstMode))
 			return 0;
 	}
-#endif // STARS_DEBUG_INFO
 	catch (const std::runtime_error& e) {
 		cout << "stars: runtime_error: ";
 		std::cerr << e.what() << '\n';
