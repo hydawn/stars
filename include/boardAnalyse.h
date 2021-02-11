@@ -24,7 +24,7 @@ private:
 
 public:
 	BoardAnalyse() : state(8, 8, 4), routes(RouteTree()), maxcaltime(81) {}
-	BoardAnalyse(BoardAnalyse& ba)
+	BoardAnalyse(const BoardAnalyse& ba)
 		: maxcaltime(ba.maxcaltime), state(ba.state), routes(ba.routes) {}
 	BoardAnalyse(BoardState board_)
 		: state(board_), routes(RouteTree()), maxcaltime(81) {}

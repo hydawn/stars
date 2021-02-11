@@ -108,7 +108,6 @@ public:
 	bool colIsFull(const int col) { return top.at(col - 1) == rows; }
 	bool colIsEmpty(const int col) { return top.at(col - 1) == 0; }
 	bool boardIsFull();
-	// TODO - change these three
 	bool winPieceNearBy(const int col, const int ro);
 	bool winPieceButOne(const int col, const int ro, const int win);
 	char isOver();
@@ -165,11 +164,8 @@ public:
 	void areaTopTransform();
 	void areaTopRestore();
 	void starShow();
-	void setATopWithTop(int i, int t);
-	void setATopWithNumber(int i, int n) {
-		if (i >= 0 && i < cols && starArea[i] < n)
-			starArea[i] = n;
-	}
+	void setATopWithTop(const int i, const int t);
+	void setATopWithNumber(const int i, const int n);
 	shortv aTopFullColumn();
 	int    starNumber();
 	int    threeRowCount(const char plr, shortv& safeList);

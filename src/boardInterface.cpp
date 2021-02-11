@@ -7,11 +7,11 @@ BoardInterface::BoardInterface()
 	: gamesFilename("Stars_games.json"),
 	  settingsFilename("Stars_settings.json"),
 	  record(gamesFilename, settingsFilename) {
-	generate(8, 8, 4);
+	analyse             = new BoardAnalyse(8, 8, 4);
 	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
 }
 
-BoardInterface::BoardInterface(BoardAnalyse& hb)
+BoardInterface::BoardInterface(const BoardAnalyse& hb)
 	: gamesFilename("Stars_games.json"),
 	  settingsFilename("Stars_settings.json"),
 	  record(gamesFilename, settingsFilename) {
@@ -862,8 +862,7 @@ string BoardInterface::playbackMode() {
 		if (input == "q" || input == "quit")
 			return "quit";
 		else if (input == "c" || input == "cut" || input == "cut in") {
-			BoardAnalyse   tempAnalyser = analyser;
-			BoardInterface interface(tempAnalyser);
+			BoardInterface interface(analyser);
 			interface.refreshRecord(tempRecord);
 #ifndef STARS_LANG_CHINESE
 			printf("Go into a new control mode:\n");
@@ -1415,7 +1414,7 @@ string BoardInterface::getInfo(string input) {
 				  "                                                            "
 				  "      by Duan Hanyu\n" +
 				  "                                                            "
-				  "          2020-8-28";
+				  "          2021-2-10";
 #else
 	string enjoy = "玩的开心！\n";
 	string end =
@@ -1447,7 +1446,7 @@ string BoardInterface::getInfo(string input) {
 				  "                                                            "
 				  "          by 段晗宇\n" +
 				  "                                                            "
-				  "          2020-8-28";
+				  "          2021-2-10";
 #endif // STARS_LANG_CHINESE
 	vector<string> story = {
 		head +

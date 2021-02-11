@@ -23,12 +23,8 @@ private:
 
 public:
 	BoardInterface();
-	BoardInterface(BoardAnalyse& hb);
+	BoardInterface(const BoardAnalyse& hb);
 	virtual ~BoardInterface();
-
-	void generate(short c, short r, short w) {
-		analyse = new BoardAnalyse(c, r, w);
-	}
 
 	// general
 	string getInput();

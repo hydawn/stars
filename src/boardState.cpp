@@ -411,7 +411,7 @@ void BoardState::starShow() {
 	areaTopRestore();
 }
 
-void BoardState::setATopWithTop(int i, int t) {
+void BoardState::setATopWithTop(const int i, const int t) {
 	// important numbers here!
 	if (t == 0)
 		return;
@@ -420,6 +420,11 @@ void BoardState::setATopWithTop(int i, int t) {
 	setATopWithNumber(i, t + 2);
 	setATopWithNumber(i + 1, t + 1 > 4 ? t + 1 : 4);
 	setATopWithNumber(i + 2, t / 2 + 1);
+}
+
+void BoardState::setATopWithNumber(const int i, const int n)  {
+	if (i >= 0 && i < cols && starArea[i] < n)
+		starArea[i] = n;
 }
 
 shortv BoardState::aTopFullColumn() {
