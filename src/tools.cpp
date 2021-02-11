@@ -17,26 +17,20 @@ void shortIntersection(vector<int>& dst, vector<int>& src1, vector<int>& src2) {
 		src1.begin(), src1.end(), src2.begin(), src2.end(),
 		std::back_inserter(dst));
 }
-
-void copy(vector<int>& list, const Json::Value& root) {
-	list.clear();
-	for (int i = 0; i < root.size(); ++i)
-		list.push_back(root[i].asInt());
-}
 } // namespace MyShortList
 
 namespace MyJson {
 Json::Value toValue(const vector<int>& list) {
 	Json::Value root;
-	for (int i : list)
+	for (const int i : list)
 		root.append(i);
 	return std::move(root);
 }
 
 vector<int> toVectorInt(const Json::Value& root) {
 	vector<int> list;
-	for (int i = 0; i < root.size(); ++i)
-		list.push_back(root[i].asInt());
+	for (auto i : root)
+		list.push_back(i.asInt());
 	return list;
 }
 } // namespace MyJson
