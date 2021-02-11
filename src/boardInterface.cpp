@@ -119,7 +119,7 @@ string BoardInterface::getInput() {
 
 // mode = "debug" or "play"
 string
-BoardInterface::getInput(char plr, double& inputTime, const string& mode) {
+BoardInterface::getInput(char plr, int64_t& inputTime, const string& mode) {
 	int counter = 0;
 	while (true) {
 		if (counter > 32)

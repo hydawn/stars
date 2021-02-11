@@ -35,10 +35,10 @@ private:
 	 * mode just have mode, move and player reverse mode just have mode and
 	 * move
 	 * */
-	string mode;
-	string word;
-	shortv list;
-	double time = 0; // time taken for the computer to respond
+	string  mode;
+	string  word;
+	shortv  list;
+	int64_t time = 0; // time taken for the computer to respond
 	// the move that is been taken after the computer analyse
 	int  move       = 0;
 	int  suggestion = 0; // suggested move by the computer
@@ -161,11 +161,11 @@ public:
 	void customBoard(const int cl, const int ro, const int wi);
 
 	// performance
-	void areaTopTransform();
-	void areaTopRestore();
-	void starShow();
-	void setATopWithTop(const int i, const int t);
-	void setATopWithNumber(const int i, const int n);
+	void   areaTopTransform();
+	void   areaTopRestore();
+	void   starShow();
+	void   setATopWithTop(const int i, const int t);
+	void   setATopWithNumber(const int i, const int n);
 	shortv aTopFullColumn();
 	int    starNumber();
 	int    threeRowCount(const char plr, shortv& safeList);

@@ -28,7 +28,7 @@ public:
 
 	// general
 	string getInput();
-	string getInput(char plr, double& inputTime, const string& mode);
+	string getInput(char plr, int64_t& inputTime, const string& mode);
 	short  getCustomInput(const string item);
 	bool   getStateFromInput();
 	bool   transformInput(

@@ -12,7 +12,7 @@ oneMove::oneMove(const Json::Value& root)
 	: mode(std::move(root["mode"].asString())),
 	  word(std::move(root["word"].asString())),
 	  list(std::move(MyJson::toVectorInt(root["list"]))),
-	  time(root["time"].asDouble()),
+	  time(root["time"].asInt64()),
 	  move(root["move"].asInt()),
 	  suggestion(root["suggestion"].asInt()),
 	  player(root["player"].asInt()),
