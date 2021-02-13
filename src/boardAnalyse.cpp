@@ -41,7 +41,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	if (!list.empty())
 		return "good";
 
-	char opp = state.rPlayer(plr);
+	char opp = rPlayer(plr);
 	list     = firstPoint(opp, nonFull);
 	if (list.size() > 1)
 		return "bad";
@@ -125,7 +125,7 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 string BoardAnalyse::oneMoveAnalyse(
 	const char plr, const short col, const short depth, const short maxDepth) {
 	// only analyse one Move
-	char   opp = state.rPlayer(plr);
+	char   opp = rPlayer(plr);
 	string word;
 	shortv list;
 
@@ -145,7 +145,7 @@ string BoardAnalyse::oneMoveAnalyseTrackRoute(
 	const char plr, const short col, short goodNode, short badNode,
 	const short depth, const short maxDepth) {
 	// only analyse one Move
-	char   opp = state.rPlayer(plr);
+	char   opp = rPlayer(plr);
 	shortv list;
 
 	routes.add(col);
@@ -213,7 +213,7 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 	}
 	++recCount;
 
-	char   opp = state.rPlayer(plr);
+	char   opp = rPlayer(plr);
 	shortv nextList, badList;
 
 	routes.add(list);
@@ -292,7 +292,7 @@ string BoardAnalyse::recursiveSituationTrackRouteFirstRound(
 	}
 	++recCount;
 
-	char   opp = state.rPlayer(plr);
+	char   opp = rPlayer(plr);
 	shortv nextList, goodList, badList;
 
 	routes.clear();
@@ -361,7 +361,7 @@ string BoardAnalyse::recursiveSituation(
 	}
 	++recCount;
 
-	char   opp = state.rPlayer(plr);
+	char   opp = rPlayer(plr);
 	shortv nextList, goodList;
 
 	for (auto iter = list.begin(); iter != list.end();) {
@@ -408,7 +408,7 @@ string BoardAnalyse::recursiveSituationFirstRound(
 	}
 	++recCount;
 
-	char   opp = state.rPlayer(plr);
+	char   opp = rPlayer(plr);
 	shortv nextList, goodList, badList;
 
 	for (const int col : list) {
@@ -450,7 +450,7 @@ int BoardAnalyse::respond(
 #ifdef STARS_DEBUG_INFO
 	if (nonFullList.empty())
 		throw logic_error("call respond with full board");
-	if (state.isOver() == plr || state.isOver() == state.rPlayer(plr))
+	if (state.isOver() == plr || state.isOver() == rPlayer(plr))
 		throw logic_error("call respond with ended game");
 #endif // STARS_DEBUG_INFO
 
@@ -464,9 +464,9 @@ int BoardAnalyse::respond(
 	} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
 	// this opp list is for the random suggestion functions
 	if (recDepth > 2)
-		recursiveSituationFirstRound(state.rPlayer(plr), oppList, recDepth - 1);
+		recursiveSituationFirstRound(rPlayer(plr), oppList, recDepth - 1);
 	else
-		recursiveSituationFirstRound(state.rPlayer(plr), oppList, recDepth);
+		recursiveSituationFirstRound(rPlayer(plr), oppList, recDepth);
 	state.areaTopRestore();
 
 	// in case something unpleasent happens - why do I need this?
@@ -525,17 +525,17 @@ int BoardAnalyse::respond(
 	thisMove.list = plrList;
 	thisMove.time = timeUsed;
 	if (word != "bad")
-		return state.randomSuggestion(plr, plrList, oppList);
+		return Random::randomSuggestion(state, plr, plrList, oppList);
 	else if (word == "bad") {
 		word = analyse(plr, plrList);
 		if (word == "bad") {
 			oppList = firstPoint(rPlayer(plr), nonFullList);
 			if (oppList.empty())
-				return state.randomMove();
-			return state.randomMove(oppList);
+				return Random::randomMove(state);
+			return Random::randomMove(oppList);
 		}
 		else
-			return state.randomSuggestion(plr, plrList, oppList);
+			return Random::randomSuggestion(state, plr, plrList, oppList);
 	}
 	else
 		throw logic_error("wrong word returned in respond");

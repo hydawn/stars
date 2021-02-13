@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "tools.h"
+#include "json/json.h"
 
 using std::logic_error;
 using std::runtime_error;
@@ -52,6 +52,8 @@ public:
 						 operator Json::Value();
 	friend std::ostream& operator<<(std::ostream& os, oneMove& move);
 };
+
+inline char rPlayer(const char plr) { return plr ^ 0x68; }
 
 class BoardState {
 	// handles the memory allocate and ways to change the board
@@ -101,31 +103,23 @@ public:
 	bool colCanRemove(const int col);
 
 	// getter
-	int  getWinn() { return winn; }
-	char getTopPiece(const int col);
+	int                   getWinn() { return winn; }
+	char                  getTopPiece(const int col);
+	const vector<string>& getBoard() const { return board; }
+	const shortv&         getTop() const { return top; }
 
 	// is function
-	bool colIsFull(const int col) { return top.at(col - 1) == rows; }
-	bool colIsEmpty(const int col) { return top.at(col - 1) == 0; }
+	bool colIsFull(const int col) const { return top.at(col - 1) == rows; }
+	bool colIsEmpty(const int col) const { return top.at(col - 1) == 0; }
 	bool boardIsFull();
 	bool winPieceNearBy(const int col, const int ro);
 	bool winPieceButOne(const int col, const int ro, const int win);
 	char isOver();
 
 	// tools
-	void nonFullColumn(shortv& nonFull);
+	void nonFullColumn(shortv& nonFull) const;
 	void sweepFullColumn(shortv& nonFull, int col);
-	char rPlayer(const char plr) { return plr ^ 0x68; }
 	int  pieceCount();
-
-	// random
-	int randomMove();
-	int randomMove(shortv& list);
-	int randomSuggestion(
-		const char plr, shortv& list, const string& mode = "progressive");
-	int randomSuggestion(
-		const char plr, shortv& list, shortv oppList,
-		const string& mode = "progressive");
 
 	// change board
 	void add(const char plr, const int col) {

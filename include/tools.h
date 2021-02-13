@@ -2,6 +2,7 @@
 #define _MY_TOOLS_H_ 1
 #include <string>
 #include <vector>
+#include "boardState.h"
 #include "json/json.h"
 
 
@@ -32,6 +33,18 @@ namespace MainArgsHandle {
 bool           inVector(const vector<string>& argv, const string& str);
 vector<string> charListToVector(int argc, char* args[]);
 } // namespace MainArgsHandle
+
+namespace Random
+{
+int randomMove(const BoardState& state);
+int randomMove(const shortv& list);
+int randomSuggestion(const BoardState& state,
+    const char plr, shortv& list, const string& mode = "progressive");
+int randomSuggestion(const BoardState& state,
+    const char plr, shortv& list, shortv oppList,
+    const string& mode = "progressive");
+} // namespace Random
+
 
 
 string toChinese(const string& word);

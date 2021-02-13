@@ -68,7 +68,7 @@ string BoardTest::debugMode(const string& mode) {
 	byPlayer.mode       = "test-" + mode;
 	byPlayer.byComputer = true;
 	byOpponent.mode     = "test-" + mode;
-	byOpponent.player   = analyse->rPlayer(byPlayer.player);
+	byOpponent.player   = rPlayer(byPlayer.player);
 	char expectedWinner = '1';
 	int  stepCount      = 0;
 	if (!lessPrint) { // if no lessPrint
@@ -263,7 +263,7 @@ bool BoardTest::isOver(const oneMove& move) {
 		}
 		return true;
 	}
-	if (analyse->gameIsOver() == analyse->rPlayer(move.player)) {
+	if (analyse->gameIsOver() == rPlayer(move.player)) {
 		toWinn = move.player;
 		if (!noPrint) {
 			cout << endl;

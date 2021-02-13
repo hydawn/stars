@@ -370,7 +370,7 @@ string BoardInterface::debugMode(const string& mode) {
 	byPlayer.mode       = mode;
 	byPlayer.byComputer = false;
 	byOpponent.mode     = mode;
-	byOpponent.player   = analyse->rPlayer(byPlayer.player);
+	byOpponent.player   = rPlayer(byPlayer.player);
 	analyse->show();
 #ifndef STARS_LANG_CHINESE
 	if (mode == "debug") {
@@ -1652,17 +1652,17 @@ bool BoardInterface::isOver(const oneMove& move, const string& mode) {
 		}
 		return true;
 	}
-	if (analyse->gameIsOver() == analyse->rPlayer(move.player)) {
+	if (analyse->gameIsOver() == rPlayer(move.player)) {
 		analyse->show();
 		if (move.byComputer) {
 			if (mode == "debug")
 				cout << congratulations;
 			else if (mode == "play")
 #ifndef STARS_LANG_CHINESE
-				cout << "Player " << analyse->rPlayer(move.player)
+				cout << "Player " << rPlayer(move.player)
 					 << " wins.\n";
 #else
-				cout << "玩家" << analyse->rPlayer(move.player) << "获胜\n";
+				cout << "玩家" << rPlayer(move.player) << "获胜\n";
 #endif // STARS_LANG_CHINESE
 		}
 		else

@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <algorithm>
+#include "boardState.h"
 #include "tools.h"
 
 namespace MyShortList {
@@ -61,6 +62,127 @@ bool inVector(const vector<string>& argv, const string& str) {
 }
 } // namespace MainArgsHandle
 
+namespace Random {
+int randomMove(const BoardState& state) {
+	shortv list;
+	state.nonFullColumn(list);
+#ifdef STARS_DEBUG_INFO
+	if (list.empty())
+		throw logic_error("trying randomMove() in full board");
+#endif // STARS_DEBUG_INFO
+	return randomMove(list);
+}
+
+int randomMove(const shortv& list) {
+#ifdef STARS_DEBUG_INFO
+	if (list.empty())
+		throw logic_error("trying randomMove(shortv& list) in an empty list");
+#endif // STARS_DEBUG_INFO
+	srand((unsigned)time(NULL));
+	return list[rand() % list.size()];
+}
+
+int randomSuggestion(
+	const BoardState& state, const char plr, shortv& list, const string& mode) {
+	shortv opp2, opp1, plr2, plr1;
+	char   opp = rPlayer(plr);
+	srand((unsigned)time(NULL));
+	const vector<string>& board = state.getBoard();
+	const shortv&         top   = state.getTop();
+	for (const int col : list) {
+		if (state.colIsFull(col) || state.colIsEmpty(col))
+			continue;
+		const string& line = board[col - 1];
+		const int     head = top[col - 1] - 1;
+		if (line[head] == plr) {
+			if (head > 0 && line[head - 1] == plr)
+				plr2.push_back(col);
+			else
+				plr1.push_back(col);
+		}
+		else {
+			if (head > 0 && line[head - 1] == opp)
+				opp2.push_back(col);
+			else
+				opp1.push_back(col);
+		}
+	}
+	int ran = rand() % 100;
+	if (mode == "progressive") {
+		if (!plr2.empty() && ran < 72)
+			return randomMove(plr2);
+		ran = rand() % 100;
+		if (!opp2.empty() && ran < 95)
+			return randomMove(opp2);
+		ran = rand() % 100;
+		if (!plr1.empty() && ran < 95)
+			return randomMove(plr1);
+		ran = rand() % 100;
+		if (!opp1.empty() && ran < 57)
+			return randomMove(opp1);
+	}
+	else if (mode == "defensive") {
+		if (!opp2.empty() && ran < 95)
+			return randomMove(opp2);
+		ran = rand() % 100;
+		if (!plr2.empty() && ran < 72)
+			return randomMove(plr2);
+		ran = rand() % 100;
+		if (!opp1.empty() && ran < 77)
+			return randomMove(opp1);
+		ran = rand() % 100;
+		if (!plr1.empty() && ran < 65)
+			return randomMove(plr1);
+	}
+#ifdef STARS_DEBUG_INFO
+	else
+		throw logic_error("no such mode");
+	if (list.empty())
+		throw logic_error("call randomSuggestion with empty list");
+#endif // STARS_DEBUG_INFO
+	return randomMove(list);
+}
+
+int randomSuggestion(
+	const BoardState& state, const char plr, shortv& list, shortv oppList,
+	const string& mode) {
+#ifdef STARS_DEBUG_INFO
+	if (list.empty())
+		throw logic_error("call randomSuggestion(4 args) with empty list");
+#endif
+	shortv intersectionList;
+	BoardState board = state;
+	// preference No.1: take what can bring me winn-1 in a row, and what can
+	// interrupt opponent's three in a row
+	// but some times it block itself which is rather stupid
+	shortv plrTList = board.makeThreeCols(plr, list),
+		   oppTList = board.makeThreeCols(rPlayer(plr), oppList);
+	srand((unsigned)time(NULL));
+	if (rand() % 100 < 85) {
+		MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
+		if (intersectionList.empty()) {
+			if (plrTList.empty()) {
+				MyShortList::shortIntersection(
+					intersectionList, list, oppTList);
+				if (!intersectionList.empty())
+					return randomSuggestion(state, plr, intersectionList, mode);
+			}
+			else
+				return randomSuggestion(state, plr, plrTList, mode);
+		}
+		else
+			return randomSuggestion(state, plr, intersectionList, mode);
+	}
+
+	// else if everything is empty
+	// preference No.2: take the opponent's safe list
+	MyShortList::shortIntersection(intersectionList, list, oppList);
+	if (intersectionList.empty())
+		return randomSuggestion(state, plr, list, mode);
+	return randomSuggestion(state, plr, intersectionList, mode);
+}
+
+} // namespace Random
 #ifdef STARS_LANG_CHINESE
 string toChinese(const string& word) {
 	if (word == "good")

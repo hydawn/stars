@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include "boardState.h"
+#include "tools.h"
 
 using std::cout;
 
@@ -108,7 +109,7 @@ char BoardState::isOver() {
 	return 'N';
 }
 
-void BoardState::nonFullColumn(shortv& nonFull) {
+void BoardState::nonFullColumn(shortv& nonFull) const {
 	nonFull.clear();
 	for (int i = 0; i < (int)top.size(); ++i)
 		if (top[i] != starArea[i])
@@ -131,121 +132,6 @@ int BoardState::pieceCount() {
 	for (const int i : top)
 		count += i;
 	return count;
-}
-
-int BoardState::randomMove() {
-	shortv list;
-	nonFullColumn(list);
-#ifdef STARS_DEBUG_INFO
-	if (list.empty())
-		throw logic_error("trying randomMove() in full board");
-#endif // STARS_DEBUG_INFO
-	return randomMove(list);
-}
-
-int BoardState::randomMove(shortv& list) {
-#ifdef STARS_DEBUG_INFO
-	if (list.empty())
-		throw logic_error("trying randomMove(shortv& list) in an empty list");
-#endif // STARS_DEBUG_INFO
-	srand((unsigned)time(NULL));
-	return list[rand() % list.size()];
-}
-
-int BoardState::randomSuggestion(
-	const char plr, shortv& list, const string& mode) {
-	shortv opp2, opp1, plr2, plr1;
-	char   opp = rPlayer(plr);
-	srand((unsigned)time(NULL));
-	for (const int col : list) {
-		if (colIsFull(col) || colIsEmpty(col))
-			continue;
-		string& line = board[col - 1];
-		int     head = top[col - 1] - 1;
-		if (line[head] == plr) {
-			if (head > 0 && line[head - 1] == plr)
-				plr2.push_back(col);
-			else
-				plr1.push_back(col);
-		}
-		else {
-			if (head > 0 && line[head - 1] == opp)
-				opp2.push_back(col);
-			else
-				opp1.push_back(col);
-		}
-	}
-	int ran = rand() % 100;
-	if (mode == "progressive") {
-		if (!plr2.empty() && ran < 72)
-			return randomMove(plr2);
-		ran = rand() % 100;
-		if (!opp2.empty() && ran < 95)
-			return randomMove(opp2);
-		ran = rand() % 100;
-		if (!plr1.empty() && ran < 95)
-			return randomMove(plr1);
-		ran = rand() % 100;
-		if (!opp1.empty() && ran < 57)
-			return randomMove(opp1);
-	}
-	else if (mode == "defensive") {
-		if (!opp2.empty() && ran < 95)
-			return randomMove(opp2);
-		ran = rand() % 100;
-		if (!plr2.empty() && ran < 72)
-			return randomMove(plr2);
-		ran = rand() % 100;
-		if (!opp1.empty() && ran < 77)
-			return randomMove(opp1);
-		ran = rand() % 100;
-		if (!plr1.empty() && ran < 65)
-			return randomMove(plr1);
-	}
-#ifdef STARS_DEBUG_INFO
-	else
-		throw logic_error("no such mode");
-	if (list.empty())
-		throw logic_error("call randomSuggestion with empty list");
-#endif // STARS_DEBUG_INFO
-	return randomMove(list);
-}
-
-int BoardState::randomSuggestion(
-	const char plr, shortv& list, shortv oppList, const string& mode) {
-#ifdef STARS_DEBUG_INFO
-	if (list.empty())
-		throw logic_error("call randomSuggestion(4 args) with empty list");
-#endif
-	shortv intersectionList;
-	// preference No.1: take what can bring me winn-1 in a row, and what can
-	// interrupt opponent's three in a row
-	// but some times it block itself which is rather stupid
-	shortv plrTList = makeThreeCols(plr, list),
-		   oppTList = makeThreeCols(rPlayer(plr), oppList);
-	srand((unsigned)time(NULL));
-	if (rand() % 100 < 85) {
-		MyShortList::shortIntersection(intersectionList, plrTList, oppTList);
-		if (intersectionList.empty()) {
-			if (plrTList.empty()) {
-				MyShortList::shortIntersection(
-					intersectionList, list, oppTList);
-				if (!intersectionList.empty())
-					return randomSuggestion(plr, intersectionList, mode);
-			}
-			else
-				return randomSuggestion(plr, plrTList, mode);
-		}
-		else
-			return randomSuggestion(plr, intersectionList, mode);
-	}
-
-	// else if everything is empty
-	// preference No.2: take the opponent's safe list
-	MyShortList::shortIntersection(intersectionList, list, oppList);
-	if (intersectionList.empty())
-		return randomSuggestion(plr, list, mode);
-	return randomSuggestion(plr, intersectionList, mode);
 }
 
 bool BoardState::valid() {
@@ -385,9 +271,9 @@ void BoardState::areaTopTransform() {
 	}
 	MyShortList::shortIntersection(inter, starNotFull, starNotZero);
 	if (inter.empty())
-		++starArea[randomMove(starNotZero) - 1];
+		++starArea[Random::randomMove(starNotZero) - 1];
 	else
-		++starArea[randomMove(inter) - 1];
+		++starArea[Random::randomMove(inter) - 1];
 }
 
 void BoardState::areaTopRestore() {

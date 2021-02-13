@@ -77,7 +77,6 @@ public:
 	bool colIsEmpty(const short col) { return state.colIsEmpty(col); }
 	char gameIsOver() { return state.isOver(); }
 	bool boardIsFull() { return state.boardIsFull(); }
-	char rPlayer(const char plr) { return state.rPlayer(plr); }
 	// show
 	void show() { state.show(); }
 	void starShow() { state.starShow(); }
