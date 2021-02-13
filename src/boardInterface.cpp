@@ -75,7 +75,7 @@ bool BoardInterface::transformInput(
 	return true;
 }
 
-// mode = "reverse"
+// mode = "reverse"/others
 string BoardInterface::getInput() {
 	while (true) {
 #ifndef STARS_LANG_CHINESE
@@ -352,7 +352,8 @@ bool BoardInterface::reverseStringConvert(string input, oneMove& move) {
 	// "r<number>"
 	if (input.empty())
 		return false;
-	input.erase(input.begin());
+	if (input[0] == '0' || input[0] == 'x' || input[0] == 'X')
+		input.erase(input.begin());
 	try {
 		move.move = ToInt::myStoi(input);
 	}
