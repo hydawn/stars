@@ -1,20 +1,17 @@
 /*-- encoding: UTF-8 --*/
 #include "boardInterface.h"
 
-const int maxBoardSize = 32;
+const int maxBoardSize     = 32;
+string    gamesFilename    = "Stars_games.json";
+string    settingsFilename = "Stars_settings.json";
 
-BoardInterface::BoardInterface()
-	: gamesFilename("Stars_games.json"),
-	  settingsFilename("Stars_settings.json"),
-	  record(gamesFilename, settingsFilename) {
+BoardInterface::BoardInterface() : record(gamesFilename, settingsFilename) {
 	analyse             = new BoardAnalyse(8, 8, 4);
 	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
 }
 
 BoardInterface::BoardInterface(const BoardAnalyse& hb)
-	: gamesFilename("Stars_games.json"),
-	  settingsFilename("Stars_settings.json"),
-	  record(gamesFilename, settingsFilename) {
+	: record(gamesFilename, settingsFilename) {
 	analyse             = new BoardAnalyse(hb);
 	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
 }
@@ -24,30 +21,37 @@ BoardInterface::~BoardInterface() {
 	delete analyse;
 }
 
-bool BoardInterface::getStateFromInput() {
-	int            rows = analyse->getRows(), cols = analyse->getCols();
+vector<string> inputBoard(const int rows, const int cols) {
 	vector<string> input;
 	string         inputEater;
-	analyse->state.printHead();
 
 	for (int i = 0; i < rows; ++i) {
 		getline(cin, inputEater);
 		if (inputEater == "e" || inputEater == "exit")
-			return false;
+			return vector<string>();
 		if (inputEater.size() != cols * 2 + 1) {
 #ifndef STARS_LANG_CHINESE
 			cout << "too much in one line of input\n";
 #else
 			cout << "输入的棋盘出了点问题\n";
 #endif
-			return false;
+			return vector<string>();
 		}
 		input.push_back(std::move(inputEater));
 	}
 
 	// transform
 	vector<string> temp(cols, string(rows, ' '));
-	if (transformInput(temp, input, cols, rows)) {
+	if (!transformInput(temp, input, cols, rows))
+		temp.clear();
+	return temp;
+}
+
+bool BoardInterface::getStateFromInput() {
+	analyse->state.printHead();
+	vector<string> temp =
+		std::move(inputBoard(analyse->getRows(), analyse->getCols()));
+	if (!temp.empty()) {
 		analyse->state.board = std::move(temp);
 		analyse->state.refreshTop();
 		return true;
@@ -55,7 +59,7 @@ bool BoardInterface::getStateFromInput() {
 	return false;
 }
 
-bool BoardInterface::transformInput(
+bool transformInput(
 	vector<string>& dest, vector<string>& src, const int cols, const int rows) {
 	for (int i = 0; i < cols; ++i) {
 		for (int j = 0; j < rows; ++j) {
@@ -94,25 +98,15 @@ string BoardInterface::getInput() {
 			analyse->show();
 		else if (input == "h" || input == "help")
 			cout << getHelp("reverse") << endl;
-		else if (
-			input == "i" || input == "info" || input == "story" ||
-			input == "t" || input == "tips")
-			cout << getInfo(input) << endl;
-		else if (input == "m" || input == "move")
-#ifndef STARS_LANG_CHINESE
-			printf(
-				"Why don't we try this in debug mode to see what it does?\n");
-#else
-			printf("你可以在人机模式里输入这个指令看看会发生什么\n");
-#endif // STARS_LANG_CHINESE
 		else {
-			if (reverseStringConvert(input))
-				return input;
-#ifndef STARS_LANG_CHINESE
+			try {
+				int res = ToInt::myStoi(input);
+				if (analyse->state.colCanRemove(res))
+					return input;
+			}
+			catch (const std::exception&) {
+			}
 			cout << "Invalid reverse mode number input, let\'s try again\n";
-#else
-			cout << "这个输入有点小问题\n";
-#endif
 		}
 	}
 }
@@ -142,7 +136,6 @@ BoardInterface::getInput(char plr, int64_t& inputTime, const string& mode) {
 		}
 		catch (const std::invalid_argument&) {
 		}
-
 
 		if (input == "e" || input == "exit")
 			return "exit";
@@ -210,10 +203,9 @@ BoardInterface::getInput(char plr, int64_t& inputTime, const string& mode) {
 		}
 		else if (input == "w" || input == "winn")
 			cout << "winn = " << analyse->state.winn << endl;
-		else if (addStringConvert(input)) {
+		else if (addStringConvert(input))
 			add(input);
-		}
-		else if (reverseStringConvert(input)) {
+		else if (reverseStringCheck(input)) {
 			reverse(input);
 		}
 		else
@@ -226,15 +218,15 @@ BoardInterface::getInput(char plr, int64_t& inputTime, const string& mode) {
 }
 
 short BoardInterface::getCustomInput(const string item) {
-	char  input[16];
-	short customNumber;
+	string input;
+	short  customNumber;
 	while (true) {
 #ifndef STARS_LANG_CHINESE
 		cout << item << " (2~" << maxBoardSize << ") = ";
 #else
 		cout << toChinese(item) << " (2~" << maxBoardSize << ") = ";
 #endif // STARS_LANG_CHINESE
-		cin.getline(input, 16);
+		getline(cin, input);
 		if (input == "e" || input == "exit")
 			return 'e';
 		if (input == "q" || input == "quit")
@@ -313,6 +305,18 @@ bool BoardInterface::addStringConvert(string input, oneMove& move) {
 	return false;
 }
 
+bool BoardInterface::reverseStringCheck(string& input) {
+	try {
+		int res = reverseStringConvert(input);
+		if (analyse->state.colCanRemove(res))
+			return true;
+		return false;
+	}
+	catch (const std::exception&) {
+		return false;
+	}
+}
+
 string BoardInterface::reverseMode() {
 	string input;
 	while (true) {
@@ -321,15 +325,14 @@ string BoardInterface::reverseMode() {
 			return "last";
 		if (input == "quit")
 			return input;
-		reverse(input);
+		reverse(std::stoi(input));
 	}
 }
 
-void BoardInterface::reverse(string& input) {
+bool BoardInterface::reverse(const int num) {
 	oneMove move;
-	move.mode = "reverse";
-	if (!reverseStringConvert(input, move))
-		throw logic_error("reverse: input is in function, yet still invalid");
+	move.mode   = "reverse";
+	move.move   = num;
 	move.player = analyse->state.getTopPiece(move.move);
 	analyse->reverse(move.move);
 #ifndef STARS_LANG_CHINESE
@@ -339,30 +342,20 @@ void BoardInterface::reverse(string& input) {
 #endif // STARS_LANG_CHINESE
 	record.push_back(move);
 	analyse->show();
+	return true;
 }
 
-// return false if wrong input
-bool BoardInterface::reverseStringConvert(string& input) {
-	oneMove dis;
-	return reverseStringConvert(input, dis);
+bool BoardInterface::reverse(string& input) {
+	return reverse(reverseStringConvert(input));
 }
 
-// return false if wrong input
-bool BoardInterface::reverseStringConvert(string input, oneMove& move) {
+// throw an error if input is not a reverse-string
+int reverseStringConvert(string input) {
 	// "r<number>"
-	if (input.empty())
-		return false;
-	if (input[0] == '0' || input[0] == 'x' || input[0] == 'X')
-		input.erase(input.begin());
-	try {
-		move.move = ToInt::myStoi(input);
-	}
-	catch (const std::invalid_argument&) {
-		return false;
-	}
-	if (analyse->state.colCanRemove(move.move))
-		return true;
-	return false;
+	if (input.empty() || input[0] != 'r')
+		throw runtime_error("wrong input in reverseStringConvert");
+	input.erase(input.begin());
+	return ToInt::myStoi(input);
 }
 
 string BoardInterface::debugMode(const string& mode) {
@@ -439,11 +432,12 @@ string BoardInterface::debugMode(const string& mode) {
 		}
 		else if (input == "I" || input == "import") {
 			if (record.getDefaultSettings("changeBoard", "askToSaveBoard"))
-				askToSaveBoard(record.getDefaultSettings(
-					"changeBoard", "defaultSaveBoard"));
-			else if (record.getDefaultSettings(
-						 "changeBoard", "defaultSaveBoard"))
-				record.saveGame(analyse->state);
+				if (askToSaveBoard(record.getDefaultSettings(
+						"changeBoard", "defaultSaveBoard")))
+					record.saveGame(analyse->state);
+				else if (record.getDefaultSettings(
+							 "changeBoard", "defaultSaveBoard"))
+					record.saveGame(analyse->state);
 			// new board
 			importNewBoard();
 			continue;
@@ -930,10 +924,11 @@ string BoardInterface::customMode() {
 	printf("将宽度设置到16以上\n");
 #endif // STARS_LANG_CHINESE
 	if (record.getDefaultSettings("inCustomMode", "askToSaveBoard"))
-		askToSaveBoard(
-			record.getDefaultSettings("inCustomMode", "defaultSaveBoard"));
-	else if (record.getDefaultSettings("inCustomMode", "defaultSaveBoard"))
-		record.saveGame(analyse->state);
+		if (askToSaveBoard(
+				record.getDefaultSettings("inCustomMode", "defaultSaveBoard")))
+			record.saveGame(analyse->state);
+		else if (record.getDefaultSettings("inCustomMode", "defaultSaveBoard"))
+			record.saveGame(analyse->state);
 	short column, row, winn;
 	column = getCustomInput("board width");
 	if (column == 'e')
@@ -998,11 +993,12 @@ bool BoardInterface::controlMode(const string& firstMode) {
 				continue;
 			}
 			if (record.getDefaultSettings("gameIsOver", "askToSaveBoard"))
-				askToSaveBoard(record.getDefaultSettings(
-					"gameIsOver", "defaultSaveBoard"));
-			else if (record.getDefaultSettings(
-						 "gameIsOver", "defaultSaveBoard"))
-				record.saveGame(analyse->state);
+				if (askToSaveBoard(record.getDefaultSettings(
+						"gameIsOver", "defaultSaveBoard")))
+					record.saveGame(analyse->state);
+				else if (record.getDefaultSettings(
+							 "gameIsOver", "defaultSaveBoard"))
+					record.saveGame(analyse->state);
 			break;
 		}
 
@@ -1178,7 +1174,7 @@ string BoardInterface::showRoutesMode() {
 	return "last";
 }
 
-string BoardInterface::getHelp(string mode) {
+string getHelp(const string& mode) {
 	string head = "";
 #ifndef STARS_LANG_CHINESE
 	string enjoy = "Enjoy!\n";
@@ -1374,7 +1370,7 @@ string BoardInterface::getHelp(string mode) {
 	return reverse;
 }
 
-string BoardInterface::getInfo(string input) {
+string getInfo(const string& input) {
 	string head = "";
 #ifdef STARS_VERSION_DEBUG
 	string version = STARS_VERSION_DEBUG;
@@ -1534,7 +1530,7 @@ string BoardInterface::getInfo(string input) {
 	return info;
 }
 
-void BoardInterface::showComment(oneMove& move) {
+void BoardInterface::showComment(const oneMove& move) {
 #ifndef STARS_LANG_CHINESE
 	// comment
 	if ((move.word == "good" && move.byComputer) ||
@@ -1577,7 +1573,7 @@ void BoardInterface::showComment(oneMove& move) {
 #endif // STARS_LANG_CHINESE
 }
 
-bool BoardInterface::askToReverse(bool yes) {
+bool askToReverse(const bool yes) {
 #ifndef STARS_LANG_CHINESE
 	if (yes)
 		printf("Care for a reverse mode? (default yes) (Yes/no)> ");
@@ -1597,7 +1593,7 @@ bool BoardInterface::askToReverse(bool yes) {
 	return false;
 }
 
-void BoardInterface::askToSaveBoard(bool yes) {
+bool askToSaveBoard(const bool yes) {
 #ifndef STARS_LANG_CHINESE
 	if (yes)
 		printf("Save the old game? (yes as default) (Yes/no)> ");
@@ -1613,7 +1609,8 @@ void BoardInterface::askToSaveBoard(bool yes) {
 	getline(cin, input);
 	if ((yes && input.empty()) || input == "Y" || input == "yes" ||
 		input == "y")
-		record.saveGame(analyse->state);
+		return true;
+	return false;
 }
 
 void BoardInterface::importNewBoard() {
@@ -1660,8 +1657,7 @@ bool BoardInterface::isOver(const oneMove& move, const string& mode) {
 				cout << congratulations;
 			else if (mode == "play")
 #ifndef STARS_LANG_CHINESE
-				cout << "Player " << rPlayer(move.player)
-					 << " wins.\n";
+				cout << "Player " << rPlayer(move.player) << " wins.\n";
 #else
 				cout << "玩家" << rPlayer(move.player) << "获胜\n";
 #endif // STARS_LANG_CHINESE

@@ -8,6 +8,22 @@ using std::cin;
 using std::getline;
 using std::string;
 
+// input
+vector<string> inputBoard();
+bool transformInput(
+	vector<string>& dest, vector<string>& src, const int cols, const int rows);
+
+// ask
+bool askToReverse(const bool yes); // if yes == true, then default yes
+bool askToSaveBoard(const bool yes);
+
+// convert
+int reverseStringConvert(string input);
+
+// print
+string getHelp(const string& mode);
+string getInfo(const string& input);
+
 class BoardInterface {
 	friend class BoardTest;
 	friend class BoardRecord;
@@ -15,8 +31,6 @@ class BoardInterface {
 
 private:
 	BoardAnalyse* analyse; // this might be more important?
-	string        gamesFilename;
-	string        settingsFilename;
 	BoardRecord   record;
 	oneMove       byOpponent;
 	oneMove       byPlayer;
@@ -31,9 +45,6 @@ public:
 	string getInput(char plr, int64_t& inputTime, const string& mode);
 	short  getCustomInput(const string item);
 	bool   getStateFromInput();
-	bool   transformInput(
-		  vector<string>& dest, vector<string>& src, const int cols,
-		  const int rows);
 
 	// mode
 	string         reverseMode();
@@ -48,33 +59,24 @@ public:
 
 	// tools for mode
 	void          add(string& input);
-	void          reverse(string& input);
+	bool          reverse(string& input);
+	bool          reverse(const int num);
+	bool          reverseStringCheck(string& input);
 	bool          addStringConvert(string& input);
 	bool          addStringConvert(string input, oneMove& move);
-	bool          reverseStringConvert(string& input);
-	bool          reverseStringConvert(string input, oneMove& move);
 	virtual short respond();
 
 	// ask & do
-	virtual bool askToReverse(bool yes); // if yes == true, then default yes
-	virtual void askToSaveBoard(bool yes);
-	void         importNewBoard();
-
-	// info
-	string getHelp(string mode);
-	string getInfo(string input);
+	void importNewBoard();
 
 	// refresh
 	void refreshRecord(const BoardRecord& record_) { record = record_; }
 
-	// show
-	void showComment(oneMove& move);
+	// print
+	void showComment(const oneMove& move);
 
 	// check
 	virtual bool isOver(const oneMove& move, const string& mode);
 };
-
-int  myStoi(string word);
-bool xtoiFit(string word, int num);
 
 #endif // _BOARDINTERFACE_H_

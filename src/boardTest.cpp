@@ -307,17 +307,6 @@ bool BoardTest::controlMode(const string& firstMode) {
 		else if (advice == "custom")
 			advice = customMode();
 		else if (advice == "over") {
-			if (askToReverseBool && askToReverse(record.getDefaultSettings(
-										"gameIsOver", "defaultReverse"))) {
-				advice = reverseMode();
-				continue;
-			}
-			else if (
-				record.getDefaultSettings("gameIsOver", "defaultReverse") &&
-				!lessPrint) {
-				advice = reverseMode();
-				continue;
-			}
 			if (askToSaveBoardBool)
 				askToSaveBoard(record.getDefaultSettings(
 					"gameIsOver", "defaultSaveBoard"));
