@@ -3,13 +3,6 @@
 
 // ./stars test play
 void displayHelp(string mode = "help") {
-#ifdef STARS_PLATFORM_WINDOWS
-	string stars = ".\\stars";
-#else
-#	ifdef STARS_PLATFORM_LINUX
-	string stars   = "./stars";
-#	endif // STARS_PLATFORM_LINUX
-#endif     // STARS_PLATFORM_WINDOWS
 	string testHelp =
 		"Option:\n"
 		"  -t, --test\n\n"
