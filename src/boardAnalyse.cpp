@@ -6,18 +6,18 @@
 using std::logic_error;
 
 void BoardAnalyse::reverse(const int column) {
-	if (!state.colCanRemove(column))
+	if (!state->colCanRemove(column))
 		throw logic_error("Error: tying to reverse in a wrong place");
-	state.remove(column);
+	state->remove(column);
 }
 
 shortv BoardAnalyse::firstPoint(const char plr, shortv& nonFullList) {
 	shortv firstPointList;
 	for (int col : nonFullList) {
-		state.add(plr, col);
-		if (plr == state.isOver())
+		state->add(plr, col);
+		if (plr == state->isOver())
 			firstPointList.push_back(col);
-		state.remove(col);
+		state->remove(col);
 	}
 	return firstPointList;
 }
@@ -28,13 +28,13 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	// if going to change code below, note that should always check the
 	// firstPoint of those who is going to go first
 #ifdef STARS_DEBUG_INFO
-	if (state.isOver() != 'N') {
+	if (state->isOver() != 'N') {
 		throw logic_error("game is over, yet analyse is called");
 	}
 #endif
 	shortv nonFull, temp1;
 
-	state.nonFullColumn(nonFull);
+	state->nonFullColumn(nonFull);
 	if (nonFull.empty())
 		return "bad";
 	list = firstPoint(plr, nonFull);
@@ -47,10 +47,10 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 		return "bad";
 	if (list.size() == 1) {
 		int frontPos = list.front();
-		state.add(plr, frontPos);
-		state.sweepFullColumn(nonFull, frontPos);
+		state->add(plr, frontPos);
+		state->sweepFullColumn(nonFull, frontPos);
 		temp1 = firstPoint(opp, nonFull);
-		state.remove(frontPos);
+		state->remove(frontPos);
 		if (!temp1.empty())
 			return "bad";
 		return "free";
@@ -60,12 +60,12 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 	shortv list1, goodList;
 	list = nonFull;
 	for (auto col = list.begin(); col != list.end();) {
-		state.add(plr, *col);
-		state.nonFullColumn(nonFull);
+		state->add(plr, *col);
+		state->nonFullColumn(nonFull);
 		list1 = firstPoint(opp, nonFull);
 		// it's not my turn to move, so check opp first
 		if (!list1.empty()) { // bad
-			state.remove(*col);
+			state->remove(*col);
 			col = list.erase(col);
 			continue;
 		}
@@ -74,30 +74,30 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 			goodList.push_back(*col);
 		else if (list1.size() == 1) {
 			shortv list2;
-			state.add(opp, list1[0]);
-			state.sweepFullColumn(nonFull, list1[0]);
+			state->add(opp, list1[0]);
+			state->sweepFullColumn(nonFull, list1[0]);
 			list2 = firstPoint(plr, nonFull);
 			// now it's my turn, check plr first
 			if (!list2.empty()) {
 				goodList.push_back(*col);
-				state.remove(list1[0], *col);
+				state->remove(list1[0], *col);
 				++col;
 				continue;
 			}
 			list2 = firstPoint(opp, nonFull);
 			if (list2.size() > 1) {
-				state.remove(list1[0], *col);
+				state->remove(list1[0], *col);
 				col = list.erase(col);
 				continue;
 			}
 			if (list2.size() == 1) {
 				shortv list3;
-				state.add(plr, list2[0]);
-				state.sweepFullColumn(nonFull, list2[0]);
+				state->add(plr, list2[0]);
+				state->sweepFullColumn(nonFull, list2[0]);
 				list3 = firstPoint(opp, nonFull);
 				// opponent's turn, check opp first
 				if (!list3.empty()) {
-					state.remove(list2[0], list1[0], *col);
+					state->remove(list2[0], list1[0], *col);
 					col = list.erase(col);
 					continue;
 				}
@@ -105,11 +105,11 @@ string BoardAnalyse::analyse(const char plr, shortv& list) {
 				// this is new
 				if (list3.size() > 1)
 					goodList.push_back(*col);
-				state.remove(list2[0]);
+				state->remove(list2[0]);
 			}
-			state.remove(list1[0]);
+			state->remove(list1[0]);
 		}
-		state.remove(*col);
+		state->remove(*col);
 		++col;
 	}
 
@@ -129,7 +129,7 @@ string BoardAnalyse::oneMoveAnalyse(
 	string word;
 	shortv list;
 
-	state.add(plr, col);
+	state->add(plr, col);
 	word = analyse(opp, list);
 	if (word == "free" && list.size() == 1 && depth < maxDepth)
 		word = oneMoveAnalyse(opp, list.front(), depth + 1, maxDepth);
@@ -137,7 +137,7 @@ string BoardAnalyse::oneMoveAnalyse(
 		word = "bad";
 	else if (word == "bad")
 		word = "good";
-	state.remove(col);
+	state->remove(col);
 	return word;
 }
 
@@ -151,7 +151,7 @@ string BoardAnalyse::oneMoveAnalyseTrackRoute(
 	routes.add(col);
 	routes.forward(col);
 
-	state.add(plr, col);
+	state->add(plr, col);
 	string word = analyse(opp, list);
 	if (word == "good") {
 		routes.add(badNode);
@@ -171,7 +171,7 @@ string BoardAnalyse::oneMoveAnalyseTrackRoute(
 	}
 	else
 		routes.add(freeNode);
-	state.remove(col);
+	state->remove(col);
 	routes.backward();
 	return word;
 }
@@ -188,10 +188,10 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 		throw logic_error("recursiveSituationTrackRoute: given list is empty");
 		return "end";
 	}
-	if (state.isOver() != 'N')
+	if (state->isOver() != 'N')
 		throw logic_error(
 			"game is over, yet recursiveSituationTrackRoute is called");
-	if (state.boardIsFull())
+	if (state->boardIsFull())
 		throw logic_error(
 			"board is full, yet recursiveSituationTrackRoute is called");
 	// checking __
@@ -219,7 +219,7 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 	routes.add(list);
 	routes.forward(list.front());
 	for (const int col : list) {
-		state.add(plr, col);
+		state->add(plr, col);
 		word = analyse(opp, nextList);
 		if (word == "good") {
 			routes.add(badNode);
@@ -227,7 +227,7 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 		}
 		else if (word == "bad") {
 			routes.add(goodNode);
-			state.remove(col);
+			state->remove(col);
 			routes.backward();
 			return "good";
 		}
@@ -237,13 +237,13 @@ string BoardAnalyse::recursiveSituationTrackRoute(
 			if (word == "good")
 				badList.push_back(col);
 			else if (word == "bad") {
-				state.remove(col);
+				state->remove(col);
 				routes.backward();
 				return "good";
 			}
 		}
 
-		state.remove(col);
+		state->remove(col);
 		routes.nextNode();
 	}
 	routes.backward();
@@ -265,11 +265,11 @@ string BoardAnalyse::recursiveSituationTrackRouteFirstRound(
 	// ? other call to do almost the same thing but don't track it
 
 	// checking
-	if (state.isOver() != 'N')
+	if (state->isOver() != 'N')
 		throw logic_error(
 			"game is over, yet recursiveSituationTrackRouteFirstRound is "
 			"called");
-	if (state.boardIsFull())
+	if (state->boardIsFull())
 		throw logic_error(
 			"board is full, yet recursiveSituationTrackRouteFirstRound is "
 			"called");
@@ -299,7 +299,7 @@ string BoardAnalyse::recursiveSituationTrackRouteFirstRound(
 	routes.add(list);
 	routes.forward(list.front());
 	for (const int col : list) {
-		state.add(plr, col);
+		state->add(plr, col);
 		word = analyse(opp, nextList);
 		if (word == "good") {
 			routes.add(badNode);
@@ -318,7 +318,7 @@ string BoardAnalyse::recursiveSituationTrackRouteFirstRound(
 				goodList.push_back(col);
 		}
 
-		state.remove(col);
+		state->remove(col);
 		routes.nextNode();
 	}
 	routes.backward();
@@ -342,9 +342,9 @@ string BoardAnalyse::recursiveSituation(
 		throw logic_error("recursiveSituation: given list is empty");
 		return "end";
 	}
-	if (state.isOver() != 'N')
+	if (state->isOver() != 'N')
 		throw logic_error("game is over, yet recursiveSituation is called");
-	if (state.boardIsFull())
+	if (state->boardIsFull())
 		throw logic_error("board is full, yet recursiveSituation is called");
 	// checking __
 
@@ -365,11 +365,11 @@ string BoardAnalyse::recursiveSituation(
 	shortv nextList, goodList;
 
 	for (auto iter = list.begin(); iter != list.end();) {
-		state.add(plr, *iter);
+		state->add(plr, *iter);
 		word = analyse(opp, nextList);
 		if (word == "free")
 			word = recursiveSituation(opp, nextList, recDepth, recCount);
-		state.remove(*iter);
+		state->remove(*iter);
 
 		if (word == "good")
 			iter = list.erase(iter);
@@ -387,10 +387,10 @@ string BoardAnalyse::recursiveSituation(
 string BoardAnalyse::recursiveSituationFirstRound(
 	const char plr, shortv& list, int recDepth, int recCount) {
 	// checking
-	if (state.isOver() != 'N')
+	if (state->isOver() != 'N')
 		throw logic_error(
 			"game is over, yet recursiveSituationFirstRound is called");
-	if (state.boardIsFull())
+	if (state->boardIsFull())
 		throw logic_error(
 			"board is full, yet recursiveSituationFirstRound is called");
 	// checking __
@@ -412,11 +412,11 @@ string BoardAnalyse::recursiveSituationFirstRound(
 	shortv nextList, goodList, badList;
 
 	for (const int col : list) {
-		state.add(plr, col);
+		state->add(plr, col);
 		word = analyse(opp, nextList);
 		if (word == "free")
 			word = recursiveSituation(opp, nextList, recDepth, recCount);
-		state.remove(col);
+		state->remove(col);
 
 		if (word == "good")
 			badList.push_back(col);
@@ -446,19 +446,19 @@ int BoardAnalyse::respond(
 	string    word;
 
 	// pre-test
-	state.nonFullColumn(nonFullList);
+	state->nonFullColumn(nonFullList);
 #ifdef STARS_DEBUG_INFO
 	if (nonFullList.empty())
 		throw logic_error("call respond with full board");
-	if (state.isOver() == plr || state.isOver() == rPlayer(plr))
+	if (state->isOver() == plr || state->isOver() == rPlayer(plr))
 		throw logic_error("call respond with ended game");
 #endif // STARS_DEBUG_INFO
 
 	// analyse
-	// && state.pieceCount() < cols*rows * 0.75 ?
-	state.areaTopRestore();
+	// && state->pieceCount() < cols*rows * 0.75 ?
+	state->areaTopRestore();
 	if (starsOn && nonFullList.size() > 4)
-		state.areaTopTransform();
+		state->areaTopTransform();
 	do {
 		timeUsed = returnTime(plr, plrList, ++recDepth, word, trackRoute);
 	} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
@@ -467,7 +467,7 @@ int BoardAnalyse::respond(
 		recursiveSituationFirstRound(rPlayer(plr), oppList, recDepth - 1);
 	else
 		recursiveSituationFirstRound(rPlayer(plr), oppList, recDepth);
-	state.areaTopRestore();
+	state->areaTopRestore();
 
 	// in case something unpleasent happens - why do I need this?
 	if (starsOn && word != "free" && recDepth > 5 && timeUsed < maxcaltime &&
@@ -525,17 +525,17 @@ int BoardAnalyse::respond(
 	thisMove.list = plrList;
 	thisMove.time = timeUsed;
 	if (word != "bad")
-		return Random::randomSuggestion(state, plr, plrList, oppList);
+		return Random::randomSuggestion(*state, plr, plrList, oppList);
 	else if (word == "bad") {
 		word = analyse(plr, plrList);
 		if (word == "bad") {
 			oppList = firstPoint(rPlayer(plr), nonFullList);
 			if (oppList.empty())
-				return Random::randomMove(state);
+				return Random::randomMove(*state);
 			return Random::randomMove(oppList);
 		}
 		else
-			return Random::randomSuggestion(state, plr, plrList, oppList);
+			return Random::randomSuggestion(*state, plr, plrList, oppList);
 	}
 	else
 		throw logic_error("wrong word returned in respond");
@@ -559,15 +559,15 @@ long long BoardAnalyse::returnTime(
 void BoardAnalyse::checkMatch() {
 	static int called = 0;
 	++called;
-	if (!state.match()) {
-		cout << "add for " << state.addNumber << " times\n"
-			 << "remove for " << state.removeNumber << "times\n"
+	if (!state->match()) {
+		cout << "add for " << state->addNumber << " times\n"
+			 << "remove for " << state->removeNumber << "times\n"
 			 << "called " << called << " times" << endl;
 		throw logic_error("add and remove doesn't match");
 	}
 	else {
-		state.addNumber    = 0;
-		state.removeNumber = 0;
+		state->addNumber    = 0;
+		state->removeNumber = 0;
 		// cout << "called " << called << " times, match" << endl;
 	}
 }

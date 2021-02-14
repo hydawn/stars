@@ -10,8 +10,8 @@ using std::string;
 
 // input
 vector<string> inputBoard();
-bool transformInput(
-	vector<string>& dest, vector<string>& src, const int cols, const int rows);
+bool           transformInput(
+			  vector<string>& dest, vector<string>& src, const int cols, const int rows);
 
 // ask
 bool askToReverse(const bool yes); // if yes == true, then default yes
@@ -30,13 +30,18 @@ class BoardInterface {
 	friend void autoTest(int n, const vector<string>& args);
 
 private:
-	BoardAnalyse* analyse; // this might be more important?
-	BoardRecord   record;
-	oneMove       byOpponent;
-	oneMove       byPlayer;
+	std::shared_ptr<BoardAnalyse> analyse; // this might be more important?
+	BoardRecord                   record;
+	oneMove                       byOpponent;
+	oneMove                       byPlayer;
 
 public:
 	BoardInterface();
+	BoardInterface(const BoardInterface& inter)
+		: analyse(new BoardAnalyse(*(inter.analyse))),
+		  record(inter.record),
+		  byOpponent(inter.byOpponent),
+		  byPlayer(inter.byPlayer) {}
 	BoardInterface(const BoardAnalyse& hb);
 	virtual ~BoardInterface();
 

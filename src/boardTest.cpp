@@ -247,7 +247,7 @@ short BoardTest::respond() {
 
 void BoardTest::askToSaveBoard(bool yes) {
 	if (yes)
-		record.saveGame("auto test auto saved games", analyse->state);
+		record.saveGame("auto test auto saved games", *analyse->state);
 }
 
 bool BoardTest::isOver(const oneMove& move) {
@@ -312,7 +312,7 @@ bool BoardTest::controlMode(const string& firstMode) {
 					"gameIsOver", "defaultSaveBoard"));
 			else if (record.getDefaultSettings(
 						 "gameIsOver", "defaultSaveBoard"))
-				record.saveGame("test mode auto save", analyse->state);
+				record.saveGame("test mode auto save", *(analyse->state));
 			break;
 		}
 
@@ -362,7 +362,7 @@ void autoTest(int n, const vector<string>& args) {
 					autoTest + e.what() + "starsOn:" +
 						std::to_string(test.record.getDefaultSettings(
 							"inDebugMode", "starsOn")),
-					test.analyse->state);
+					*(test.analyse->state));
 				++err;
 			}
 			catch (const std::logic_error& e) {
@@ -373,7 +373,7 @@ void autoTest(int n, const vector<string>& args) {
 					autoTest + e.what() + "starsOn:" +
 						std::to_string(test.record.getDefaultSettings(
 							"inDebugMode", "starsOn")),
-					test.analyse->state);
+					*(test.analyse->state));
 				++err;
 			}
 		}

@@ -1,9 +1,9 @@
 /*-- encoding: UTF-8 --*/
 #include "boardInterface.h"
 
-const int maxBoardSize     = 32;
-const string    gamesFilename    = "Stars_games.json";
-const string    settingsFilename = "Stars_settings.json";
+const int    maxBoardSize     = 32;
+const string gamesFilename    = "Stars_games.json";
+const string settingsFilename = "Stars_settings.json";
 
 namespace GetHelp {
 const string head = "";
@@ -105,9 +105,9 @@ const string end =
 const string enterForMore =
 	"-------------------------- '回车'显示余下信息，e返"
 	"回 ------------------------";
-const string reverse = head + "\n输入列数撤回该列最顶端棋子，按回车退出\n\n" +
-				 "如果你不知道发生了什么，最好回到人机模式看那里的帮助文档\n" +
-				 enjoy + end;
+const string reverse =
+	head + "\n输入列数撤回该列最顶端棋子，按回车退出\n\n" +
+	"如果你不知道发生了什么，最好回到人机模式看那里的帮助文档\n" + enjoy + end;
 const vector<string> debug = {
 	head +
 		"\n输入数字下棋，程序会自动回应，四子连成一条线则获胜，注意棋子只能"
@@ -151,13 +151,13 @@ const vector<string> debug = {
 
 namespace GetInfo {
 const string head = "";
-const string aSong = head + "\n    Oh my darling,\n" + "    oh my darling,\n" +
-			   "    oh my darling Clementine\n\n" + "    You are lost and\n" +
-			   "    gone forever,\n" + "    dreadful sorry Clementine\n\n" +
-			   "    How I missed her,\n" + "    how I missed her,\n" +
-			   "    how I missed my Clementine\n\n" +
-			   "    Until I kissed her\n" + "    little sister\n" +
-			   "    and forgot my Clementine";
+const string aSong =
+	head + "\n    Oh my darling,\n" + "    oh my darling,\n" +
+	"    oh my darling Clementine\n\n" + "    You are lost and\n" +
+	"    gone forever,\n" + "    dreadful sorry Clementine\n\n" +
+	"    How I missed her,\n" + "    how I missed her,\n" +
+	"    how I missed my Clementine\n\n" + "    Until I kissed her\n" +
+	"    little sister\n" + "    and forgot my Clementine";
 #ifdef STARS_VERSION_DEBUG
 const string version = STARS_VERSION_DEBUG;
 #else
@@ -184,19 +184,20 @@ const string tips =
 	"This type of layout will give you a lot of advantage. Trying to build "
 	"any kind\n" +
 	"of three piece in a row is helpful.\nGood luck!\n" + end;
-const string info = head + "\nA 1v1 & 8x8 command line based board game\n" +
+const string info =
+	head + "\nA 1v1 & 8x8 command line based board game\n" +
 #ifndef STARS_DEBUG_INFO
-			  "\n-------------------------------- version " + version +
-			  " --------------------------------\n" +
+	"\n-------------------------------- version " + version +
+	" --------------------------------\n" +
 #endif
 #ifdef STARS_DEBUG_INFO
-			  "\n------------------------------ version " + version +
-			  " -----------------------------\n" +
+	"\n------------------------------ version " + version +
+	" -----------------------------\n" +
 #endif
-			  "                                                            "
-			  "      by Duan Hanyu\n" +
-			  "                                                            "
-			  "          2021-2-10";
+	"                                                            "
+	"      by Duan Hanyu\n" +
+	"                                                            "
+	"          2021-2-10";
 const vector<string> story = {
 	head +
 		"Out of a few random try, you finally get yourself an Easter Egg! "
@@ -252,21 +253,19 @@ const vector<string> story = {
 		end};
 } // namespace GetInfo
 
-
-BoardInterface::BoardInterface() : record(gamesFilename, settingsFilename) {
-	analyse             = new BoardAnalyse(8, 8, 4);
+BoardInterface::BoardInterface()
+	: analyse(new BoardAnalyse(8, 8, 4)),
+	  record(gamesFilename, settingsFilename) {
 	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
 }
 
 BoardInterface::BoardInterface(const BoardAnalyse& hb)
-	: record(gamesFilename, settingsFilename) {
-	analyse             = new BoardAnalyse(hb);
+	: analyse(new BoardAnalyse(hb)), record(gamesFilename, settingsFilename) {
 	analyse->maxcaltime = record.getOtherSettings("maxcaltime").asInt();
 }
 
 BoardInterface::~BoardInterface() {
 	record.changeOtherSettings("maxcaltime", analyse->maxcaltime);
-	delete analyse;
 }
 
 vector<string> inputBoard(const int rows, const int cols) {
@@ -296,12 +295,12 @@ vector<string> inputBoard(const int rows, const int cols) {
 }
 
 bool BoardInterface::getStateFromInput() {
-	analyse->state.printHead();
+	analyse->state->printHead();
 	vector<string> temp =
 		std::move(inputBoard(analyse->getRows(), analyse->getCols()));
 	if (!temp.empty()) {
-		analyse->state.board = std::move(temp);
-		analyse->state.refreshTop();
+		analyse->state->board = std::move(temp);
+		analyse->state->refreshTop();
 		return true;
 	}
 	return false;
@@ -349,7 +348,7 @@ string BoardInterface::getInput() {
 		else {
 			try {
 				int res = ToInt::myStoi(input);
-				if (analyse->state.colCanRemove(res))
+				if (analyse->state->colCanRemove(res))
 					return input;
 			}
 			catch (const std::exception&) {
@@ -387,7 +386,7 @@ BoardInterface::getInput(char plr, int64_t& inputTime, const string& mode) {
 
 		if (input == "e" || input == "exit")
 			return "exit";
-		else if (analyse->state.colCanAdd(num) && input[0] != '0')
+		else if (analyse->state->colCanAdd(num) && input[0] != '0')
 			return input;
 		// excute
 		else if (input.empty()) {
@@ -443,14 +442,14 @@ BoardInterface::getInput(char plr, int64_t& inputTime, const string& mode) {
 		else if (input == "sa" || input == "st" || input == "show stars")
 			analyse->starShow();
 		else if (input == "sv" || input == "save")
-			record.saveGame(analyse->state);
+			record.saveGame(*(analyse->state));
 		else if (input == "sr" || input == "show routes") {
 			analyse->routes.crnt = analyse->routes.head;
 			if (showRoutesMode() == "quit")
 				return "quit";
 		}
 		else if (input == "w" || input == "winn")
-			cout << "winn = " << analyse->state.winn << endl;
+			cout << "winn = " << analyse->state->winn << endl;
 		else if (addStringConvert(input))
 			add(input);
 		else if (reverseStringCheck(input)) {
@@ -548,7 +547,7 @@ bool BoardInterface::addStringConvert(string input, oneMove& move) {
 	catch (const std::invalid_argument&) {
 		return false;
 	}
-	if (analyse->state.colCanAdd(move.move))
+	if (analyse->state->colCanAdd(move.move))
 		return true;
 	return false;
 }
@@ -556,7 +555,7 @@ bool BoardInterface::addStringConvert(string input, oneMove& move) {
 bool BoardInterface::reverseStringCheck(string& input) {
 	try {
 		int res = reverseStringConvert(input);
-		if (analyse->state.colCanRemove(res))
+		if (analyse->state->colCanRemove(res))
 			return true;
 		return false;
 	}
@@ -581,7 +580,7 @@ bool BoardInterface::reverse(const int num) {
 	oneMove move;
 	move.mode   = "reverse";
 	move.move   = num;
-	move.player = analyse->state.getTopPiece(move.move);
+	move.player = analyse->state->getTopPiece(move.move);
 	analyse->reverse(move.move);
 #ifndef STARS_LANG_CHINESE
 	printf("Remove %d as you like it:\n", move.move);
@@ -682,10 +681,10 @@ string BoardInterface::debugMode(const string& mode) {
 			if (record.getDefaultSettings("changeBoard", "askToSaveBoard"))
 				if (askToSaveBoard(record.getDefaultSettings(
 						"changeBoard", "defaultSaveBoard")))
-					record.saveGame(analyse->state);
+					record.saveGame(*(analyse->state));
 				else if (record.getDefaultSettings(
 							 "changeBoard", "defaultSaveBoard"))
-					record.saveGame(analyse->state);
+					record.saveGame(*(analyse->state));
 			// new board
 			importNewBoard();
 			continue;
@@ -1053,7 +1052,7 @@ string BoardInterface::playbackMode() {
 #endif     // STARS_LANG_CHINESE
 
 	// set up a new game and playback the moves
-	BoardState  state = game["state"];
+	BoardState  state(game["state"]);
 	BoardRecord newRecord, tempRecord;
 	newRecord.refreshHistoryMove(game["historyMove"]);
 	// return to the initial state
@@ -1090,7 +1089,7 @@ string BoardInterface::playbackMode() {
 			if (iter->mode != "reverse")
 				analyser.go(iter->player, iter->move);
 			else {
-				reversePlayer = analyser.state.getTopPiece(iter->move);
+				reversePlayer = analyser.state->getTopPiece(iter->move);
 				analyser.reverse(iter->move);
 			}
 		}
@@ -1105,6 +1104,7 @@ string BoardInterface::playbackMode() {
 		if (input == "q" || input == "quit")
 			return "quit";
 		else if (input == "c" || input == "cut" || input == "cut in") {
+			// copy the analyser along with the board
 			BoardInterface interface(analyser);
 			interface.refreshRecord(tempRecord);
 #ifndef STARS_LANG_CHINESE
@@ -1174,9 +1174,9 @@ string BoardInterface::customMode() {
 	if (record.getDefaultSettings("inCustomMode", "askToSaveBoard"))
 		if (askToSaveBoard(
 				record.getDefaultSettings("inCustomMode", "defaultSaveBoard")))
-			record.saveGame(analyse->state);
+			record.saveGame(*(analyse->state));
 		else if (record.getDefaultSettings("inCustomMode", "defaultSaveBoard"))
-			record.saveGame(analyse->state);
+			record.saveGame(*(analyse->state));
 	short column, row, winn;
 	column = getCustomInput("board width");
 	if (column == 'e')
@@ -1243,10 +1243,10 @@ bool BoardInterface::controlMode(const string& firstMode) {
 			if (record.getDefaultSettings("gameIsOver", "askToSaveBoard"))
 				if (askToSaveBoard(record.getDefaultSettings(
 						"gameIsOver", "defaultSaveBoard")))
-					record.saveGame(analyse->state);
+					record.saveGame(*(analyse->state));
 				else if (record.getDefaultSettings(
 							 "gameIsOver", "defaultSaveBoard"))
-					record.saveGame(analyse->state);
+					record.saveGame(*(analyse->state));
 			break;
 		}
 
@@ -1470,7 +1470,7 @@ void BoardInterface::showComment(const oneMove& move) {
 		cout << "    going well~\n";
 	else {
 		shortv non;
-		analyse->state.nonFullColumn(non);
+		analyse->state->nonFullColumn(non);
 		if (move.list.size() == 1 && move.byComputer)
 			cout << "    one move left, where can I go then?\n";
 		else if (move.list.size() == 1 && !move.byComputer)
