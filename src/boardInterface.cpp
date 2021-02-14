@@ -2,8 +2,256 @@
 #include "boardInterface.h"
 
 const int maxBoardSize     = 32;
-string    gamesFilename    = "Stars_games.json";
-string    settingsFilename = "Stars_settings.json";
+const string    gamesFilename    = "Stars_games.json";
+const string    settingsFilename = "Stars_settings.json";
+
+namespace GetHelp {
+const string head = "";
+const string settings =
+	head + "\nDefault settings:\n" +
+	"Customize the program's behaviour in certain situations\n" +
+	"Each situation represent a situation where questions might be "
+	"asked, you can\n" +
+	"decide whether it will be asked, and dispite whether it IS asked, "
+	"the default\n" +
+	"answer would be. Notice that, for example, in situation "
+	"gameIsOver, if\n" +
+	"askToReverse is false but defaultReverse is true, then when game "
+	"is over, we will\n" +
+	"went into reverse mode immediately.\n" +
+	"If starsOn is true, then stars will fall down from the sky then "
+	"make sure the\n" +
+	"program think fast and reckless.\n"
+	"A " +
+	settingsFilename +
+	" file will be generated if the settings are "
+	"changed\n";
+#ifndef STARS_LANG_CHINESE
+const string enjoy = "Enjoy!\n";
+const string end =
+	"----------------------------------------------------------------------"
+	"---------\n";
+const string enterForMore =
+	"------------------------- 'Enter' for more, e to exit "
+	"------------------------\n";
+const string reverse =
+	head +
+	"\nType in column number to reverse that action. Hit 'Enter' to "
+	"exit\n" +
+	"\nIf you don't know what's going on, why are you here. Why don't you "
+	"exit from here\n" +
+	"and see what the help information in debug mode have to say?\n" + enjoy +
+	end;
+const vector<string> debug = {
+	head +
+		"\nType in number to play, the program will automaticaly respond. "
+		"One who place\n" +
+		"four piece in a row first wins.\n" +
+		"\nUse <piece><column number> to place a piece in a column without "
+		"auto-respond.\n"
+		"\nUse r<column number> to reverse an action\n\n" +
+		"Options\n" + "  e  / exit             exit from a certain mode\n" +
+		"  q  / quit             quit the whole game\n" +
+		"  C  / custom           custom board height, width and win number "
+		"(4 "
+		"by default)\n" +
+		"  h  / help             show help message of the current mode\n" +
+		"  p  / play             play mode - play with others\n" +
+		"  P  / playback         playback mode - playback saved games\n" +
+		"  S  / show             show the current board\n" +
+		"  s  / settings         view and change the settings\n" +
+		"  st / show stars       show stars\n" +
+		"  sv / save             save the current game in file " +
+		gamesFilename + "\n" +
+		"  sr / show routes      show routes that the program has "
+		"examined\n" +
+		"  t  / tips             tips I wrote to help other player (you) "
+		"to "
+		"play the game\n" +
+		"  w  / winn             show win number (4 by default) in case "
+		"you "
+		"forgot\n" +
+		"  i  / info             information about the game\n\n" + enterForMore,
+	head +
+		"If hintOn is true, then when the program says your word = good, "
+		"you'll win in a\n" +
+		"few steps if you chose to take the step within the list that "
+		"follows. However,\n" +
+		"if starsOn is true, the program will be faster but might make "
+		"mistakes. Use\n" +
+		"settings to turn on/off hint\n" + enterForMore,
+	head +
+		"If word=free, list=[1, 5], it is recommended that you take the "
+		"step within the\n" +
+		"list.\n" +
+		"\nNote that area that's covered by the stars cannot be accessed "
+		"by "
+		"the program,\n" +
+		"therefore might contain surprises.\n" + "\nOther options\n" +
+		"  c / change     change the player\n" +
+		"  H / hint       show hint for the previous step\n"
+		"  I / import     import a new board from input, the new board "
+		"must "
+		"fit in with\n" +
+		"                 the current board\n" +
+		"  m / move       force the program to take a move now\n" +
+		"  r / reverse    into reverse mode - reverse some moves\n" + enjoy +
+		end};
+#else
+const string enjoy = "玩的开心!\n";
+const string end =
+	"----------------------------------------------------------"
+	"---------------------\n";
+const string enterForMore =
+	"-------------------------- '回车'显示余下信息，e返"
+	"回 ------------------------";
+const string reverse = head + "\n输入列数撤回该列最顶端棋子，按回车退出\n\n" +
+				 "如果你不知道发生了什么，最好回到人机模式看那里的帮助文档\n" +
+				 enjoy + end;
+const vector<string> debug = {
+	head +
+		"\n输入数字下棋，程序会自动回应，四子连成一条线则获胜，注意棋子只能"
+		"从下往上叠起\n\n" +
+		"选项               效果\n" + "  e  / exit             退出所在模式\n" +
+		"  q  / quit             退出游戏\n" +
+		"  C  / custom           "
+		"自定义棋盘长宽和获胜所需最小成排棋子数（默认4）\n" +
+		"  h  / help             显示当前模式帮助文档\n" +
+		"  p  / play             双人模式\n" +
+		"  P  / playback         读档回放模式 - 回放已有存档\n" +
+		"  S  / show             显示当前棋盘\n" +
+		"  s  / settings         进入设置模式\n" +
+		"  st / show stars       显示星星\n" +
+		"  sv / save             将游戏文件存档在" + gamesFilename + "里\n" +
+		"  sr / show routes      显示程序计算过的路径\n" +
+		"  t  / tips             显示游戏玩法提示\n" +
+		"  w  / winn             显示获胜所需最小成排棋子数\n" +
+		"  i  / info             显示游戏信息\n\n" + enterForMore,
+	head +
+		"\n如果打开提示（hintOn）为真，那么当程序显示玩家状态为好时，如果玩"
+		"家选择遵循推荐\n" +
+		"列表中的下法，那么玩家将在几步之内获胜，反之如果显示玩家状态为坏则"
+		"程序将在几步\n" +
+		"之内获胜\n\n" +
+		"不过如果设置中的晴天（starsOn）为真，那么程序有大概15%"
+		"概率计算错误 ;-)\n" +
+		enterForMore,
+	head +
+		"\n当玩家状态显示为自由时，推荐列表中的下法一般可以随便下，推荐列表"
+		"之外最好不要下\n" +
+		"注意有星星的地方程序是看不到的，所以不会推荐，但这并不说明那儿是好"
+		"或者坏只能说\n" +
+		"明那儿远\n\n" + "其他选项\n" + "  c / change     人机玩家身份互换\n" +
+		"  H / hint       显示上一步的提示\n" +
+		"  I / import     导入新棋盘，注意新旧棋盘的大小必须相同\n" +
+		"  m / move       使程序立刻走一步（不等待玩家输入）\n" +
+		"  r / reverse    进入撤回模式\n" + enjoy + end};
+#endif // STARS_LANG_CHINESE
+} // namespace GetHelp
+
+namespace GetInfo {
+const string head = "";
+const string aSong = head + "\n    Oh my darling,\n" + "    oh my darling,\n" +
+			   "    oh my darling Clementine\n\n" + "    You are lost and\n" +
+			   "    gone forever,\n" + "    dreadful sorry Clementine\n\n" +
+			   "    How I missed her,\n" + "    how I missed her,\n" +
+			   "    how I missed my Clementine\n\n" +
+			   "    Until I kissed her\n" + "    little sister\n" +
+			   "    and forgot my Clementine";
+#ifdef STARS_VERSION_DEBUG
+const string version = STARS_VERSION_DEBUG;
+#else
+#	ifdef STARS_VERSION_RELEASE
+const string version = STARS_VERSION_RELEASE;
+#	endif // STARS_VERSION_RELEASE
+#endif     // STARS_VERSION_DEBUG
+const string enjoy = "Enjoy!\n";
+const string end =
+	"----------------------------------------------------------------------"
+	"---------\n";
+const string tips =
+	head + "\nTips from CharmedPython:\n" +
+	"So the trick is to build yourself as high as possible, but don't make "
+	"hugh\n" +
+	"chunks, leave some room between them. Here are some good examples:\n" +
+	" 1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" + "| | | | | | | | |\n" +
+	"| | | | | |0| | |\n" + "|0| | | | |X| | |\n" + "|X| |X|0| |X| | |\n" +
+	"|0| |X|X| |X| | |\n" + "|0| |X|X| |0|X| |\n" + "|0|0|0|X|0|X|0| |\n" +
+	"\nor\n" + " 1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" +
+	"| |0| | | | | | |\n" + "| |0| | | | | | |\n" + "| |X| | |0| | | |\n" +
+	"| |X| |0|X| | | |\n" + "| |X| |X|X| | | |\n" + "| |0| |X|X| | | |\n" +
+	"|0|0| |X|0|X|0|0|\n" +
+	"This type of layout will give you a lot of advantage. Trying to build "
+	"any kind\n" +
+	"of three piece in a row is helpful.\nGood luck!\n" + end;
+const string info = head + "\nA 1v1 & 8x8 command line based board game\n" +
+#ifndef STARS_DEBUG_INFO
+			  "\n-------------------------------- version " + version +
+			  " --------------------------------\n" +
+#endif
+#ifdef STARS_DEBUG_INFO
+			  "\n------------------------------ version " + version +
+			  " -----------------------------\n" +
+#endif
+			  "                                                            "
+			  "      by Duan Hanyu\n" +
+			  "                                                            "
+			  "          2021-2-10";
+const vector<string> story = {
+	head +
+		"Out of a few random try, you finally get yourself an Easter Egg! "
+		"But I'm afraid\n" +
+		"this is actually wrote for myself, so it's quite boring for other "
+		"players. Not\n" +
+		"too late to quite now.\n" +
+		"------------------------- 'Enter' for more, q to quit "
+		"--------------------------\n",
+	head +
+		"Anyway, I have just finished an interview when I see my "
+		"roommate\n" +
+		"coding. He told me it was his homework, I got interested. Then I "
+		"begin to work\n"
+		"on this silly thing till I found that it's taking up all of my "
+		"time and I'm not\n" +
+		"even satisfied? Like it's a weird addictive activity that does "
+		"even provide\n" +
+		"satisfaction like another other decent addictive activity will. "
+		"Watching Game of\n" +
+		"Thrones all day might indicate that someone's life is decaying, "
+		"but at least\n" +
+		"that \"feels good\". Now I'm just coding for almost no reason at "
+		"all, there's\n" +
+		"not much technique here, doesn't require any brain work. Brick by "
+		"brick, anyone\n" +
+		"can build this. I mean, what? I didn't go to school so that I can "
+		"sit here and\n" +
+		"type all day. And there's always new features to develop and new "
+		"bugs to fix.\n" +
+		"Now I really get it when my cousin say you can never finish a "
+		"project, it's a\n" +
+		"disaster.\n" +
+		"------------------------- 'Enter' for more, q to quit "
+		"--------------------------\n",
+	head +
+		"But when I say end a project instead of stop coding, I suddenly "
+		"realized that it\n" +
+		"IS my fault that the project never ends 'cause I never said WHEN "
+		"it ends. When?\n" +
+		"Do I stop once the program can play at least five moves? Do I "
+		"stop once I've\n" +
+		"developed a recursive analyse function? Do I stop once playback "
+		"feature is\n" +
+		"developed? Maybe I should have set a goal, a point, where once it "
+		"was met, I\n" +
+		"stop. Maybe I should do that whenever I start to do anything?\n" +
+		"So... where should I stop?\n" + "\n" +
+		"Well, one have to admit, typing that IS refreshing. The developer "
+		"is OK now.\n" +
+		"Sorry you have to see all these irrelevant crap. Have a nice "
+		"day!\n" +
+		end};
+} // namespace GetInfo
+
 
 BoardInterface::BoardInterface() : record(gamesFilename, settingsFilename) {
 	analyse             = new BoardAnalyse(8, 8, 4);
@@ -789,7 +1037,7 @@ string BoardInterface::playbackMode() {
 	printf("使用 d/rm/delete/remove 删除当前存档，e退出\n");
 	printf("探索愉快!\n");
 	Json::Value game;
-	string result = record.showSavedGames(game);
+	string      result = record.showSavedGames(game);
 	if (result == "exit") {
 #	ifdef STARS_DEBUG_INFO
 		printf("退出读档回放模式 ...\n");
@@ -1175,135 +1423,9 @@ string BoardInterface::showRoutesMode() {
 }
 
 string getHelp(const string& mode) {
-	string head = "";
-#ifndef STARS_LANG_CHINESE
-	string enjoy = "Enjoy!\n";
-	string end =
-		"----------------------------------------------------------------------"
-		"---------\n";
-	string enterForMore =
-		"------------------------- 'Enter' for more, e to exit "
-		"------------------------\n";
-	string reverse =
-		head +
-		"\nType in column number to reverse that action. Hit 'Enter' to "
-		"exit\n" +
-		"\nIf you don't know what's going on, why are you here. Why don't you "
-		"exit from here\n" +
-		"and see what the help information in debug mode have to say?\n" +
-		enjoy + end;
-	vector<string> debug = {
-		head +
-			"\nType in number to play, the program will automaticaly respond. "
-			"One who place\n" +
-			"four piece in a row first wins.\n" +
-			"\nUse <piece><column number> to place a piece in a column without "
-			"auto-respond.\n"
-			"\nUse r<column number> to reverse an action\n\n" +
-			"Options\n" + "  e  / exit             exit from a certain mode\n" +
-			"  q  / quit             quit the whole game\n" +
-			"  C  / custom           custom board height, width and win number "
-			"(4 "
-			"by default)\n" +
-			"  h  / help             show help message of the current mode\n" +
-			"  p  / play             play mode - play with others\n" +
-			"  P  / playback         playback mode - playback saved games\n" +
-			"  S  / show             show the current board\n" +
-			"  s  / settings         view and change the settings\n" +
-			"  st / show stars       show stars\n" +
-			"  sv / save             save the current game in file " +
-			gamesFilename + "\n" +
-			"  sr / show routes      show routes that the program has "
-			"examined\n" +
-			"  t  / tips             tips I wrote to help other player (you) "
-			"to "
-			"play the game\n" +
-			"  w  / winn             show win number (4 by default) in case "
-			"you "
-			"forgot\n" +
-			"  i  / info             information about the game\n\n" +
-			enterForMore,
-		head +
-			"If hintOn is true, then when the program says your word = good, "
-			"you'll win in a\n" +
-			"few steps if you chose to take the step within the list that "
-			"follows. However,\n" +
-			"if starsOn is true, the program will be faster but might make "
-			"mistakes. Use\n" +
-			"settings to turn on/off hint\n" + enterForMore,
-		head +
-			"If word=free, list=[1, 5], it is recommended that you take the "
-			"step within the\n" +
-			"list.\n" +
-			"\nNote that area that's covered by the stars cannot be accessed "
-			"by "
-			"the program,\n" +
-			"therefore might contain surprises.\n" + "\nOther options\n" +
-			"  c / change     change the player\n" +
-			"  H / hint       show hint for the previous step\n"
-			"  I / import     import a new board from input, the new board "
-			"must "
-			"fit in with\n" +
-			"                 the current board\n" +
-			"  m / move       force the program to take a move now\n" +
-			"  r / reverse    into reverse mode - reverse some moves\n" +
-			enjoy + end};
-#else
-	string enjoy = "玩的开心!\n";
-	string end =
-		"----------------------------------------------------------"
-		"---------------------\n";
-	string enterForMore =
-		"-------------------------- '回车'显示余下信息，e返"
-		"回 ------------------------";
-	string reverse =
-		head + "\n输入列数撤回该列最顶端棋子，按回车退出\n\n" +
-		"如果你不知道发生了什么，最好回到人机模式看那里的帮助文档\n" + enjoy +
-		end;
-	vector<string> debug = {
-		head +
-			"\n输入数字下棋，程序会自动回应，四子连成一条线则获胜，注意棋子只能"
-			"从下往上叠起\n\n" +
-			"选项               效果\n" +
-			"  e  / exit             退出所在模式\n" +
-			"  q  / quit             退出游戏\n" +
-			"  C  / custom           "
-			"自定义棋盘长宽和获胜所需最小成排棋子数（默认4）\n" +
-			"  h  / help             显示当前模式帮助文档\n" +
-			"  p  / play             双人模式\n" +
-			"  P  / playback         读档回放模式 - 回放已有存档\n" +
-			"  S  / show             显示当前棋盘\n" +
-			"  s  / settings         进入设置模式\n" +
-			"  st / show stars       显示星星\n" +
-			"  sv / save             将游戏文件存档在" + gamesFilename +
-			"里\n" + "  sr / show routes      显示程序计算过的路径\n" +
-			"  t  / tips             显示游戏玩法提示\n" +
-			"  w  / winn             显示获胜所需最小成排棋子数\n" +
-			"  i  / info             显示游戏信息\n\n" + enterForMore,
-		head +
-			"\n如果打开提示（hintOn）为真，那么当程序显示玩家状态为好时，如果玩"
-			"家选择遵循推荐\n" +
-			"列表中的下法，那么玩家将在几步之内获胜，反之如果显示玩家状态为坏则"
-			"程序将在几步\n" +
-			"之内获胜\n\n" +
-			"不过如果设置中的晴天（starsOn）为真，那么程序有大概15%"
-			"概率计算错误 ;-)\n" +
-			enterForMore,
-		head +
-			"\n当玩家状态显示为自由时，推荐列表中的下法一般可以随便下，推荐列表"
-			"之外最好不要下\n" +
-			"注意有星星的地方程序是看不到的，所以不会推荐，但这并不说明那儿是好"
-			"或者坏只能说\n" +
-			"明那儿远\n\n" + "其他选项\n" +
-			"  c / change     人机玩家身份互换\n" +
-			"  H / hint       显示上一步的提示\n" +
-			"  I / import     导入新棋盘，注意新旧棋盘的大小必须相同\n" +
-			"  m / move       使程序立刻走一步（不等待玩家输入）\n" +
-			"  r / reverse    进入撤回模式\n" + enjoy + end};
-#endif // STARS_LANG_CHINESE
 	if (mode == "debug") {
-		string                   input;
-		vector<string>::iterator iter = debug.begin();
+		string input;
+		auto   iter = GetHelp::debug.begin();
 		do {
 			if (input.empty())
 				cout << *iter;
@@ -1312,227 +1434,33 @@ string getHelp(const string& mode) {
 			else if (input == "quit" || input == "q")
 				return "quit";
 			else {
-#ifndef STARS_LANG_CHINESE
 				cout << "Pardon?\n> ";
-#else
-				cout << "嗯?\n> ";
-#endif // STARS_LANG_CHINESE
 				getline(cin, input);
 				continue;
 			}
 			++iter;
-			if (iter == debug.end())
+			if (iter == GetHelp::debug.end())
 				break;
 			getline(cin, input);
-		} while (iter != debug.end());
-		return head;
+		} while (iter != GetHelp::debug.end());
+		return GetHelp::head;
 	}
 	if (mode == "reverse")
-		return reverse;
-#ifndef STARS_LANG_CHINESE
-	if (mode == "settings") {
-		string settings =
-			head + "\nDefault settings:\n" +
-			"Customize the program's behaviour in certain situations\n" +
-			"Each situation represent a situation where questions might be "
-			"asked, you can\n" +
-			"decide whether it will be asked, and dispite whether it IS asked, "
-			"the default\n" +
-			"answer would be. Notice that, for example, in situation "
-			"gameIsOver, if\n" +
-			"askToReverse is false but defaultReverse is true, then when game "
-			"is over, we will\n" +
-			"went into reverse mode immediately.\n" +
-			"If starsOn is true, then stars will fall down from the sky then "
-			"make sure the\n" +
-			"program think fast and reckless.\n"
-			"A " +
-			settingsFilename +
-			" file will be generated if the settings are "
-			"changed\n";
-		return settings;
-	}
-#else
-	if (mode == "settings") {
-		string settings =
-			head + "\n默认设定：\n" +
-			"设定程序在特定情况下的行为，比如情况：游戏结束 "
-			"下的项目：询问撤回如果为真，\n" +
-			"程序就会在游戏结束时询问是否进入撤回模式，注意如果询问撤回为假而项"
-			"目：默认\n" +
-			"撤回为真，则程序会跳过询问直接进入撤回模式\n\n" +
-			"如果晴天为真，星星就会落到棋盘上，进而导致程序的计算迅速而鲁莽\n"
-			"自定义设置将被储存在" +
-			settingsFilename + "里";
-		return settings;
-	}
-#endif // STARS_LANG_CHINESE
-	return reverse;
+		return GetHelp::reverse;
+	if (mode == "settings")
+		return GetHelp::settings;
+	return GetHelp::reverse;
 }
 
 string getInfo(const string& input) {
-	string head = "";
-#ifdef STARS_VERSION_DEBUG
-	string version = STARS_VERSION_DEBUG;
-#else
-#	ifdef STARS_VERSION_RELEASE
-	string version = STARS_VERSION_RELEASE;
-#	endif // STARS_VERSION_RELEASE
-#endif     // STARS_VERSION_DEBUG
-#ifndef STARS_LANG_CHINESE
-	string enjoy = "Enjoy!\n";
-	string end =
-		"----------------------------------------------------------------------"
-		"---------\n";
-	string tips =
-		head + "\nTips from CharmedPython:\n" +
-		"So the trick is to build yourself as high as possible, but don't make "
-		"hugh\n" +
-		"chunks, leave some room between them. Here are some good examples:\n" +
-		" 1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" + "| | | | | | | | |\n" +
-		"| | | | | |0| | |\n" + "|0| | | | |X| | |\n" + "|X| |X|0| |X| | |\n" +
-		"|0| |X|X| |X| | |\n" + "|0| |X|X| |0|X| |\n" + "|0|0|0|X|0|X|0| |\n" +
-		"\nor\n" + " 1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" +
-		"| |0| | | | | | |\n" + "| |0| | | | | | |\n" + "| |X| | |0| | | |\n" +
-		"| |X| |0|X| | | |\n" + "| |X| |X|X| | | |\n" + "| |0| |X|X| | | |\n" +
-		"|0|0| |X|0|X|0|0|\n" +
-		"This type of layout will give you a lot of advantage. Trying to build "
-		"any kind\n" +
-		"of three piece in a row is helpful.\nGood luck!\n" + end;
-	string info = head + "\nA 1v1 & 8x8 command line based board game\n" +
-#	ifndef STARS_DEBUG_INFO
-				  "\n-------------------------------- version " + version +
-				  " --------------------------------\n" +
-#	endif
-#	ifdef STARS_DEBUG_INFO
-				  "\n------------------------------ version " + version +
-				  " -----------------------------\n" +
-#	endif
-				  "                                                            "
-				  "      by Duan Hanyu\n" +
-				  "                                                            "
-				  "          2021-2-10";
-#else
-	string enjoy = "玩的开心！\n";
-	string end =
-		"----------------------------------------------------------------------"
-		"---------\n";
-	string tips =
-		head + "从上一个python版游戏复制来的游戏:\n" +
-		"这个要诀就是尽量造出连续的，对方不能下的点，可以从盖连续高楼开始但中间"
-		"留点空，\n" +
-		"别弄成一大堆\n" + " 1 2 3 4 5 6 7 8\n" + "| | | | | | | | |\n" +
-		"| | | | | | | | |\n" + "| | | | | |0| | |\n" + "|0| | | | |X| | |\n" +
-		"|X| |X|0| |X| | |\n" + "|0| |X|X| |X| | |\n" + "|0| |X|X| |0|X| |\n" +
-		"|0|0|0|X|0|X|0| |\n" + "\nor\n" + " 1 2 3 4 5 6 7 8\n" +
-		"| | | | | | | | |\n" + "| |0| | | | | | |\n" + "| |0| | | | | | |\n" +
-		"| |X| | |0| | | |\n" + "| |X| |0|X| | | |\n" + "| |X| |X|X| | | |\n" +
-		"| |0| |X|X| | | |\n" + "|0|0| |X|0|X|0|0|\n" +
-		"这样就能提升赢的概率。实际上，所有形式的三个一行都能达到提高获胜概率的"
-		"效果" +
-		"\n祝好运!\n" + end;
-	string info = head + "\n一个一对一，8x8 基于命令行的四子棋游戏\n" +
-#	ifndef STARS_DEBUG_INFO
-				  "\n------------------------------- version " + version +
-				  " ---------------------------------\n" +
-#	endif
-#	ifdef STARS_DEBUG_INFO
-				  "\n---------------------------- version " + version +
-				  " -------------------------------\n" +
-#	endif
-				  "                                                            "
-				  "          by 段晗宇\n" +
-				  "                                                            "
-				  "          2021-2-10";
-#endif // STARS_LANG_CHINESE
-	vector<string> story = {
-		head +
-			"Out of a few random try, you finally get yourself an Easter Egg! "
-			"But I'm afraid\n" +
-			"this is actually wrote for myself, so it's quite boring for other "
-			"players. Not\n" +
-			"too late to quite now.\n" +
-			"------------------------- 'Enter' for more, q to quit "
-			"--------------------------\n",
-		head +
-			"Anyway, I have just finished an interview when I see my "
-			"roommate\n" +
-			"coding. He told me it was his homework, I got interested. Then I "
-			"begin to work\n"
-			"on this silly thing till I found that it's taking up all of my "
-			"time and I'm not\n" +
-			"even satisfied? Like it's a weird addictive activity that does "
-			"even provide\n" +
-			"satisfaction like another other decent addictive activity will. "
-			"Watching Game of\n" +
-			"Thrones all day might indicate that someone's life is decaying, "
-			"but at least\n" +
-			"that \"feels good\". Now I'm just coding for almost no reason at "
-			"all, there's\n" +
-			"not much technique here, doesn't require any brain work. Brick by "
-			"brick, anyone\n" +
-			"can build this. I mean, what? I didn't go to school so that I can "
-			"sit here and\n" +
-			"type all day. And there's always new features to develop and new "
-			"bugs to fix.\n" +
-			"Now I really get it when my cousin say you can never finish a "
-			"project, it's a\n" +
-			"disaster.\n" +
-			"------------------------- 'Enter' for more, q to quit "
-			"--------------------------\n",
-		head +
-			"But when I say end a project instead of stop coding, I suddenly "
-			"realized that it\n" +
-			"IS my fault that the project never ends 'cause I never said WHEN "
-			"it ends. When?\n" +
-			"Do I stop once the program can play at least five moves? Do I "
-			"stop once I've\n" +
-			"developed a recursive analyse function? Do I stop once playback "
-			"feature is\n" +
-			"developed? Maybe I should have set a goal, a point, where once it "
-			"was met, I\n" +
-			"stop. Maybe I should do that whenever I start to do anything?\n" +
-			"So... where should I stop?\n" + "\n" +
-			"Well, one have to admit, typing that IS refreshing. The developer "
-			"is OK now.\n" +
-			"Sorry you have to see all these irrelevant crap. Have a nice "
-			"day!\n" +
-			end};
-	if (input == "t" || input == "tips") {
-		return tips;
-	}
-	if (input == "story") {
-		return head;
-		int   wrongInput = 0;
-		short i          = 1;
-		cout << story[0] << "> ";
-		string dis;
-		getline(cin, dis);
-		if (dis == "q" || dis == "e" || dis == "quit" || dis == "exit")
-			return head;
-		cout << story[1] << "> ";
-		getline(cin, dis);
-		if (dis == "q" || dis == "e" || dis == "quit" || dis == "exit")
-			return head;
-		cout << story[2];
-		return head;
-	}
-	if (input == "a song, please") {
-		string aSong =
-			head + "\n    Oh my darling,\n" + "    oh my darling,\n" +
-			"    oh my darling Clementine\n\n" + "    You are lost and\n" +
-			"    gone forever,\n" + "    dreadful sorry Clementine\n\n" +
-			"    How I missed her,\n" + "    how I missed her,\n" +
-			"    how I missed my Clementine\n\n" + "    Until I kissed her\n" +
-			"    little sister\n" + "    and forgot my Clementine";
-		return aSong;
-	}
-	return info;
+	if (input == "t" || input == "tips")
+		return GetInfo::tips;
+	if (input == "a song, please")
+		return GetInfo::aSong;
+	return GetInfo::info;
 }
 
 void BoardInterface::showComment(const oneMove& move) {
-#ifndef STARS_LANG_CHINESE
-	// comment
 	if ((move.word == "good" && move.byComputer) ||
 		(move.word == "bad" && !move.byComputer))
 		cout << "    not a promising future I'm afraid.\n";
@@ -1552,25 +1480,6 @@ void BoardInterface::showComment(const oneMove& move) {
 		else if (non.size() < 4)
 			cout << "    not much space to chose form.\n";
 	}
-#else
-	if ((move.word == "good" && move.byComputer) ||
-		(move.word == "bad" && !move.byComputer))
-		cout << "    似乎不妙\n";
-	else if (
-		(move.word == "bad" && move.byComputer) ||
-		(move.word == "good" && !move.byComputer))
-		cout << "    妙呀~\n";
-	else {
-		shortv non;
-		analyse->state.nonFullColumn(non);
-		if (move.list.size() == 1 && move.byComputer)
-			cout << "    只剩一步，能走哪儿呢？\n";
-		else if (move.list.size() == 1 && !move.byComputer)
-			cout << "    只剩一步，能走哪儿呢？\n";
-		else if (non.size() < 4)
-			cout << "    剩下的空间不多了\n";
-	}
-#endif // STARS_LANG_CHINESE
 }
 
 bool askToReverse(const bool yes) {
@@ -1630,9 +1539,9 @@ bool BoardInterface::isOver(const oneMove& move, const string& mode) {
 	string congratulations = "Congratulations, you win!\n";
 	string boardFull       = "board is full, game is over, lura is gone.\n";
 #else
-	string gameOver = "游戏结束\n";
+	string gameOver        = "游戏结束\n";
 	string congratulations = "玩家获胜！\n";
-	string boardFull = "棋盘满了\n";
+	string boardFull       = "棋盘满了\n";
 #endif // STARS_LANG_CHINESE
 	if (analyse->gameIsOver() == move.player) {
 		analyse->show();
@@ -1645,7 +1554,7 @@ bool BoardInterface::isOver(const oneMove& move, const string& mode) {
 #ifndef STARS_LANG_CHINESE
 				cout << "Player " << move.player << " wins.\n";
 #else
-				cout << "玩家" << move.player << "获胜\n";
+                cout << "玩家" << move.player << "获胜\n";
 #endif // STARS_LANG_CHINESE
 		}
 		return true;
@@ -1659,7 +1568,7 @@ bool BoardInterface::isOver(const oneMove& move, const string& mode) {
 #ifndef STARS_LANG_CHINESE
 				cout << "Player " << rPlayer(move.player) << " wins.\n";
 #else
-				cout << "玩家" << rPlayer(move.player) << "获胜\n";
+                cout << "玩家" << rPlayer(move.player) << "获胜\n";
 #endif // STARS_LANG_CHINESE
 		}
 		else
