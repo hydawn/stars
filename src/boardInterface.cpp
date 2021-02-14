@@ -1096,9 +1096,23 @@ string BoardInterface::playbackMode() {
 		analyser.show();
 
 		// get input
-		cout << "> ";
 		string input;
-		getline(cin, input);
+		while (true) {
+			cout << "> ";
+			getline(cin, input);
+			if (input == "h" || input == "help") {
+#ifndef STARS_LANG_CHINESE
+				cout
+					<< "b to go back to the previous move, c to cut in and "
+					<< "play, q to quit\nthe whole game, e to exit this mode\n";
+#else
+				cout << "使用c打断回放并进入游戏模式，b回到上一步，h帮助，e退出"
+						"\n";
+#endif // STARS_LANG_CHINESE
+			}
+			else
+				break;
+		}
 		if (input == "e" || input == "exit")
 			break;
 		if (input == "q" || input == "quit")
@@ -1136,16 +1150,6 @@ string BoardInterface::playbackMode() {
 				--iter;
 				continue;
 			}
-		}
-		else if (input == "h" || input == "help") {
-#ifndef STARS_LANG_CHINESE
-			printf(
-				"b to go back to the previous move, c to cut in and play, q to "
-				"quit\n");
-			printf("the whole game, e to exit this mode\n");
-#else
-			printf("使用c打断回放并进入游戏模式，b回到上一步，h帮助，e退出\n");
-#endif // STARS_LANG_CHINESE
 		}
 		++iter;
 	}
