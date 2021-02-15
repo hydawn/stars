@@ -1,4 +1,5 @@
 /*-- encoding: UTF-8 --*/
+#include <algorithm>
 #include "boardInterface.h"
 
 const int    maxBoardSize     = 32;
@@ -1309,9 +1310,8 @@ string BoardInterface::showRoutesMode() {
 		nextFlag = true; // next is a flag
 	else {
 		cout << "or see less in the next node choosing from:\n[ ";
-		vRi iter = next.begin();
-		for (; iter != next.end(); ++iter)
-			cout << (*iter)->data << " ";
+		for (auto iter : next)
+			cout << iter->data << " ";
 		cout << "]\n";
 	}
 	if (routes.crnt->prev)
@@ -1388,10 +1388,10 @@ string BoardInterface::showRoutesMode() {
 				continue;
 			}
 			// find_if by me
-			vRi iter = next.begin();
-			for (; iter != next.end() && (*iter)->data != num; ++iter)
-				;
-			if (iter == next.end()) {
+			if (next.end() ==
+				std::find_if(next.begin(), next.end(), [&num](auto a) {
+					return a->data == num;
+				})) {
 				cout << tryAgain << endl;
 				continue;
 			}

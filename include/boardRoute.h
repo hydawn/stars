@@ -25,12 +25,12 @@ class RouteNode {
 private:
 	RouteNode*         prev = nullptr;
 	vector<RouteNode*> next;
-	short              data = 0;
+	int              data  = 0;
 	bool               print = true;
 
 public:
 	RouteNode() {}
-	RouteNode(RouteNode* prev_, const short data_)
+	RouteNode(RouteNode* prev_, const int data_)
 		: prev(prev_), next(vector<RouteNode*>()), data(data_), print(true) {}
 	RouteNode(const RouteNode& rn) { clone(rn); }
 
@@ -42,8 +42,6 @@ public:
 	void maskFlag(int flag); // mask those marked if match the flag
 	void resetMask();
 };
-
-typedef vector<RouteNode*>::iterator vRi;
 
 
 class RouteTree {
@@ -61,7 +59,7 @@ public:
 
 #ifdef STARS_DEBUG_INFO
 	// check
-	bool match() { return head == crnt; }
+	bool match() const { return head == crnt; }
 #endif
 
 	// handle
@@ -72,26 +70,26 @@ public:
 
 	// move
 	void       forward();
-	void       forward(short data);
+	void       forward(const int data);
 	void       nextNode(); // next node in the same level
 	void       backward();
-	RouteNode* fastBackward(RouteNode* node, int num);
+	RouteNode* fastBackward(RouteNode* node, const int num);
 
 	// change
-	void add(short data);
-	void add(vector<int>& list);
+	void add(const int data);
+	void add(const vector<int>& list);
 
 	// related to show
-	void showRoute();         // for boardAnalyse
-	void showRoute(int flag); // for boardAnalyse
-	bool showRoute(RouteNode* node, int level);
-	void show(RouteNode* node, int level);
+	void showRoute();               // for boardAnalyse
+	void showRoute(const int flag); // for boardAnalyse
+	bool showRoute(RouteNode* node, const int level);
+	void show(RouteNode* node, const int level);
 	void showAll() { show(head, 0); }
 	void showCurrent() { show(crnt, 0); }
 
 	// counter
-	int  getBranches(int flag = 1);
-	void branchCounter(const RouteNode* node);
+	int  getBranches(const int flag = 1);
+	void branchCounter(const RouteNode* node) const;
 };
 
 #endif // _BOARDROUTE_H_

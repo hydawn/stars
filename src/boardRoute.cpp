@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "boardRoute.h"
 
 using std::logic_error;
@@ -39,20 +40,18 @@ bool RouteNode::masked(vector<RouteNode*>& list) {
 bool RouteNode::hasNext() {
 	if (!prev)
 		return false;
-	vRi iter = prev->next.begin();
-	for (; iter != prev->next.end() && *iter != this; ++iter)
-		;
+	auto sibs = prev->next;
+	auto iter = std::find(sibs.begin(), sibs.end(), this);
 #ifdef STARS_DEBUG_INFO
-	if (iter == prev->next.end())
+	if (iter == sibs.end())
 		throw logic_error("error RouteNode::hasNext");
 #endif
 	++iter;
-	if (iter == prev->next.end())
+	if (iter == sibs.end())
 		return false;
-	for (vRi save = iter; save != prev->next.end(); ++save) {
-		if ((*save)->print)
+	for (auto i : sibs)
+		if (i->print)
 			return true;
-	}
 	return false;
 }
 
@@ -106,8 +105,8 @@ void RouteTree::free(RouteNode* node) {
 }
 
 void RouteTree::free(vector<RouteNode*> list) {
-	for (vRi iter = list.begin(); iter != list.end(); ++iter)
-		free(*iter);
+	for (auto iter : list)
+		free(iter);
 }
 
 void RouteTree::generate() {
@@ -131,15 +130,14 @@ void RouteTree::forward() {
 	crnt = crnt->next[0];
 }
 
-void RouteTree::forward(short data) {
+void RouteTree::forward(const int data) {
 #ifdef STARS_DEBUG_INFO
 	if (crnt->next.empty())
 		throw logic_error("reached the end of the tree");
 #endif
-	vector<RouteNode*>::iterator iter = crnt->next.begin();
-	for (; iter != crnt->next.end(); ++iter)
-		if ((*iter)->data == data) {
-			crnt = *iter;
+	for (auto iter : crnt->next)
+		if (iter->data == data) {
+			crnt = iter;
 			return;
 		}
 #ifdef STARS_DEBUG_INFO
@@ -154,15 +152,14 @@ void RouteTree::nextNode() {
 	if (crnt->prev->next.empty())
 		throw logic_error("reached the end of the tree");
 #endif
-	vRi iter = crnt->prev->next.begin();
-	for (; iter != crnt->prev->next.end() && *iter != crnt; ++iter)
-		;
+	auto sibs   = crnt->prev->next;
+	auto iter = std::find(sibs.begin(), sibs.end(), crnt);
 #ifdef STARS_DEBUG_INFO
-	if (iter == crnt->prev->next.end())
-		throw logic_error("no such data, bugs occurred inside this class");
+	if (iter == sibs.end())
+		throw logic_error("no such data, error occurred inside this class");
 #endif
 	++iter;
-	if (iter == crnt->prev->next.end())
+	if (iter == sibs.end())
 		return;
 	crnt = *iter;
 }
@@ -175,7 +172,7 @@ void RouteTree::backward() {
 	crnt = crnt->prev;
 }
 
-RouteNode* RouteTree::fastBackward(RouteNode* node, int num) {
+RouteNode* RouteTree::fastBackward(RouteNode* node, const int num) {
 #ifdef STARS_DEBUG_INFO
 	if (num < 0)
 		throw logic_error("invalid argument");
@@ -190,17 +187,17 @@ RouteNode* RouteTree::fastBackward(RouteNode* node, int num) {
 	return node;
 }
 
-void RouteTree::add(short data) {
+void RouteTree::add(const int data) {
 	RouteNode* p = new RouteNode(crnt, data);
 	crnt->next.push_back(p);
 }
 
-void RouteTree::add(vector<int>& list) {
+void RouteTree::add(const vector<int>& list) {
 	for (int i : list)
 		add(i);
 }
 
-void RouteTree::showRoute(int flag) {
+void RouteTree::showRoute(const int flag) {
 	if (flag == goodNode) { // good
 		crnt->maskFlag(freeNode);
 		crnt->maskFlag(badNode);
@@ -229,15 +226,15 @@ void RouteTree::showRoute() {
 }
 
 #ifdef STARS_PLATFORM_WINDOWS
-string twoDot   = "-- ";
-string oneDot   = "-";
-string vertical = "|";
+const string twoDot   = "-- ";
+const string oneDot   = "-";
+const string vertical = "|";
 #elif STARS_PLATFORM_LINUX
-string twoDot   = "\u2500\u2500 ";
-string oneDot   = "\u2514";
-string vertical = "\u2502";
+const string twoDot   = "\u2500\u2500 ";
+const string oneDot   = "\u2514";
+const string vertical = "\u2502";
 #endif // STARS_PLATFORM
-bool RouteTree::showRoute(RouteNode* node, int level) {
+bool RouteTree::showRoute(RouteNode* node, const int level) {
 	if (!node->print)
 		return false;
 	if (node->next.empty()) {
@@ -261,42 +258,43 @@ bool RouteTree::showRoute(RouteNode* node, int level) {
 		cout << node->data;
 
 	bool firstPrinted = false;
-	for (vRi iter = node->next.begin(); iter != node->next.end(); ++iter) {
-		if (!(*iter)->print)
+	for (auto iter : node->next) {
+		if (!(iter)->print)
 			continue;
 		if (!firstPrinted) { // print the first element
 			cout << twoDot;
-			showRoute(*iter, level + 1);
+			showRoute(iter, level + 1);
 			firstPrinted = true;
 			continue;
 		}
 		for (int i = 0; i < level; ++i) {
-			if (fastBackward(*iter, level - i)->hasNext())
+			if (fastBackward(iter, level - i)->hasNext())
 				cout << vertical << "   ";
 			else
 				cout << ' ' << "   ";
 		}
-		if ((*iter)->hasNext())
+		if ((iter)->hasNext())
 			cout << vertical;
 		else
 			cout << oneDot;
 		cout << twoDot;
-		showRoute(*iter, level + 1);
+		showRoute(iter, level + 1);
 	}
 	return firstPrinted;
 }
 
-void RouteTree::show(RouteNode* node, int level) {
+void RouteTree::show(RouteNode* node, const int level) {
 	cout << node->data;
-	if (node->next.empty()) {
+	auto nNext = node->next;
+	if (nNext.empty()) {
 		cout << endl;
 		return;
 	}
 
 	cout << ' ' << twoDot;
-	show(node->next[0], level + 1);
-	vRi iter = node->next.begin();
-	for (++iter; iter != node->next.end(); ++iter) {
+	show(nNext[0], level + 1);
+	auto iter = nNext.begin();
+	for (++iter; iter != nNext.end(); ++iter) {
 		for (int i = 0; i < level; ++i) {
 			if (fastBackward(*iter, level - i)->hasNext())
 				cout << vertical << "    ";
@@ -308,7 +306,7 @@ void RouteTree::show(RouteNode* node, int level) {
 	}
 }
 
-int RouteTree::getBranches(int flag) {
+int RouteTree::getBranches(const int flag) {
 	if (flag == goodNode) {
 		crnt->maskFlag(freeNode);
 		crnt->maskFlag(badNode);
@@ -328,7 +326,7 @@ int RouteTree::getBranches(int flag) {
 	return branches;
 }
 
-void RouteTree::branchCounter(const RouteNode* node) {
+void RouteTree::branchCounter(const RouteNode* node) const {
 	if (node->next.empty()) {
 		if (node->print && node->prev && node->prev->next.size() == 1)
 			++branches;
