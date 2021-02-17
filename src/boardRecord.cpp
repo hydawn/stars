@@ -28,11 +28,11 @@ BoardRecord::~BoardRecord() {
 		match();
 	}
 	catch (const std::logic_error& e) {
-		cout << "logic_error when destory BoardRecord:\n\t";
+		cout << "logic_error while destorying BoardRecord:\n\t";
 		std::cerr << e.what() << '\n';
 	}
 	catch (const std::runtime_error& e) {
-		cout << "runtime_error when destory BoardRecord:\n\t";
+		cout << "runtime_error while destorying BoardRecord:\n\t";
 		std::cerr << e.what() << '\n';
 	}
 	if (!settingsUnChanged)
@@ -158,8 +158,7 @@ void BoardRecord::saveGame(const string& gameName, const BoardState& state) {
 	Json::Value oneGame;
 	oneGame["name"]  = gameName;
 	time_t now       = time(NULL);
-	char*  date      = ctime(&now);
-	oneGame["date"]  = date;
+	oneGame["date"]  = ctime(&now);
 	oneGame["state"] = state;
 	for (oneMove move : historyMove)
 		oneGame["historyMove"].append(move);
@@ -219,7 +218,7 @@ bool BoardRecord::getDefaultSettings(
 }
 
 const Json::Value& BoardRecord::getOtherSettings(const string& name) const {
-	bool        ret           = true;
+	bool               ret           = true;
 	const Json::Value& otherSettings = settings["otherSettings"];
 	while (true) {
 		if (otherSettings.isMember(name))
@@ -413,7 +412,7 @@ BoardRecord& BoardRecord::operator=(const BoardRecord& br) {
 }
 
 // check if settings match
-bool BoardRecord::match() {
+bool BoardRecord::match() const {
 	if (settingsUnChanged)
 		return true;
 	string dsString = "defaultSettings", osString = "otherSettings",
@@ -435,8 +434,8 @@ bool BoardRecord::match() {
 		cout << "no such member as " << osString << endl;
 		return false;
 	}
-	Json::Value &ds = settings["defaultSettings"],
-				os  = settings["otherSettings"];
+	const Json::Value &ds = settings["defaultSettings"],
+					  os  = settings["otherSettings"];
 	if (!os.isMember(mctString)) {
 		cout << "no such member as " << mctString << endl;
 		return false;

@@ -74,7 +74,7 @@ public:
 	BoardRecord& operator=(const BoardRecord& br);
 
 	// check
-	bool match();
+	bool match() const;
 };
 
 string toChinese(const string& word);
