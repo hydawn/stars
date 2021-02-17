@@ -82,12 +82,12 @@ public:
 	short getCols() const { return state->cols; }
 	short getRows() const { return state->rows; }
 	// else transfer
-	bool colIsFull(const short col) { return state->colIsFull(col); }
-	bool colIsEmpty(const short col) { return state->colIsEmpty(col); }
-	char gameIsOver() { return state->isOver(); }
-	bool boardIsFull() { return state->boardIsFull(); }
+	// bool colIsFull(const short col) { return state->colIsFull(col); }
+	// bool colIsEmpty(const short col) { return state->colIsEmpty(col); }
+	char gameIsOver() const { return state->isOver(); }
+	bool boardIsFull() const { return state->boardIsFull(); }
 	// show
-	void show() { state->show(); }
+	void show() const { state->show(); }
 	void starShow() { state->starShow(); }
 
 	// custom board

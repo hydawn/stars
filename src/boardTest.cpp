@@ -37,7 +37,7 @@ BoardTest::BoardTest(const vector<string>& args)
 	}
 }
 
-string BoardTest::getInput(const string& mode, const short& suggestion) {
+string BoardTest::getInput(const string& mode, const short& suggestion) const {
 	if (mode == "play") {
 		return std::to_string(suggestion);
 	}

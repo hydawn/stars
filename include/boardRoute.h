@@ -25,7 +25,7 @@ class RouteNode {
 private:
 	RouteNode*         prev = nullptr;
 	vector<RouteNode*> next;
-	int              data  = 0;
+	int                data  = 0;
 	bool               print = true;
 
 public:
@@ -36,10 +36,10 @@ public:
 
 	void clone(const RouteNode& rn);
 
-	bool listNextIs(vector<RouteNode*>& list, int data);
-	bool masked(vector<RouteNode*>& list); // if all of list isn't printable
-	bool hasNext();
-	void maskFlag(int flag); // mask those marked if match the flag
+	bool listNextIs(const vector<RouteNode*>& list, const int data) const;
+	bool masked(const vector<RouteNode*>& list) const; // if all of list isn't printable
+	bool hasNext() const;
+	void maskFlag(const int flag); // mask those marked if match the flag
 	void resetMask();
 };
 

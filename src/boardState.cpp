@@ -47,14 +47,14 @@ BoardState::BoardState(const Json::Value& root)
 	}
 }
 
-Json::Value BoardState::boardToJson() {
+Json::Value BoardState::boardToJson() const {
 	Json::Value root;
 	for (const string& str : board)
 		root.append(str);
 	return root;
 }
 
-Json::Value BoardState::topToJson() {
+Json::Value BoardState::topToJson() const {
 	Json::Value root;
 	for (const int i : top)
 		root.append(i);
@@ -80,28 +80,28 @@ void BoardState::printHead() const {
 	cout << '\n';
 }
 
-bool BoardState::colCanAdd(const int col) {
+bool BoardState::colCanAdd(const int col) const {
 	return col > 0 && col <= cols && top[col - 1] != rows;
 }
 
-bool BoardState::colCanRemove(const int col) {
+bool BoardState::colCanRemove(const int col) const {
 	return col > 0 && col <= cols && top[col - 1] != 0;
 }
 
-char BoardState::getTopPiece(const int col) {
+char BoardState::getTopPiece(const int col) const {
 	if (!colCanRemove(col))
 		throw std::logic_error("getTopPiece: call this on an empty column");
 	return board[col - 1][top[col - 1] - 1];
 }
 
-bool BoardState::boardIsFull() {
+bool BoardState::boardIsFull() const {
 	for (const int i : top)
 		if (i != rows)
 			return false;
 	return true;
 }
 
-char BoardState::isOver() {
+char BoardState::isOver() const {
 	for (int i = 0; i < cols; ++i)
 		for (int j = 0; j < top[i]; ++j)
 			if (winPieceNearBy(i, j))
@@ -116,7 +116,15 @@ void BoardState::nonFullColumn(shortv& nonFull) const {
 			nonFull.push_back(i + 1);
 }
 
-void BoardState::sweepFullColumn(shortv& nonFull, int col) {
+// shortv BoardState::nonFullColumn() const {
+// 	shortv nonFull;
+// 	for (int i = 0; i < (int)top.size(); ++i)
+// 		if (top[i] != starArea[i])
+// 			nonFull.push_back(i + 1);
+// 	return nonFull;
+// }
+
+void BoardState::sweepFullColumn(shortv& nonFull, int col) const {
 	if (top[col - 1] == starArea[col - 1])
 		nonFull.erase(std::find(nonFull.begin(), nonFull.end(), col));
 	shortv realNonFull;
@@ -127,14 +135,14 @@ void BoardState::sweepFullColumn(shortv& nonFull, int col) {
 #endif
 }
 
-int BoardState::pieceCount() {
+int BoardState::pieceCount() const {
 	int count = 0;
 	for (const int i : top)
 		count += i;
 	return count;
 }
 
-bool BoardState::valid() {
+bool BoardState::valid() const {
 	for (int i = 0; i < cols; ++i) {
 		int j = 0;
 		while (j < rows && (board[i][j] == 'X' || board[i][j] == '0'))
@@ -145,12 +153,12 @@ bool BoardState::valid() {
 	return true;
 }
 
-bool BoardState::winPieceNearBy(const int col, const int ro) {
+bool BoardState::winPieceNearBy(const int col, const int ro) const {
 	// grow up, right, upright, downright
-	int  i       = 1;
-	char present = board[col][ro];
-	bool canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
-		 canDown = ro >= winn - 1;
+	int        i       = 1;
+	char       present = board[col][ro];
+	const bool canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
+			   canDown = ro >= winn - 1;
 	if (canRight) {
 		// right
 		for (i = 1; i < winn; ++i)
@@ -183,7 +191,8 @@ bool BoardState::winPieceNearBy(const int col, const int ro) {
 	return false;
 }
 
-bool BoardState::winPieceButOne(const int col, const int ro, const int win) {
+bool BoardState::winPieceButOne(
+	const int col, const int ro, const int win) const {
 	// grow right, upright, downright
 	int  i         = 1;
 	bool butOneMet = false;
@@ -308,7 +317,7 @@ void BoardState::setATopWithTop(const int i, const int t) {
 	setATopWithNumber(i + 2, t / 2 + 1);
 }
 
-void BoardState::setATopWithNumber(const int i, const int n)  {
+void BoardState::setATopWithNumber(const int i, const int n) {
 	if (i >= 0 && i < cols && starArea[i] < n)
 		starArea[i] = n;
 }
@@ -322,7 +331,7 @@ shortv BoardState::aTopFullColumn() {
 	return list;
 }
 
-int BoardState::starNumber() {
+int BoardState::starNumber() const {
 	int sum = 0;
 	for (int i = 0; i < cols; ++i)
 		sum += rows - starArea[i];
@@ -356,12 +365,12 @@ shortv BoardState::makeThreeCols(const char plr, shortv& safeList) {
 	return rax;
 }
 
-bool BoardState::specialPiece(const int col, const int ro) {
+bool BoardState::specialPiece(const int col, const int ro) const {
 	// grow up, right, upright, downright
-	int  i       = 1;
-	char present = board[col][ro];
-	bool canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
-		 canDown = ro >= winn - 1;
+	int        i       = 1;
+	char       present = board[col][ro];
+	const bool canUp = ro <= top[col] - winn, canRight = col <= cols - winn,
+			   canDown = ro >= winn - 1;
 	if (canRight) {
 		// right
 		for (i = 1; i < winn; ++i)

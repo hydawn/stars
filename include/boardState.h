@@ -53,7 +53,9 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, oneMove& move);
 };
 
-inline char rPlayer(const char plr) { return plr ^ 0x68; }
+inline char rPlayer(const char plr) {
+	return plr ^ 0x68;
+}
 
 class BoardState {
 	// handles the memory allocate and ways to change the board
@@ -82,7 +84,7 @@ public:
 		  winn(w) {}
 
 	// operator
-	operator Json::Value() {
+	operator Json::Value() const {
 		Json::Value root;
 		root["board"]  = std::move(boardToJson());
 		root["top"]    = std::move(topToJson());
@@ -91,35 +93,36 @@ public:
 		root["winn"]   = winn;
 		return root;
 	}
-	Json::Value boardToJson();
-	Json::Value topToJson();
+	Json::Value boardToJson() const;
+	Json::Value topToJson() const;
 
 	// show
 	void show() const;
 	void printHead() const;
 
 	// check
-	bool colCanAdd(const int col);
-	bool colCanRemove(const int col);
+	bool colCanAdd(const int col) const;
+	bool colCanRemove(const int col) const;
 
 	// getter
-	int                   getWinn() { return winn; }
-	char                  getTopPiece(const int col);
+	int                   getWinn() const { return winn; }
+	char                  getTopPiece(const int col) const;
 	const vector<string>& getBoard() const { return board; }
 	const shortv&         getTop() const { return top; }
 
 	// is function
 	bool colIsFull(const int col) const { return top.at(col - 1) == rows; }
 	bool colIsEmpty(const int col) const { return top.at(col - 1) == 0; }
-	bool boardIsFull();
-	bool winPieceNearBy(const int col, const int ro);
-	bool winPieceButOne(const int col, const int ro, const int win);
-	char isOver();
+	bool boardIsFull() const;
+	bool winPieceNearBy(const int col, const int ro) const;
+	bool winPieceButOne(const int col, const int ro, const int win) const;
+	char isOver() const;
 
 	// tools
 	void nonFullColumn(shortv& nonFull) const;
-	void sweepFullColumn(shortv& nonFull, int col);
-	int  pieceCount();
+	// shortv nonFullColumn() const;
+	void sweepFullColumn(shortv& nonFull, const int col) const;
+	int  pieceCount() const;
 
 	// change board
 	void add(const char plr, const int col) {
@@ -148,8 +151,8 @@ public:
 		remove(args...);
 	}
 	// debug
-	bool match() { return removeNumber == addNumber; }
-	bool valid();
+	bool match() const { return removeNumber == addNumber; }
+	bool valid() const;
 
 	// custom
 	void customBoard(const int cl, const int ro, const int wi);
@@ -161,10 +164,10 @@ public:
 	void   setATopWithTop(const int i, const int t);
 	void   setATopWithNumber(const int i, const int n);
 	shortv aTopFullColumn();
-	int    starNumber();
+	int    starNumber() const;
 	int    threeRowCount(const char plr, shortv& safeList);
 	shortv makeThreeCols(const char plr, shortv& safeList);
-	bool   specialPiece(const int col, const int ro);
+	bool   specialPiece(const int col, const int ro) const;
 
 	// input a new board
 	void refreshTop() noexcept;

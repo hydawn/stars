@@ -56,13 +56,13 @@ void displayHelp(string mode = "help") {
 
 bool argsHandle(int argc, char* argv[], string& firstMode) {
 #ifdef STARS_VERSION_DEBUG
-	string version = STARS_VERSION_DEBUG;
+	const string version = STARS_VERSION_DEBUG;
 #else
 #	ifdef STARS_VERSION_RELEASE
-	string version = STARS_VERSION_RELEASE;
+	const string version = STARS_VERSION_RELEASE;
 #	endif // STARS_VERSION_RELEASE
 #endif     // STARS_VERSION_DEBUG
-	vector<string> argl = {"--no-hint", "--less-print", "--no-print",
+	const vector<string> argl = {"--no-hint", "--less-print", "--no-print",
 						   "--no-ask",  "--debug",      "--play"};
 	if (argc > 16)
 		throw invalid_argument("Too many arguments");

@@ -2,40 +2,25 @@
 #include "boardRecord.h"
 
 // hard core code
-string addon		   = "";
-string inFileSettings = addon +
-	"{\n" +
-	"	\"defaultSettings\": {\n" +
-	"		\"changeBoard\": {\n" +
-	"			\"askToSaveBoard\": false,\n" +
-	"			\"defaultSaveBoard\": false\n" +
-	"		},\n" +
-	"		\"gameIsOver\": {\n" +
-	"			\"askToReverse\": true,\n" +
+string addon = "";
+string inFileSettings =
+	addon + "{\n" + "	\"defaultSettings\": {\n" +
+	"		\"changeBoard\": {\n" + "			\"askToSaveBoard\": false,\n" +
+	"			\"defaultSaveBoard\": false\n" + "		},\n" +
+	"		\"gameIsOver\": {\n" + "			\"askToReverse\": true,\n" +
 	"			\"askToSaveBoard\": true,\n" +
 	"			\"defaultReverse\": false,\n" +
-	"			\"defaultSaveBoard\": false\n" +
-	"		},\n" +
-	"		\"inCustomMode\": {\n" +
-	"			\"askToSaveBoard\": false,\n" +
-	"			\"defaultSaveBoard\": false\n" +
-	"		},\n" +
-	"		\"inDebugMode\": {\n" +
-	"			\"hintOn\": false,\n" +
+	"			\"defaultSaveBoard\": false\n" + "		},\n" +
+	"		\"inCustomMode\": {\n" + "			\"askToSaveBoard\": false,\n" +
+	"			\"defaultSaveBoard\": false\n" + "		},\n" +
+	"		\"inDebugMode\": {\n" + "			\"hintOn\": false,\n" +
 	"			\"showCalculate\": false,\n" +
-	"			\"showTime\": false,\n" +
-	"			\"starrySky\": false,\n" +
-	"			\"starsOn\": false,\n" +
-	"			\"trackRoutes\": false\n" +
-	"		},\n" +
-	"		\"whenSaveGame\": {\n" +
+	"			\"showTime\": false,\n" + "			\"starrySky\": false,\n" +
+	"			\"starsOn\": false,\n" + "			\"trackRoutes\": false\n" +
+	"		},\n" + "		\"whenSaveGame\": {\n" +
 	"			\"askGiveName\": true,\n" +
-	"			\"defaultGiveName\": false\n" +
-	"		}\n" +
-	"	},\n" +
-	"	\"otherSettings\": {\n" +
-	"		\"maxcaltime\":81\n" +
-	"	}\n" +
+	"			\"defaultGiveName\": false\n" + "		}\n" + "	},\n" +
+	"	\"otherSettings\": {\n" + "		\"maxcaltime\":81\n" + "	}\n" +
 	"}\n";
 
 BoardRecord::~BoardRecord() {
@@ -101,7 +86,7 @@ void BoardRecord::getFile() {
 		throw logic_error("can't parse in-file settings");
 }
 
-void BoardRecord::writeGames() {
+void BoardRecord::writeGames() const {
 	std::ofstream outFile(gamesFileName);
 	if (!outFile.is_open()) {
 		cout << "Failed to open file \"" << gamesFileName << "\" to write\n";
@@ -111,7 +96,7 @@ void BoardRecord::writeGames() {
 	outFile << games;
 }
 
-void BoardRecord::writeSettings() {
+void BoardRecord::writeSettings() const {
 	if (settingsUnChanged)
 		return;
 	std::ofstream outFile(settingsFileName);
@@ -123,7 +108,7 @@ void BoardRecord::writeSettings() {
 	outFile << settings;
 }
 
-bool BoardRecord::importInFileSettings(Json::Value* dest) {
+bool BoardRecord::importInFileSettings(Json::Value* dest) const {
 	Json::String            errors;
 	Json::CharReaderBuilder charRB;
 	Json::CharReader*       charReader(charRB.newCharReader());
@@ -134,7 +119,7 @@ bool BoardRecord::importInFileSettings(Json::Value* dest) {
 	return true;
 }
 
-void BoardRecord::saveGame(BoardState& state) {
+void BoardRecord::saveGame(const BoardState& state) {
 	string gameName = "no one";
 	if (getDefaultSettings("whenSaveGame", "askGiveName")) {
 		bool defaultGiveName =
@@ -169,7 +154,7 @@ void BoardRecord::saveGame(BoardState& state) {
 #endif // STARS_LANG_CHINESE
 }
 
-void BoardRecord::saveGame(const string& gameName, BoardState& state) {
+void BoardRecord::saveGame(const string& gameName, const BoardState& state) {
 	Json::Value oneGame;
 	oneGame["name"]  = gameName;
 	time_t now       = time(NULL);
@@ -182,74 +167,82 @@ void BoardRecord::saveGame(const string& gameName, BoardState& state) {
 	writeGames();
 }
 
-bool BoardRecord::getDefaultSettings(const string& situ, const string& item) {
-	int          i               = 0;
-	Json::Value& defaultSettings = settings["defaultSettings"];
-	while (i < 3) {
+bool BoardRecord::getDefaultSettings(
+	const string& situ, const string& item) const {
+	const Json::Value& defaultSettings = settings["defaultSettings"];
+	for (int i = 0; i < 1; ++i) {
 		if (defaultSettings.isMember(situ)) {
 			if (defaultSettings[situ].isMember(item))
 				return defaultSettings[situ][item].asBool();
-			else if (i < 2) {
-				std::ofstream outSet(settingsFileName);
-				outSet << inFileSettings;
-				outSet.close();
-				std::ifstream in(settingsFileName);
-				in >> settings;
-				++i;
-				continue;
-			}
 			else {
-				cout << "situ = " << situ << " item = " << item << endl;
-				throw runtime_error("no such item in Stars_settings.json");
+				cout << "situation = " << situ << "item = " << item << '\n';
+				cout << "considering delete old Stars_settings.json file\n";
+				throw runtime_error("no such item in situation");
 			}
 		}
-		else if (i < 2) {
-			std::ofstream outSet(settingsFileName);
-			outSet << inFileSettings;
-			outSet.close();
-			std::ifstream in(settingsFileName);
-			in >> settings;
-			defaultSettings = settings["defaultSettings"];
-			++i;
-			continue;
-		}
+		// this is only valid when there is an version update;
+		// 	else if (i < 2) {
+		// 		std::ofstream outSet(settingsFileName);
+		// 		outSet << inFileSettings;
+		// 		outSet.close();
+		// 		std::ifstream in(settingsFileName);
+		// 		in >> settings;
+		// 		++i;
+		// 		continue;
+		// 	}
+		// 	else {
+		// 		cout << "situ = " << situ << " item = " << item << endl;
+		// 		throw runtime_error("no such item in Stars_settings.json");
+		// 	}
+		// }
+		// else if (i < 2) {
+		// 	std::ofstream outSet(settingsFileName);
+		// 	outSet << inFileSettings;
+		// 	outSet.close();
+		// 	std::ifstream in(settingsFileName);
+		// 	in >> settings;
+		// 	defaultSettings = settings["defaultSettings"];
+		// 	++i;
+		// 	continue;
+		// }
 		else {
-			cout << "situ = " << situ << endl;
+			cout << "situ = " << situ << '\n';
+			cout << "considering delete old Stars_settings.json file\n";
 			throw runtime_error("no such situation in Stars_settings.json");
 		}
 	}
 #ifdef STARS_DEBUG_INFO
 	throw logic_error(
 		"control flow to the end of BoardRecord::getDefaultSettings");
-#endif
+#endif // STARS_DEBUG_INFO
 	return false;
 }
 
-Json::Value& BoardRecord::getOtherSettings(const string& name) {
-	bool         ret           = true;
-	Json::Value& otherSettings = settings["otherSettings"];
+const Json::Value& BoardRecord::getOtherSettings(const string& name) const {
+	bool        ret           = true;
+	const Json::Value& otherSettings = settings["otherSettings"];
 	while (true) {
 		if (otherSettings.isMember(name))
 			return otherSettings[name];
 		// if not, try writting first
-		if (ret) {
-			std::ofstream outSet(settingsFileName);
-			outSet << inFileSettings;
-			outSet.close();
-			std::ifstream in(settingsFileName);
-			in >> settings;
-			otherSettings = settings["otherSettings"];
-			ret           = false;
-			continue;
-		}
+		// if (ret) {
+		// 	std::ofstream outSet(settingsFileName);
+		// 	outSet << inFileSettings;
+		// 	outSet.close();
+		// 	std::ifstream in(settingsFileName);
+		// 	in >> settings;
+		// 	otherSettings = settings["otherSettings"];
+		// 	ret           = false;
+		// 	continue;
+		// }
 		// if tried and failed
 		throw runtime_error("no such other settings");
 	}
 }
 
-void BoardRecord::showSettingsWithTags() {
-	Json::Value& defaultSettings = settings["defaultSettings"];
-	members      member          = defaultSettings.getMemberNames();
+void BoardRecord::showSettingsWithTags() const {
+	const Json::Value& defaultSettings = settings["defaultSettings"];
+	members            member          = defaultSettings.getMemberNames();
 #ifndef STARS_LANG_CHINESE
 	cout << "situation\t"
 		 << "item\t\t\t"
@@ -301,7 +294,7 @@ void BoardRecord::showSettingsWithTags() {
 #endif // STARS_LANG_CHINESE
 }
 
-bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
+bool BoardRecord::changeSettingsUsingTags(const int tag1, const int tag2) {
 	int          x               = 0;
 	Json::Value& defaultSettings = settings["defaultSettings"];
 	members      member          = defaultSettings.getMemberNames();
@@ -310,17 +303,16 @@ bool BoardRecord::changeSettingsUsingTags(int tag1, int tag2) {
 		members inset = defaultSettings[*i].getMemberNames();
 		for (members::iterator j = inset.begin(); j != inset.end(); ++j) {
 			if (x == tag1 && y == tag2) {
-				defaultSettings[*i][*j] = !defaultSettings[*i][*j].asBool();
+				Json::Value& curr = defaultSettings[*i][*j];
+				curr              = !curr.asBool();
 #ifndef STARS_LANG_CHINESE
 				cout << *i << ": " << *j << " is changed from "
-					 << std::boolalpha << !defaultSettings[*i][*j].asBool()
-					 << " to " << defaultSettings[*i][*j] << endl;
+					 << std::boolalpha << !curr.asBool() << " to " << curr
+					 << endl;
 #else
 				cout << toChinese(*i) << ": " << toChinese(*j) << " 已从 "
-					 << std::boolalpha
-					 << toChinese(!defaultSettings[*i][*j].asBool())
-					 << " 更改到 "
-					 << toChinese(defaultSettings[*i][*j].asBool()) << endl;
+					 << std::boolalpha << toChinese(!curr.asBool())
+					 << " 更改到 " << toChinese(curr.asBool()) << endl;
 #endif // STARS_LANG_CHINESE
 				settingsUnChanged = false;
 				return true;
@@ -399,7 +391,7 @@ string BoardRecord::showSavedGames(Json::Value& ret) {
 	return "exit";
 }
 
-void BoardRecord::showSavedBoard(const Json::Value& state) {
+void BoardRecord::showSavedBoard(const Json::Value& state) const {
 	BoardState bstate(state);
 	bstate.show();
 }

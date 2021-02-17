@@ -18,17 +18,15 @@ void RouteNode::clone(const RouteNode& rn) {
 	}
 }
 
-bool RouteNode::listNextIs(vector<RouteNode*>& list, int data) {
-	for (RouteNode* iter : list) {
-		if (iter->next.size() != 1)
+bool RouteNode::listNextIs(
+	const vector<RouteNode*>& list, const int data) const {
+	for (RouteNode* iter : list)
+		if (iter->next.size() != 1 || iter->next[0]->data != data)
 			return false;
-		if (iter->next[0]->data != data)
-			return false;
-	}
 	return true;
 }
 
-bool RouteNode::masked(vector<RouteNode*>& list) {
+bool RouteNode::masked(const vector<RouteNode*>& list) const {
 	if (list.empty())
 		return false;
 	for (RouteNode* i : list)
@@ -37,7 +35,7 @@ bool RouteNode::masked(vector<RouteNode*>& list) {
 	return true;
 }
 
-bool RouteNode::hasNext() {
+bool RouteNode::hasNext() const {
 	if (!prev)
 		return false;
 	auto sibs = prev->next;
@@ -56,7 +54,7 @@ bool RouteNode::hasNext() {
 }
 
 // flag = 1, 0, -1, -2. 1 is for those that are not considered
-void RouteNode::maskFlag(int flag) {
+void RouteNode::maskFlag(const int flag) {
 	if (flag == 1) {
 		// mask those not considered
 		if (!(data == goodNode || data == badNode || data == freeNode) &&
@@ -152,7 +150,7 @@ void RouteTree::nextNode() {
 	if (crnt->prev->next.empty())
 		throw logic_error("reached the end of the tree");
 #endif
-	auto sibs   = crnt->prev->next;
+	auto sibs = crnt->prev->next;
 	auto iter = std::find(sibs.begin(), sibs.end(), crnt);
 #ifdef STARS_DEBUG_INFO
 	if (iter == sibs.end())
@@ -229,7 +227,7 @@ void RouteTree::showRoute() {
 const string twoDot   = "-- ";
 const string oneDot   = "-";
 const string vertical = "|";
-#elif STARS_PLATFORM_LINUX
+#else // STARS_PLATFORM_LINUX
 const string twoDot   = "\u2500\u2500 ";
 const string oneDot   = "\u2514";
 const string vertical = "\u2502";

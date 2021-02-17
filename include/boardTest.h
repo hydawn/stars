@@ -42,7 +42,7 @@ public:
 	virtual short  respond();
 
 	// tools
-	string getInput(const string& mode, const short& suggestion);
+	string getInput(const string& mode, const short& suggestion) const;
 };
 
 void autoTest(int n, const vector<string>& args);
