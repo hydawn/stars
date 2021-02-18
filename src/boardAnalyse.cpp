@@ -459,9 +459,13 @@ int BoardAnalyse::respond(
 	state->areaTopRestore();
 	if (starsOn && nonFullList.size() > 4)
 		state->areaTopTransform();
+	auto checkTime = [&word, &recDepth, &timeUsed, this]() {
+		return word == "free" && timeUsed < (this->maxcaltime) / 2 &&
+			   recDepth < 10;
+	};
 	do {
 		timeUsed = returnTime(plr, plrList, ++recDepth, word, trackRoute);
-	} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
+	} while (checkTime());
 	// this opp list is for the random suggestion functions
 	if (recDepth > 2)
 		recursiveSituationFirstRound(rPlayer(plr), oppList, recDepth - 1);
@@ -469,13 +473,13 @@ int BoardAnalyse::respond(
 		recursiveSituationFirstRound(rPlayer(plr), oppList, recDepth);
 	state->areaTopRestore();
 
-	// in case something unpleasent happens - why do I need this?
-	if (starsOn && word != "free" && recDepth > 5 && timeUsed < maxcaltime &&
+	// in case analyse with stars went crazy, do analyse without stars
+	if (starsOn && word != "free" && recDepth > 5 && checkTime() &&
 		nonFullList.size() < 12) {
 		recDepth = 2;
 		do {
 			timeUsed = returnTime(plr, plrList, ++recDepth, word, trackRoute);
-		} while (word == "free" && timeUsed < maxcaltime && recDepth < 10);
+		} while (checkTime());
 #ifndef STARS_LANG_CHINESE
 		if (showCal)
 			cout << "    calculation depth without stars = " << recDepth
