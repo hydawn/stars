@@ -23,33 +23,43 @@ Now X wins.
 Note that whenever you try to place a piece in a column, it always start piling from the button. You can't put a piece in the middle like any other proper board game would, which might bring boredom but certainly makes it easier for me.
 
 # Play &#x1F3AE;
-## Windows
-### Option 1: Download directly
+
+<details>
+<summary>Windows</summary>
+
+## Option 1: Download directly
 Download in [here](https://github.com/HanyuDuan/stars/releases), click to run.  
 
-### Option 2: Build &#x1F528; with cmake  
+## Option 2: Build &#x1F528; with cmake
 In cmd build an English version:
 
 ```cmd
 git clone https://github.com/HanyuDuan/stars.git
 script\build.cmd
 ```
+</details>
 
 
-## Linux
-### Build &#x1F528; with cmake
+<details>
+<summary>Linux</summary>
+
+## Build &#x1F528; with cmake
+
 ```sh
 git clone https://github.com/HanyuDuan/stars.git
 ./script/build.sh
 ```
 Use `./stars` to start the game.  
 `./build.sh install` to install, `./build.sh uninstall` to uninstall &#x1f5d1;  
+</details>
 
-## macOS
+<details>
+<summary>macOS</summary>
 Same as Linux.
+</details>
 
 # Import
-You can see there's a few board in [oldTestingBoard.md](./oldTestingBoard.md). If you want to import and play in a new board, just enter `import` or `I` and you'll see this:  
+You can see there's a few board in [oldTestingBoard.md](./docs/oldTestingBoard.md). If you want to import and play in a new board, just enter `import` or `I` and you'll see this:  
 ```
 In debug mode
 Player 'X' move> I
