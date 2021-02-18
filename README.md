@@ -26,11 +26,13 @@ Note that whenever you try to place a piece in a column, it always start piling 
 ## Windows
 ### Option 1: Download directly
 Download in [here](https://github.com/HanyuDuan/stars/releases), click to run.  
+
 ### Option 2: Build &#x1F528; with cmake  
-In powershell build an English version:
-```powershell
+In cmd build an English version:
+
+```cmd
 git clone https://github.com/HanyuDuan/stars.git
-.\build
+script\build.cmd
 ```
 
 
@@ -38,13 +40,13 @@ git clone https://github.com/HanyuDuan/stars.git
 ### Build &#x1F528; with cmake
 ```sh
 git clone https://github.com/HanyuDuan/stars.git
-./build.sh
+./script/build.sh
 ```
 Use `./stars` to start the game.  
 `./build.sh install` to install, `./build.sh uninstall` to uninstall &#x1f5d1;  
 
 ## macOS
-Same as Linux.  
+Same as Linux.
 
 # Import
 You can see there's a few board in [oldTestingBoard.md](./oldTestingBoard.md). If you want to import and play in a new board, just enter `import` or `I` and you'll see this:  

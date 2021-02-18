@@ -18,6 +18,10 @@ function displayHelp {
 }
 
 # -- main -- #
+
+# move to workspace folder
+cd `dirname "$0"`/..
+
 # if have a CMakeCache that dose not match
 if [ -f ${buildDir}/CMakeCache.txt ]; then
     if [ `grep CMAKE_HOME_DIRECTORY ${buildDir}/CMakeCache.txt | cut -d "=" -f2` != `pwd` ]; then
