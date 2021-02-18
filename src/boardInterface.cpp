@@ -814,8 +814,7 @@ string BoardInterface::debugMode(const string& mode) {
 
 		// recommend
 		byPlayer.suggestion = analyse->respond(
-			byPlayer.player, byPlayer, byPlayer.hintOn,
-			record.getDefaultSettings("inDebugMode", "showTime"),
+			byPlayer.player, byPlayer, byPlayer.hintOn, false,
 			record.getDefaultSettings("inDebugMode", "starsOn"), false);
 		if (mode == "debug")
 			showComment(byPlayer);

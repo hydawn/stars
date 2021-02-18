@@ -210,7 +210,7 @@ string BoardTest::debugMode(const string& mode) {
 
 		// recommend
 		byPlayer.suggestion = analyse->respond(
-			byPlayer.player, byPlayer, showCalculate, showTime,
+			byPlayer.player, byPlayer, showCalculate, false,
 			record.getDefaultSettings("inDebugMode", "starsOn"), false);
 		if (showCalculate && byPlayer.word != "bad")
 			printf("    %d is recommended\n", byPlayer.suggestion);
