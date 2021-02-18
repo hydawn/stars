@@ -1,4 +1,4 @@
-well, this is clearly more unorganized than CharmedPython
+change logs, todos, thoughts
 
 # cmt code
 ## 001
