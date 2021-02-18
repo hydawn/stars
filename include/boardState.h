@@ -119,10 +119,10 @@ public:
 	char isOver() const;
 
 	// tools
-	void nonFullColumn(shortv& nonFull) const;
-	// shortv nonFullColumn() const;
-	void sweepFullColumn(shortv& nonFull, const int col) const;
-	int  pieceCount() const;
+	void   nonFullColumn(shortv& nonFull) const;
+	shortv nonFullColumn() const;
+	void   sweepFullColumn(shortv& nonFull, const int col) const;
+	int    pieceCount() const;
 
 	// change board
 	void add(const char plr, const int col) {
@@ -150,6 +150,7 @@ public:
 		board[col - 1][(top[col - 1]--) - 1] = ' ';
 		remove(args...);
 	}
+
 	// debug
 	bool match() const { return removeNumber == addNumber; }
 	bool valid() const;

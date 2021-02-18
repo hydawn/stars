@@ -116,13 +116,13 @@ void BoardState::nonFullColumn(shortv& nonFull) const {
 			nonFull.push_back(i + 1);
 }
 
-// shortv BoardState::nonFullColumn() const {
-// 	shortv nonFull;
-// 	for (int i = 0; i < (int)top.size(); ++i)
-// 		if (top[i] != starArea[i])
-// 			nonFull.push_back(i + 1);
-// 	return nonFull;
-// }
+shortv BoardState::nonFullColumn() const {
+	shortv nonFull;
+	for (int i = 0; i < (int)top.size(); ++i)
+		if (top[i] != starArea[i])
+			nonFull.push_back(i + 1);
+	return nonFull;
+}
 
 void BoardState::sweepFullColumn(shortv& nonFull, int col) const {
 	if (top[col - 1] == starArea[col - 1])

@@ -63,16 +63,6 @@ bool inVector(const vector<string>& argv, const string& str) {
 } // namespace MainArgsHandle
 
 namespace Random {
-int randomMove(const BoardState& state) {
-	shortv list;
-	state.nonFullColumn(list);
-#ifdef STARS_DEBUG_INFO
-	if (list.empty())
-		throw logic_error("trying randomMove() in full board");
-#endif // STARS_DEBUG_INFO
-	return randomMove(list);
-}
-
 int randomMove(const shortv& list) {
 #ifdef STARS_DEBUG_INFO
 	if (list.empty())
@@ -150,7 +140,7 @@ int randomSuggestion(
 	if (list.empty())
 		throw logic_error("call randomSuggestion(4 args) with empty list");
 #endif
-	shortv intersectionList;
+	shortv     intersectionList;
 	BoardState board = state;
 	// preference No.1: take what can bring me winn-1 in a row, and what can
 	// interrupt opponent's three in a row

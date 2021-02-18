@@ -531,7 +531,7 @@ int BoardAnalyse::respond(
 		if (word == "bad") {
 			oppList = firstPoint(rPlayer(plr), nonFullList);
 			if (oppList.empty())
-				return Random::randomMove(*state);
+				return Random::randomMove(std::move(state->nonFullColumn()));
 			return Random::randomMove(oppList);
 		}
 		else
