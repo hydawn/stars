@@ -3,8 +3,10 @@ build/
 lbuild/
 release/
 test/
-.DS_Store
-._*
+
+in
+test.log
+
 Stars_*
 stars*
 test_*

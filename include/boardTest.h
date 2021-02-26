@@ -1,11 +1,12 @@
 #ifndef _BOARDTEST_H_
 #define _BOARDTEST_H_ 1
 #include "boardInterface.h"
-#include "boardTools.h"
 
 // reload getInput to test
 class BoardTest : public BoardInterface {
-public:
+	friend void autoTest(int n, const vector<string>& args);
+
+private:
 	char toWinn;
 	bool showCalculate;
 	bool showTime;
@@ -17,6 +18,7 @@ public:
 
 	static char lastMove;
 
+public:
 	BoardTest()
 		: BoardInterface(),
 		  toWinn('N'),
@@ -29,7 +31,7 @@ public:
 			  record.getDefaultSettings("gameIsOver", "askToSaveBoard")),
 		  lessPrint(false),
 		  noPrint(false) {}
-	BoardTest(const vector<string>& option);
+	BoardTest(const vector<string>& args);
 
 	// virtual
 	virtual bool   askToReverse(bool yes) { return false; }
@@ -40,7 +42,7 @@ public:
 	virtual short  respond();
 
 	// tools
-	string getInput(const string& mode, const short& suggestion);
+	string getInput(const string& mode, const short& suggestion) const;
 };
 
 void autoTest(int n, const vector<string>& args);

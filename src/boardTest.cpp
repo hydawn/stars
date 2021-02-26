@@ -37,7 +37,7 @@ BoardTest::BoardTest(const vector<string>& args)
 	}
 }
 
-string BoardTest::getInput(const string& mode, const short& suggestion) {
+string BoardTest::getInput(const string& mode, const short& suggestion) const {
 	if (mode == "play") {
 		return std::to_string(suggestion);
 	}
@@ -68,7 +68,7 @@ string BoardTest::debugMode(const string& mode) {
 	byPlayer.mode       = "test-" + mode;
 	byPlayer.byComputer = true;
 	byOpponent.mode     = "test-" + mode;
-	byOpponent.player   = analyse->rPlayer(byPlayer.player);
+	byOpponent.player   = rPlayer(byPlayer.player);
 	char expectedWinner = '1';
 	int  stepCount      = 0;
 	if (!lessPrint) { // if no lessPrint
@@ -210,7 +210,7 @@ string BoardTest::debugMode(const string& mode) {
 
 		// recommend
 		byPlayer.suggestion = analyse->respond(
-			byPlayer.player, byPlayer, showCalculate, showTime,
+			byPlayer.player, byPlayer, showCalculate, false,
 			record.getDefaultSettings("inDebugMode", "starsOn"), false);
 		if (showCalculate && byPlayer.word != "bad")
 			printf("    %d is recommended\n", byPlayer.suggestion);
@@ -247,7 +247,7 @@ short BoardTest::respond() {
 
 void BoardTest::askToSaveBoard(bool yes) {
 	if (yes)
-		record.saveGame("auto test auto saved games", analyse->state);
+		record.saveGame("auto test auto saved games", *analyse->state);
 }
 
 bool BoardTest::isOver(const oneMove& move) {
@@ -263,7 +263,7 @@ bool BoardTest::isOver(const oneMove& move) {
 		}
 		return true;
 	}
-	if (analyse->gameIsOver() == analyse->rPlayer(move.player)) {
+	if (analyse->gameIsOver() == rPlayer(move.player)) {
 		toWinn = move.player;
 		if (!noPrint) {
 			cout << endl;
@@ -307,23 +307,12 @@ bool BoardTest::controlMode(const string& firstMode) {
 		else if (advice == "custom")
 			advice = customMode();
 		else if (advice == "over") {
-			if (askToReverseBool && askToReverse(record.getDefaultSettings(
-										"gameIsOver", "defaultReverse"))) {
-				advice = reverseMode();
-				continue;
-			}
-			else if (
-				record.getDefaultSettings("gameIsOver", "defaultReverse") &&
-				!lessPrint) {
-				advice = reverseMode();
-				continue;
-			}
 			if (askToSaveBoardBool)
 				askToSaveBoard(record.getDefaultSettings(
 					"gameIsOver", "defaultSaveBoard"));
 			else if (record.getDefaultSettings(
 						 "gameIsOver", "defaultSaveBoard"))
-				record.saveGame("test mode auto save", analyse->state);
+				record.saveGame("test mode auto save", *(analyse->state));
 			break;
 		}
 
@@ -373,7 +362,7 @@ void autoTest(int n, const vector<string>& args) {
 					autoTest + e.what() + "starsOn:" +
 						std::to_string(test.record.getDefaultSettings(
 							"inDebugMode", "starsOn")),
-					test.analyse->state);
+					*(test.analyse->state));
 				++err;
 			}
 			catch (const std::logic_error& e) {
@@ -384,7 +373,7 @@ void autoTest(int n, const vector<string>& args) {
 					autoTest + e.what() + "starsOn:" +
 						std::to_string(test.record.getDefaultSettings(
 							"inDebugMode", "starsOn")),
-					test.analyse->state);
+					*(test.analyse->state));
 				++err;
 			}
 		}
@@ -406,6 +395,5 @@ void autoTest(int n, const vector<string>& args) {
 		 << "Player 0 goes first\n"
 		 << "Player X win:\t\t" << XWinn << " times" << endl
 		 << "Player 0 win:\t\t" << ZeroWinn << " times" << endl
-		 << "Over, hit 'Enter' to close ...";
-	cin.get();
+		 << "Over.";
 }

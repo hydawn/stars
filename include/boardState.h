@@ -6,169 +6,126 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "boardTools.h"
+#include "json/json.h"
 
-#ifdef STARS_DEBUG_INFO
 using std::logic_error;
-#endif // STARS_DEBUG_INFO
-
 using std::runtime_error;
 using std::string;
 using std::vector;
-/*****
-typedef vector<short>::iterator vIter;
-typedef vector<short> shortv;
-*****/
-typedef ShortList::iterator vIter;
-typedef ShortList           shortv;
+typedef vector<int> shortv;
+
+class BoardState;
+class BoardAnalyse;
+class BoardInterface;
+class BoardTest;
 
 class oneMove {
-public:
-	/*
-	respond can give oneMove player, word,
-	list, time(by computer),
-	mode function can give oneMove mode, move, time(by a person), byComputer,
-	suggestion, player(reverse & add), then push back to boardRecord
-	*/
-	/*
-	debug has them all
-	normal doesn't have suggestion
-	add mode just have mode, move and player
-	reverse mode just have mode and move
-	*/
-	bool   byComputer; // is this move taken by the computer
-	bool   hintOn;
-	shortv list;
-	string mode;
-	short  move; // the move that is been taken after the computer analyse
-	char   player;
-	short  suggestion; // suggested move by the computer
-	double time;       // time taken for the computer to respond
-	string word;
+	friend class BoardState;
+	friend class BoardAnalyse;
+	friend class BoardInterface;
+	friend class BoardTest;
+	friend void autoTest(int n, const vector<string>& args);
 
-	oneMove()
-		: byComputer(true),
-		  hintOn(true),
-		  list(shortv()),
-		  mode(string()),
-		  player(' '),
-		  suggestion(0),
-		  time(0),
-		  word(string()) {}
-	oneMove(Json::Value root) {
-		byComputer = root["byComputer"].asBool();
-		hintOn     = root["hintOn"].asBool();
-		list       = root["list"];
-		mode       = root["mode"].asString();
-		move       = root["move"].asInt();
-		player     = root["player"].asInt();
-		suggestion = root["suggestion"].asInt();
-		time       = root["time"].asDouble();
-		word       = root["word"].asString();
-	}
-	operator Json::Value() {
-		Json::Value root;
-		root["byComputer"] = byComputer;
-		root["hintOn"]     = hintOn;
-		root["list"]       = list;
-		root["mode"]       = mode;
-		root["move"]       = move;
-		root["player"]     = player;
-		root["suggestion"] = suggestion;
-		root["time"]       = time;
-		root["word"]       = word;
-		return root;
-	}
+private:
+	/*
+	 * respond can give oneMove player, word, list, time(by computer),
+	 * mode function can give oneMove mode, move, time(by a person),
+	 * byComputer, suggestion, player(reverse & add), then push back to
+	 * boardRecord debug has them all normal doesn't have suggestion add
+	 * mode just have mode, move and player reverse mode just have mode and
+	 * move
+	 * */
+	string  mode;
+	string  word;
+	shortv  list;
+	int64_t time = 0; // time taken for the computer to respond
+	// the move that is been taken after the computer analyse
+	int  move       = 0;
+	int  suggestion = 0; // suggested move by the computer
+	char player     = '0';
+	bool byComputer = true; // is this move taken by the computer
+	bool hintOn     = true;
+
+public:
+	oneMove() {}
+	oneMove(const Json::Value& root);
+						 operator Json::Value();
 	friend std::ostream& operator<<(std::ostream& os, oneMove& move);
 };
 
+inline char rPlayer(const char plr) {
+	return plr ^ 0x68;
+}
+
 class BoardState {
 	// handles the memory allocate and ways to change the board
+	friend class BoardAnalyse;
+	friend class BoardInterface;
+
+private:
+	vector<string> board;
+	vector<int>    top;
+	vector<int>    starArea;
+	int            rows;
+	int            cols;
+	int            winn;
+	static int     removeNumber;
+	static int     addNumber;
+
 public:
-	char** board;
-	short* top;
-	short* starArea;
-	short  rows;
-	short  cols;
-	short  winn; // winning number
-#ifdef STARS_DEBUG_INFO
-	static int removeNumber;
-	static int addNumber;
-#endif
-
-	BoardState() : rows(8), cols(8), winn(4) { generate(); }
-	BoardState(const BoardState& input)
-		: rows(input.rows), cols(input.cols), winn(input.winn) {
-		generate(input.board, input.top);
-	}
+	BoardState() : BoardState(8, 8, 4) {}
 	BoardState(const Json::Value& root);
-	BoardState(const short r, const short c, const short w)
-		: rows(r), cols(c), winn(w) {
-		generate();
-	}
-	~BoardState() { free(); }
-
-	// construct
-	void generate();
-	void generate(char** b, const short* t);
-
-	// destruct
-	void free();
-	void freeBoard(char** b, int length);
+	BoardState(const int r, const int c, const int w)
+		: board(vector<string>(c, string(r, ' '))),
+		  top(vector<int>(c, 0)),
+		  starArea(vector<int>(c, r)),
+		  rows(r),
+		  cols(c),
+		  winn(w) {}
 
 	// operator
-	operator Json::Value() {
+	operator Json::Value() const {
 		Json::Value root;
-		root["board"]  = boardToJson();
-		root["top"]    = topToJson();
+		root["board"]  = std::move(boardToJson());
+		root["top"]    = std::move(topToJson());
 		root["row"]    = rows;
 		root["column"] = cols;
 		root["winn"]   = winn;
 		return root;
 	}
-	BoardState& operator=(const BoardState& bh);
-	Json::Value boardToJson();
-	template <typename T>
-	Json::Value arraryToJson(T a[], int n);
-	Json::Value topToJson();
+	Json::Value boardToJson() const;
+	Json::Value topToJson() const;
 
 	// show
-	void show();
-	void printHead();
+	void show() const;
+	void printHead() const;
 
 	// check
-	bool colCanAdd(const short col);
-	bool colCanRemove(const short col);
+	bool colCanAdd(const int col) const;
+	bool colCanRemove(const int col) const;
 
 	// getter
-	short getWinn() { return winn; }
-	char  getTopPiece(short col);
+	int                   getWinn() const { return winn; }
+	char                  getTopPiece(const int col) const;
+	const vector<string>& getBoard() const { return board; }
+	const shortv&         getTop() const { return top; }
 
 	// is function
-	bool colIsFull(const short col) { return top[col - 1] == rows; }
-	bool colIsEmpty(const short col) { return top[col - 1] == 0; }
-	bool boardIsFull();
-	bool winPieceNearBy(const short col, const short ro);
-	bool winPieceButOne(const short col, const short ro, const short win);
-	char isOver();
+	bool colIsFull(const int col) const { return top.at(col - 1) == rows; }
+	bool colIsEmpty(const int col) const { return top.at(col - 1) == 0; }
+	bool boardIsFull() const;
+	bool winPieceNearBy(const int col, const int ro) const;
+	bool winPieceButOne(const int col, const int ro, const int win) const;
+	char isOver() const;
 
 	// tools
-	void nonFullColumn(shortv& nonFull);
-	void sweepFullColumn(shortv& nonFull, short col);
-	char rPlayer(const char plr);
-	int  pieceCount();
+	void   nonFullColumn(shortv& nonFull) const;
+	shortv nonFullColumn() const;
+	void   sweepFullColumn(shortv& nonFull, const int col) const;
+	int    pieceCount() const;
 
-	// random
-	short randomMove();
-	short randomMove(shortv& list);
-	short randomSuggestion(
-		const char plr, shortv& list, const string& mode = "progressive");
-	short randomSuggestion(
-		const char plr, shortv& list, shortv oppList,
-		const string& mode = "progressive");
-
-	// change function
-	void add(const char plr, const short col) {
+	// change board
+	void add(const char plr, const int col) {
 #ifdef STARS_DEBUG_INFO
 		if (col < 1 || col > cols)
 			throw logic_error("trying to add in a wrong place");
@@ -180,7 +137,9 @@ public:
 #endif
 		board[col - 1][top[col - 1]++] = plr;
 	}
-	void remove(const short col) {
+	void remove() {}
+	template <typename T, typename... Args>
+	void remove(const T col, Args... args) {
 #ifdef STARS_DEBUG_INFO
 		if (col < 1 || col > cols)
 			throw logic_error("trying to remove in a wrong place");
@@ -189,43 +148,33 @@ public:
 		++removeNumber;
 #endif
 		board[col - 1][(top[col - 1]--) - 1] = ' ';
+		remove(args...);
 	}
-	void remove(const short first, const short second, const short third) {
-		remove(first);
-		remove(second);
-		remove(third);
-	}
-	// debug
-#ifdef STARS_DEBUG_INFO
-	int  getRemoveNumber() { return removeNumber; }
-	int  getAddNumber() { return addNumber; }
-	bool match();
-#endif
 
-	// refresh
-	void refreshBoard(char** b);
-	void refreshTop();
+	// debug
+	bool match() const { return removeNumber == addNumber; }
+	bool valid() const;
 
 	// custom
-	void customBoard(const short cl, const short ro, const short wi);
+	void customBoard(const int cl, const int ro, const int wi);
 
 	// performance
-	void areaTopTransform();
-	void areaTopRestore();
-	void starShow();
-	void setATopWithTop(short i, short t);
-	void setATopWithNumber(short i, short n) {
-		if (i >= 0 && i < cols && starArea[i] < n)
-			starArea[i] = n;
-	}
+	void   areaTopTransform();
+	void   areaTopRestore();
+	void   starShow();
+	void   setATopWithTop(const int i, const int t);
+	void   setATopWithNumber(const int i, const int n);
 	shortv aTopFullColumn();
-	int    starNumber();
+	int    starNumber() const;
 	int    threeRowCount(const char plr, shortv& safeList);
 	shortv makeThreeCols(const char plr, shortv& safeList);
-	bool   specialPiece(const short col, const short ro);
+	bool   specialPiece(const int col, const int ro) const;
+
+	// input a new board
+	void refreshTop() noexcept;
 
 	// history move
-	void retInit(vector<oneMove>& his);
+	void retInit(const vector<oneMove>& history);
 };
 
 #endif // _BOARDHANDLE_H_

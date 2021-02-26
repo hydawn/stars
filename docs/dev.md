@@ -1,4 +1,4 @@
-well, this is clearly more unorganized than CharmedPython
+change logs, todos, thoughts
 
 # cmt code
 ## 001
@@ -123,13 +123,12 @@ well, this is clearly more unorganized than CharmedPython
 writing .cmd files is AAA disaster
 
 # TODO
-- tested which move will starsOn error occur, and act on it
+- change if-else to switch
+- send every printing to one class, so that multi-language can be achieved more easily.
+- add the word: consecutive
 - new strategy to choose from a safe list: prevent opp from getting available three in a row, see that three in a column is meaningless
 - sometimes settings just crash, why - seldom happens now
-- add a new strategy to avoid letting opp have more three in a row
-- change the last tag to 0.1.0 and add info: delete `#include "boardArea.h"`
 - add GUI - I don't think so
-- Then I will stop
 
 - actually, seen that starArea + while returnMove is doing quite well, there's no need to use recursive function anymore - I was actually proud of that, few thing here that needed brain work. Now that it's useless, I suddenly lost interest in all of this stuff. No then I will stop, I'll stop right now.
 

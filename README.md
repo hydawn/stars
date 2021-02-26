@@ -4,7 +4,7 @@ A 1v1 & 8x8 command line based board game
 ![tag](./icon/tag.png)
 
 # Introduction
-Type in number 1~8 to play, 0 to exit. Whoever to be the first to put 4 pieces in a row wins.
+Type in number 1~8 to play, q to exit. Whoever to be the first to put 4 pieces in a row wins.
 
 For example:
 ```
@@ -20,45 +20,46 @@ For example:
 ```
 Now X wins.
 
-Note that whenever you try to place a piece in a column, it always start piling from the button. You can't put a piece in the middle like any other proper board game would, which might bring boredom but certainly ease things up for me.
+Note that whenever you try to place a piece in a column, it always start piling from the button. You can't put a piece in the middle like any other proper board game would, which might bring boredom but certainly makes it easier for me.
 
 # Play &#x1F3AE;
-## Windows
-### Option 1: Download directly (Recommended)
-Download .zip file in [here](https://github.com/HanyuDuan/stars/releases), unzip it, click to run.  
-### Option 2: Build &#x1F528; with cmake  
-In powershell build an English version:
-```powershell
-git clone https://github.com/HanyuDuan/stars.git
-.\build
-```
-Or use 
-```powershell
-.\build Chinese
-```
-to build a Chinese version.  
-Use `.\stars -s` to start the game  
 
-## Linux
-### Build &#x1F528; with cmake
+<details>
+<summary>Windows</summary>
+
+## Option 1: Download directly
+Download in [here](https://github.com/HanyuDuan/stars/releases), click to run.  
+
+## Option 2: Build &#x1F528; with cmake
+In cmd build an English version:
+
+```cmd
+git clone https://github.com/HanyuDuan/stars.git
+script\build.cmd
+```
+</details>
+
+
+<details>
+<summary>Linux</summary>
+
+## Build &#x1F528; with cmake
+
 ```sh
 git clone https://github.com/HanyuDuan/stars.git
-chmod +x build.sh
-./build.sh
+./script/build.sh
 ```
-Or use 
-```sh
-./build.sh Chinese
-```
-to build a Chinese version.  
-Use `./stars -s` to start the game.  
+Use `./stars` to start the game.  
 `./build.sh install` to install, `./build.sh uninstall` to uninstall &#x1f5d1;  
+</details>
 
-## macOS
-Same as Linux.  
+<details>
+<summary>macOS</summary>
+Same as Linux.
+</details>
 
 # Import
-You can see there's a few board in [oldTestingBoard.md](./oldTestingBoard.md). If you want to import and play in a new board, just enter `import` or `I` and you'll see this:  
+You can see there's a few board in [oldTestingBoard.md](./docs/oldTestingBoard.md). If you want to import and play in a new board, just enter `import` or `I` and you'll see this:  
 ```
 In debug mode
 Player 'X' move> I
@@ -103,4 +104,4 @@ Sometimes your personal settings get wiped out and reset to factory settings &#1
 # Thanks
 [JsonCpp](https://github.com/open-source-parsers/jsoncpp) - from where those dependencies files are copied  
 
-My roommate - from whom I learned about this little game which was actually his homework. But the original instruction was to write in python, so no worries about copying and stuff ;-)
+My roommate - from whom I learned about this little game which was actually his homework. But the original instruction was to write in python, so ... ;-)

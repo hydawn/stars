@@ -3,19 +3,13 @@
 
 // ./stars test play
 void displayHelp(string mode = "help") {
-#ifdef STARS_PLATFORM_WINDOWS
-	string stars = ".\\stars";
-#else
-#	ifdef STARS_PLATFORM_LINUX
-	string stars   = "./stars";
-#	endif // STARS_PLATFORM_LINUX
-#endif     // STARS_PLATFORM_WINDOWS
 	string testHelp =
 		"Option:\n"
 		"  -t, --test\n\n"
-		"Description:\n  Test the game by automatically play it in a specified "
-		"mode for a few rounds\n\n"
+		"Description:\n  Test the game by automatically playing it in a "
+		"specified mode for a few rounds\n\n"
 		"Usage:\n"
+		"  stars --test\n"
 		"  stars --test <number> [suboption] [suboption]\n\n"
 		"Suboptions:\n"
 		"  --debug             test debug mode (default)\n"
@@ -26,7 +20,7 @@ void displayHelp(string mode = "help") {
 		"  --no-print          print only the finishing result\n\n"
 		"The argument <number> must follow the option test closely, the "
 		"program will\n"
-		"test the game for that number of rounds. If argument <number> is not "
+		"run the game for that number of rounds. If argument <number> is not "
 		"given\n"
 		"it will be set to one by default.\n\n"
 		"[suboption] can also be omitted and set to its default value\n";
@@ -39,12 +33,12 @@ void displayHelp(string mode = "help") {
 		throw invalid_argument("no help info");
 	}
 	cout
-		<< "Usage:" << endl
+		<< "Usage:\n"
 		<< "  stars\n"
 		<< "  stars [options]\n"
 		<< "  stars [--test] <number> [suboption] ...\n"
-		<< "  If not installed, use '" << stars << "' instead\n"
-		<< endl
+		<< '\n'
+		<< '\n'
 		<< "Options:            Description\n"
 		<< "  -s, --start         start the game in debug mode (default)\n"
 		<< "  -p, --play          start the game in play mode\n"
@@ -52,22 +46,23 @@ void displayHelp(string mode = "help") {
 		<< "  -S, --settings      go into settings mode\n"
 		<< "  -v, --version       show version\n"
 		<< "  -t, --test          test the game, several suboptions available\n"
-		<< endl
-		<< "It is not recommended to use --test without suboptions\n"
-		<< endl
-		<< "Use " << stars
-		<< " --help [option] to see help for available suboptions\n";
+		<< '\n'
+		<< "  It is not recommended to use --test without suboptions\n"
+		<< '\n'
+		<< "Use '"
+		<< "stars"
+		<< " --help [option]' to see help for available suboptions" << endl;
 }
 
 bool argsHandle(int argc, char* argv[], string& firstMode) {
 #ifdef STARS_VERSION_DEBUG
-	string version = STARS_VERSION_DEBUG;
+	const string version = STARS_VERSION_DEBUG;
 #else
 #	ifdef STARS_VERSION_RELEASE
-	string version = STARS_VERSION_RELEASE;
+	const string version = STARS_VERSION_RELEASE;
 #	endif // STARS_VERSION_RELEASE
 #endif     // STARS_VERSION_DEBUG
-	vector<string> argl = {"--no-hint", "--less-print", "--no-print",
+	const vector<string> argl = {"--no-hint", "--less-print", "--no-print",
 						   "--no-ask",  "--debug",      "--play"};
 	if (argc > 16)
 		throw invalid_argument("Too many arguments");
@@ -113,7 +108,7 @@ bool argsHandle(int argc, char* argv[], string& firstMode) {
 					rounds = ToInt::myStoi(argv[2]);
 				}
 				catch (const std::exception&) {
-					printf("Invalid option: %s", argv[2]);
+					printf("Invalid option: %s\n", argv[2]);
 					throw invalid_argument("wrong usage of option --test");
 				}
 			}
@@ -134,7 +129,7 @@ bool argsHandle(int argc, char* argv[], string& firstMode) {
 			autoTest(rounds, MainArgsHandle::charListToVector(argc, argv));
 			return false;
 		}
-		printf("option %s doesn't exit or wrong usage", argv[1]);
+		printf("option %s doesn't exit or wrong usage\n", argv[1]);
 		throw invalid_argument("invalid option");
 	}
 	return true;
@@ -142,26 +137,10 @@ bool argsHandle(int argc, char* argv[], string& firstMode) {
 
 int main(int argc, char* argv[]) {
 	string firstMode;
-#ifdef STARS_DEBUG_INFO
-	char a[8]  = "./stars";
-	char b[5]  = "test";
-	char c[4]  = "1";
-	char d[16] = "--less-print";
-	char e[16] = "--no-ask";
-	char f[16] = "--play";
-	// char* fakeArgv[] = {a, b, c, d, e, f};
-	char* fakeArgv[] = {a, b, e};
-	try {
-		// if (!argsHandle(3, fakeArgv, firstMode))
-		if (!argsHandle(argc, argv, firstMode))
-			return 0;
-	}
-#else
 	try {
 		if (!argsHandle(argc, argv, firstMode))
 			return 0;
 	}
-#endif // STARS_DEBUG_INFO
 	catch (const std::runtime_error& e) {
 		cout << "stars: runtime_error: ";
 		std::cerr << e.what() << '\n';
@@ -201,7 +180,6 @@ int main(int argc, char* argv[]) {
 	catch (const std::runtime_error& e) {
 		cout << "stars: runtime_error: ";
 		std::cerr << e.what() << '\n';
-		cout << "a bug perhaps\n";
 		cout << "Over, hit 'Enter' to close ...";
 		cin.get();
 		return 1;
