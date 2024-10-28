@@ -35,6 +35,7 @@ In cmd build an English version:
 
 ```cmd
 git clone https://github.com/HanyuDuan/stars.git
+cd stars
 script\build.cmd
 ```
 </details>
@@ -47,7 +48,8 @@ script\build.cmd
 
 ```sh
 git clone https://github.com/HanyuDuan/stars.git
-./script/build.sh
+cd stars
+bash script/build.sh
 ```
 Use `./stars` to start the game.  
 `./build.sh install` to install, `./build.sh uninstall` to uninstall &#x1f5d1;  
