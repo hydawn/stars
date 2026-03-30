@@ -420,12 +420,11 @@ bool BoardRecord::match() const {
 #ifndef STARS_DEBUG_INFO
 	if (!settings.isMember(dsString) || !settings.isMember(osString))
 		return false;
-	Json::Value &ds = settings["defaultSettings"],
+	const Json::Value& ds = settings["defaultSettings"],
 				os  = settings["otherSettings"];
 	if (!os.isMember(mctString) || os[mctString].asInt() < 10)
 		return false;
-#endif // !STARS_DEBUG_INFO
-#ifdef STARS_DEBUG_INFO
+#else
 	if (!settings.isMember(dsString)) {
 		cout << "no such member as " << dsString << endl;
 		return false;
